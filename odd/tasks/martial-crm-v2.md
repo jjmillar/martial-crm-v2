@@ -45,14 +45,14 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 
 ### Quality
 
-- **S10 Checks per task.** `npm run lint`, `npm run build` and `npm run test` pass. Every migration applies cleanly with `supabase db reset`. Each RLS-bearing table gets an isolation check proving that a member of school A cannot read or write school B's rows (assumption: SQL test file under `supabase/tests/`, run with `supabase test db`).
+- **S10 Checks per task.** `npm run lint`, `npm run build` and `npm run test` pass. Every migration applies cleanly with `supabase db reset`. Each RLS-bearing table gets an isolation check proving that a member of school A cannot read or write school B's rows (assumption: SQL test file under `supabase/tests/`, run with `supabase test db`). Without Docker, `npm run test:db` runs `scripts/db/*.check.mjs` against PGlite with a stubbed `auth` schema; every task that adds tables adds its own `.check.mjs`.
 
 ## Tasks
 
 | ID | Task | Specs | Route | Status | Evidence |
 |---|---|---|---|---|---|
 | T0 | Scaffold: Vite React TS, deps, Vitest, Supabase init, netlify.toml, this doc | S1 S4 S5 | inline (Claude) | done | initial commit |
-| T1 | DB foundation: `schools`, `profiles`, `school_members`, role enum, helper functions, RLS, signup trigger, `create_school` RPC, isolation tests | S2 S3 S5 S10 | Gentle Shell, risk: escalate (security) → Claude verifies | pending | |
+| T1 | DB foundation: `schools`, `profiles`, `school_members`, role enum, helper functions, RLS, signup trigger, `create_school` RPC, isolation tests | S2 S3 S5 S10 | Gentle Shell, risk: escalate (security) → Claude verifies | done | de133f5 + test:db 21/21 |
 | T2 | App shell: Supabase client, auth (login, signup, password reset), protected routes, active-school context + switcher, onboarding "crear escuela", module registry, layout (sidebar/dock), design tokens | S1 S3 S4 S8 S9 | Gentle Shell | pending | |
 | T3 | Catalogs: specialties + tags (DB + module) | S6 | Gentle Shell | pending | |
 | T4 | Students module | S6 S7 | Gentle Shell | pending | |
@@ -80,3 +80,9 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Gentle Shell gets one small module pedido at a time, referencing this doc.
   - Claude reviews every diff and runs lint/build/test before applying. T1 is security-critical, so Claude independently verifies its RLS.
   - If Gentle Shell fails on quota, Claude implements the unit and logs it here.
+- **L4 (2026-11-10, Claude): T1 verification.**
+  - Gentle Shell (attempt 3, 52s) wrote the migration and the pgTAP file.
+  - Independent PGlite checks: 21/21 pass. Covered: school isolation, anon blocked, slug rules, admin cannot create/demote/remove an owner or delete the school, profile visibility only across shared schools, RLS on every table.
+  - Claude fixed three pgTAP bugs: anon error is `42501` (no EXECUTE grant), not `P0001`; `update … returning` inside a subquery is invalid SQL; A cannot read school B's id under RLS, so it is captured as superuser first.
+  - Open finding, not fixed (no spec covers it): an owner can demote or remove themselves, leaving a school with no owner. Proposed follow-up is a "last owner" guard trigger, pending user decision.
+  - Next: T2 app shell.
