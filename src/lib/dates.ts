@@ -11,6 +11,9 @@ export function todayIso(now = new Date()): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(now)
 }
 
+/** Calendar date (Santiago) of a timestamp, as 'aaaa-mm-dd'. */
+export const santiagoDate = (ts: string) => todayIso(new Date(ts))
+
 /** Full years between an ISO date and today (Santiago). */
 export function yearsSince(iso: string | null | undefined, today = todayIso()): number | null {
   if (!iso) return null

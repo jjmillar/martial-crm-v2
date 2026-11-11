@@ -76,7 +76,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T8 | Classes + schedule blocks | S6 | Claude | done | migration 20261112000005; test:db 146/146 (21 new); browser QA at 390 |
 | T9 | Calendar (day/week/month) | S6 | Claude | done | frontend only; browser QA 390 + 1440 |
 | T10 | Attendance | S6 | Claude | done | migration 20261112000006; test:db 158/158 (12 new); browser QA at 390 as user role |
-| T11 | Payments (transfer/cash + admin confirmation) | S6 S7 | Gentle Shell | pending | |
+| T11 | Payments (transfer/cash + admin confirmation) | S6 S7 S12 | Claude | done | migrations 20261112000007–09; test:db 184/184 (20 new); live storage + email QA |
 | T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Gentle Shell | pending | |
 | T13 | Dashboard (bento) + data export | S6 S8 | Gentle Shell | pending | |
 | T14 | Deploy: link Supabase project, push migrations, Netlify env vars | S1 S5 | Claude + user | done | Supabase `hjeholicsijqurubuntv` (sa-east-1); https://martialcrm-v2.netlify.app; live smoke test ok |
@@ -272,3 +272,22 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
       - Roster shows students with a current enrollment first; "Todos los alumnos" and search reveal the rest.
       - One-tap optimistic toggles with rollback, and a present count against capacity.
       - Calendar slots deep-link here with the class and date.
+  - T11 Pagos:
+    - DB:
+      - Enums `payment_method` and `payment_status`; `payments` stores CLP integers.
+      - Users can insert only 'pendiente'; admins update, confirm and delete.
+      - A trigger stamps `paid_at`/`confirmed_by` on confirmation and clears them when the payment goes back.
+      - Students with payments can't be deleted (FK restrict); deleting an enrollment sets the link to null.
+    - Storage migration (skipped by PGlite, verified live):
+      - Private `receipts` bucket under `<school>/<payment>/`; public `logos` bucket.
+      - Policies check membership through `storage_school_id(name)`.
+    - Bug found in live QA: user-role receipts never got linked, because payments UPDATE is admin-only and the error was swallowed.
+      - Fix: the receipt is uploaded first under a client-generated id, and the payment is inserted already linked.
+      - The narrow `attach_payment_receipt` RPC lets members attach while the payment is pending or has no receipt; admins always.
+    - `send-email` gained a `payment_receipt` template (admin only, confirmed payments, sent to the student's email).
+      - Verified live: built, sent and logged. Resend rejected example.com as expected while there is no domain.
+    - UI:
+      - KPIs (collected this month in Santiago time, pending) and status filters.
+      - New form prefills from the enrollment (instalment or matrícula fee), with method and receipt upload.
+      - Detail: confirm, mark failed, refund, back to pending; signed-URL receipt viewer; email receipt.
+      - Payments section on the student page.

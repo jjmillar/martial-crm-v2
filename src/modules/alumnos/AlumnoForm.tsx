@@ -10,6 +10,7 @@ import { createStudent, deleteStudent, getStudent, studentsKey, updateStudent } 
 import { beltSuggestions } from '../../lib/belts'
 import { emptyForm, formFromStudent, parseStudent, type StudentForm } from './schema'
 import { StudentEnrollments } from './StudentEnrollments'
+import { StudentPayments } from './StudentPayments'
 
 type Errors = Partial<Record<keyof StudentForm, string>>
 
@@ -179,6 +180,7 @@ function AlumnoForm({ student }: { student?: Student }) {
       </section>
 
       {student && <StudentEnrollments studentId={student.id} />}
+      {student && <StudentPayments studentId={student.id} />}
 
       {serverError && <p className="alert" role="alert">{serverError}</p>}
       {saved && <p className="alert alert--ok" role="status">Cambios guardados.</p>}

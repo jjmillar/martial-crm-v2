@@ -1,0 +1,100 @@
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--gap);
+}
+
+.kpi {
+  display: grid;
+  gap: 6px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.kpi strong {
+  font-size: clamp(26px, 4vw, 34px);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.kpi--link {
+  cursor: pointer;
+}
+
+.kpi--link:hover {
+  border-color: var(--faint);
+}
+
+.pay-amount {
+  flex: none;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tag--pay-pagado {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+}
+
+.tag--pay-pendiente {
+  color: #e8c547;
+  border-color: color-mix(in srgb, #e8c547 45%, transparent);
+}
+
+.tag--pay-fallido {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.tag--pay-reembolsado {
+  color: var(--muted);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: 14px 20px;
+  margin: 0;
+}
+
+.facts dt {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.facts dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.facts a {
+  color: inherit;
+}
+
+.facts__wide {
+  grid-column: 1 / -1;
+}
+
+.input--file {
+  padding: 8px 12px;
+  min-height: 0;
+}
+
+.file-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.file-btn input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 560px) {
+  .student-row .pay-amount {
+    margin-left: auto;
+  }
+}

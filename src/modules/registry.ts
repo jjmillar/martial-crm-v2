@@ -10,8 +10,9 @@ import { matriculas } from './matriculas'
 import { clases } from './clases'
 import { calendario } from './calendario'
 import { asistencia } from './asistencia'
+import { pagos } from './pagos'
 
 // One line per module. Order here is the order in the navigation; the first 4 also fill the mobile dock.
-export const modules: ModuleManifest[] = [inicio, alumnos, asistencia, matriculas, calendario, clases, profesores, planes, miembros, escuelas, ajustes]
+export const modules: ModuleManifest[] = [inicio, alumnos, asistencia, pagos, matriculas, calendario, clases, profesores, planes, miembros, escuelas, ajustes]
 
 export const modulesFor = (role: AppRole | null) => (role ? modules.filter((m) => m.roles.includes(role)) : [])

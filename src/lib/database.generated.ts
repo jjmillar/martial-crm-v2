@@ -344,6 +344,86 @@ export type Database = {
           },
         ];
       };
+      payments: {
+        Row: {
+          amount: number;
+          concept: string;
+          confirmed_by: string | null;
+          created_at: string;
+          created_by: string | null;
+          due_date: string | null;
+          enrollment_id: string | null;
+          id: string;
+          method: Database["public"]["Enums"]["payment_method"];
+          notes: string | null;
+          paid_at: string | null;
+          receipt_path: string | null;
+          school_id: string;
+          status: Database["public"]["Enums"]["payment_status"];
+          student_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          concept: string;
+          confirmed_by?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          due_date?: string | null;
+          enrollment_id?: string | null;
+          id?: string;
+          method?: Database["public"]["Enums"]["payment_method"];
+          notes?: string | null;
+          paid_at?: string | null;
+          receipt_path?: string | null;
+          school_id: string;
+          status?: Database["public"]["Enums"]["payment_status"];
+          student_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          amount?: number;
+          concept?: string;
+          confirmed_by?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          due_date?: string | null;
+          enrollment_id?: string | null;
+          id?: string;
+          method?: Database["public"]["Enums"]["payment_method"];
+          notes?: string | null;
+          paid_at?: string | null;
+          receipt_path?: string | null;
+          school_id?: string;
+          status?: Database["public"]["Enums"]["payment_status"];
+          student_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payments_enrollment_id_school_id_fkey";
+            columns: ["enrollment_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "enrollments";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "payments_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payments_student_id_school_id_fkey";
+            columns: ["student_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       plans: {
         Row: {
           active: boolean;
@@ -817,6 +897,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      attach_payment_receipt: {
+        Args: { p_path: string; p_payment_id: string };
+        Returns: undefined;
+      };
       create_school: {
         Args: { p_name: string; p_slug: string };
         Returns: {
@@ -860,6 +944,7 @@ export type Database = {
         Args: { p_specialty_ids: string[]; p_teacher_id: string };
         Returns: undefined;
       };
+      storage_school_id: { Args: { p_name: string }; Returns: string };
     };
     Enums: {
       billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";
@@ -872,6 +957,8 @@ export type Database = {
         | "competicion";
       enrollment_status: "activa" | "pausada" | "cancelada";
       gender: "masculino" | "femenino" | "otro";
+      payment_method: "transferencia" | "efectivo" | "tarjeta" | "otro";
+      payment_status: "pendiente" | "pagado" | "fallido" | "reembolsado";
       school_role: "admin" | "user";
     };
     CompositeTypes: {
@@ -1014,6 +1101,8 @@ export const Constants = {
       ],
       enrollment_status: ["activa", "pausada", "cancelada"],
       gender: ["masculino", "femenino", "otro"],
+      payment_method: ["transferencia", "efectivo", "tarjeta", "otro"],
+      payment_status: ["pendiente", "pagado", "fallido", "reembolsado"],
       school_role: ["admin", "user"],
     },
   },

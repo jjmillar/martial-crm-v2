@@ -28,3 +28,6 @@ export type EnrollmentStatus = Enums<'enrollment_status'>
 export type ClassRow = Tables<'classes'>
 export type ClassSchedule = Tables<'class_schedules'>
 export type ClassLevel = Enums<'class_level'>
+export type Payment = Tables<'payments'>
+export type PaymentMethod = Enums<'payment_method'>
+export type PaymentStatus = Enums<'payment_status'>

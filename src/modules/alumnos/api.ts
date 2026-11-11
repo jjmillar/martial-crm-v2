@@ -18,6 +18,7 @@ export async function getStudent(id: string): Promise<Student | null> {
 function friendly(message: string): string {
   if (message.includes('students_school_rut_key')) return 'Ya existe un alumno con ese RUT en esta escuela.'
   if (message.includes('students_rut_valid')) return 'El RUT no es válido.'
+  if (message.includes('payments_student_id_school_id_fkey')) return 'Este alumno tiene pagos registrados: márcalo como inactivo en vez de eliminarlo.'
   if (message.includes('row-level security')) return 'No tienes permiso para esta acción.'
   return 'No se pudo guardar. Revisa los datos e intenta de nuevo.'
 }
