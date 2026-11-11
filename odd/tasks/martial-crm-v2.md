@@ -126,13 +126,13 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Next: T14 deploy, which needs the user's `supabase login` and `netlify login`.
 - **L9 (2026-11-11, user): "todo listo e instalado"** (after logging in to the Supabase and Netlify CLIs).
   - Claude did T14:
-    - Created the Supabase project  (sa-east-1). The DB password is kept outside the repo.
-    - Pushed both migrations and the auth config: invite-only,  = Netlify, redirect wildcards.
-    - Deployed  with the  secret.
-    - Created the Netlify site  with  env vars and deployed it with the CLI.
-  - The CEO account was invited and  was run from a script outside the repo. The email is not recorded here.
+    - Created the Supabase project `martial-crm-v2` (sa-east-1). The DB password is kept outside the repo.
+    - Pushed both migrations and the auth config: invite-only, `site_url` = Netlify, redirect wildcards.
+    - Deployed `invite-member` with the `SITE_URL` secret.
+    - Created the Netlify site `martialcrm-v2` with `VITE_SUPABASE_*` env vars and deployed it with the CLI.
+  - The CEO account was invited and `grant_ceo` was run from a script outside the repo. The email is not recorded here.
   - Live smoke test with a temporary user, deleted afterwards:
     - Sign-in works and public sign-up is blocked.
-    - A user who is not a member sees 0 schools;  returns false;  is refused.
-    -  returns 403 for someone who is not an admin.
+    - A user who is not a member sees 0 schools; `is_ceo` returns false; `create_school` is refused.
+    - `invite-member` returns 403 for someone who is not an admin.
   - Next: T3+ modules.
