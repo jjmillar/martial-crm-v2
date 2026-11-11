@@ -1,13 +1,15 @@
 // Minimal Supabase-like Postgres in PGlite: auth schema stub, anon/authenticated roles, migrations applied in order.
 import { PGlite } from '@electric-sql/pglite'
+import { btree_gist } from '@electric-sql/pglite/contrib/btree_gist'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export async function boot(repo) {
-  const db = new PGlite()
+  const db = new PGlite({ extensions: { btree_gist } })
   await db.exec(`
     create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
     create schema auth;
+    create schema extensions;
     create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}'::jsonb, created_at timestamptz default now());
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claims', true)::jsonb->>'sub','')::uuid $$;
     create function auth.role() returns text language sql stable as $$ select current_setting('request.jwt.claims', true)::jsonb->>'role' $$;

@@ -73,7 +73,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T5 | Teachers module | S6 | Claude (Gentle Shell skipped: quota) | done | migration 20261112000002; test:db 94/94 (20 new); 19 unit tests; browser QA as CEO + user role, 1440/390 |
 | T6 | Plans module | S6 S7 | Claude | done | migration 20261112000003; test:db 112/112 (18 new); 25 unit tests; browser QA CEO + user role, 1440/390 |
 | T7 | Enrollments module | S6 | Claude | done | migration 20261112000004; test:db 125/125 (13 new); browser QA at 390 as user role |
-| T8 | Classes + schedule blocks | S6 | Gentle Shell | pending | |
+| T8 | Classes + schedule blocks | S6 | Claude | done | migration 20261112000005; test:db 146/146 (21 new); browser QA at 390 |
 | T9 | Calendar (day/week/month) | S6 | Gentle Shell | pending | |
 | T10 | Attendance | S6 | Gentle Shell | pending | |
 | T11 | Payments (transfer/cash + admin confirmation) | S6 S7 | Gentle Shell | pending | |
@@ -246,3 +246,15 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
       - New form preselects the default plan and auto-fills price, fee and end date.
       - Detail: renew (extends from the current end, or from today if expired), pause, reactivate and cancel.
       - The student page shows the student's enrollments plus a "Matricular" shortcut.
+  - T8 Clases:
+    - DB:
+      - `classes`: discipline and teacher via composite FKs, a `class_level` enum, colour, capacity, room.
+      - `class_tags` join table.
+      - `class_schedules` (ISO weekday, start/end, end > start).
+      - A btree_gist exclusion constraint stops the same teacher from having overlapping blocks; the teacher is kept in sync by triggers, including when a class's teacher is reassigned.
+      - `set_class_details` saves tags and blocks atomically and refuses non-admins explicitly.
+      - The PGlite harness now loads btree_gist and an `extensions` schema.
+    - UI:
+      - Class cards with a colour stripe, slot chips and tags; filter by weekday and search.
+      - Editor with a colour swatch picker, editable weekly blocks and tag pick-chips.
+      - A brand-new class whose schedule fails is rolled back.

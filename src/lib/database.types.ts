@@ -25,3 +25,6 @@ export type PlanInsert = TablesInsert<'plans'>
 export type BillingCycle = Enums<'billing_cycle'>
 export type Enrollment = Tables<'enrollments'>
 export type EnrollmentStatus = Enums<'enrollment_status'>
+export type ClassRow = Tables<'classes'>
+export type ClassSchedule = Tables<'class_schedules'>
+export type ClassLevel = Enums<'class_level'>

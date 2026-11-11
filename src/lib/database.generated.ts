@@ -14,6 +14,164 @@ export type Database = {
   };
   public: {
     Tables: {
+      class_schedules: {
+        Row: {
+          class_id: string;
+          end_time: string;
+          id: string;
+          school_id: string;
+          start_time: string;
+          teacher_id: string | null;
+          weekday: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          end_time: string;
+          id?: string;
+          school_id: string;
+          start_time: string;
+          teacher_id?: string | null;
+          weekday: number;
+        };
+        Update: {
+          class_id?: string;
+          end_time?: string;
+          id?: string;
+          school_id?: string;
+          start_time?: string;
+          teacher_id?: string | null;
+          weekday?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "class_schedules_class_id_school_id_fkey";
+            columns: ["class_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "class_schedules_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      class_tags: {
+        Row: {
+          class_id: string;
+          school_id: string;
+          tag_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          school_id: string;
+          tag_id: string;
+        };
+        Update: {
+          class_id?: string;
+          school_id?: string;
+          tag_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "class_tags_class_id_school_id_fkey";
+            columns: ["class_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "class_tags_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "class_tags_tag_id_school_id_fkey";
+            columns: ["tag_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "tags";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
+      classes: {
+        Row: {
+          active: boolean;
+          capacity: number | null;
+          color: string;
+          created_at: string;
+          id: string;
+          level: Database["public"]["Enums"]["class_level"];
+          name: string;
+          notes: string | null;
+          room: string | null;
+          school_id: string;
+          specialty_id: string | null;
+          teacher_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          capacity?: number | null;
+          color?: string;
+          created_at?: string;
+          id?: string;
+          level?: Database["public"]["Enums"]["class_level"];
+          name: string;
+          notes?: string | null;
+          room?: string | null;
+          school_id: string;
+          specialty_id?: string | null;
+          teacher_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          active?: boolean;
+          capacity?: number | null;
+          color?: string;
+          created_at?: string;
+          id?: string;
+          level?: Database["public"]["Enums"]["class_level"];
+          name?: string;
+          notes?: string | null;
+          room?: string | null;
+          school_id?: string;
+          specialty_id?: string | null;
+          teacher_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "classes_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "classes_specialty_id_school_id_fkey";
+            columns: ["specialty_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "specialties";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "classes_teacher_id_school_id_fkey";
+            columns: ["teacher_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "teachers";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       email_log: {
         Row: {
           created_at: string;
@@ -641,6 +799,10 @@ export type Database = {
       is_ceo: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
+      set_class_details: {
+        Args: { p_blocks: Json; p_class_id: string; p_tag_ids: string[] };
+        Returns: undefined;
+      };
       set_teacher_specialties: {
         Args: { p_specialty_ids: string[]; p_teacher_id: string };
         Returns: undefined;
@@ -648,6 +810,13 @@ export type Database = {
     };
     Enums: {
       billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";
+      class_level:
+        | "todos"
+        | "principiante"
+        | "intermedio"
+        | "avanzado"
+        | "ninos"
+        | "competicion";
       enrollment_status: "activa" | "pausada" | "cancelada";
       gender: "masculino" | "femenino" | "otro";
       school_role: "admin" | "user";
@@ -782,6 +951,14 @@ export const Constants = {
   public: {
     Enums: {
       billing_cycle: ["mensual", "trimestral", "semestral", "anual", "unico"],
+      class_level: [
+        "todos",
+        "principiante",
+        "intermedio",
+        "avanzado",
+        "ninos",
+        "competicion",
+      ],
       enrollment_status: ["activa", "pausada", "cancelada"],
       gender: ["masculino", "femenino", "otro"],
       school_role: ["admin", "user"],
