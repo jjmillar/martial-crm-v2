@@ -73,7 +73,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchUserData(session.user.id)
+        // Supabase warns against awaiting other supabase calls inside this callback (it can deadlock),
+        // so the profile/CEO lookup is deferred to the next tick.
+        const id = session.user.id
+        setTimeout(() => fetchUserData(id), 0)
       } else {
         setProfile(null)
         setIsCeo(false)

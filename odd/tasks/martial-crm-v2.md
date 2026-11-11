@@ -65,8 +65,8 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T0 | Scaffold: Vite React TS, deps, Vitest, Supabase init, netlify.toml, this doc | S1 S4 S5 | inline (Claude) | done | initial commit |
 | T1 | DB foundation (v1 roles; superseded by T1b): `schools`, `profiles`, `school_members`, role enum, helper functions, RLS, signup trigger, `create_school` RPC, isolation tests | S2 S3 S5 S10 | Gentle Shell, risk: escalate (security) → Claude verifies | done | de133f5 + test:db 21/21 |
 | T1b | Roles revision: CEO platform role, school roles admin/user, last-admin guard, CEO-only create_school, grant_ceo; update checks | S2 S3 S5 S10 | Gentle Shell, risk: escalate → Claude verifies | done | 979100d + test:db 34/34 |
-| T2 | App shell: Supabase client, auth (login, signup, password reset), protected routes, active-school context + switcher, module registry, layout (sidebar/dock), design tokens, CEO "Escuelas" page (create school, list) | S1 S3 S4 S8 S9 | Gentle Shell | pending | |
-| T2b | Landing page `/`, `/login`, password reset, `/bienvenida`, Edge Function `invite-member` + members page | S3 S8 S11 | Gentle Shell | pending | |
+| T2 | App shell: Supabase client, auth (login, signup, password reset), protected routes, active-school context + switcher, module registry, layout (sidebar/dock), design tokens, CEO "Escuelas" page (create school, list) | S1 S3 S4 S8 S9 | Gentle Shell (part 1) + Claude | done | e72b075 (GS) + T2 commit; lint 0 errors, 8 tests, build ok |
+| T2b | Landing page `/`, `/login`, password reset, `/bienvenida` (done in T2) + Edge Function `invite-member` + members page (pending) | S3 S8 S11 | Claude / Gentle Shell | in_progress | landing+login+bienvenida screenshots 1440/390, no overflow |
 | T3 | Catalogs: specialties + tags (DB + module) | S6 | Gentle Shell | pending | |
 | T4 | Students module | S6 S7 | Gentle Shell | pending | |
 | T5 | Teachers module | S6 | Gentle Shell | pending | |
@@ -108,3 +108,11 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Claude fixed the pgTAP file again: the CEO inserted into `schools` directly, which RLS forbids. It now uses `create_school`.
   - The pgTAP files have not been executed (no Docker); the PGlite checks are the executed evidence.
   - `supabase/config.toml`: `enable_signup = false` (invite-only, S3), local site URL set to Vite's port.
+- **L7 (2026-11-11, Claude): T2 route change.**
+  - Gentle Shell wrote `src/lib/{supabase,database.types,auth,school}.ts(x)` and `src/modules/types.ts` across two pedidos. Each pedido was cut by the Gemini free-tier per-minute input token quota (250k) after about 2 files.
+  - Per the L3 fallback, Claude wrote the rest: router, guards, layout, Inicio and Escuelas modules, landing, login, bienvenida, design tokens, and tests.
+  - Review fixes to Gentle Shell's code:
+    - The profile/CEO lookup inside `onAuthStateChange` is deferred, as Supabase recommends, to avoid a deadlock.
+    - The school reload depends on the user id, so token refreshes do not refetch.
+    - A missing Supabase env no longer crashes the landing page.
+  - Next: Edge Function `invite-member` and the Miembros page, then T14 deploy.

@@ -19,6 +19,8 @@ const LOCAL_STORAGE_KEY = 'mcrm.activeSchool'
 
 export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isCeo } = useAuth()
+  // Depend on the id, not the object: token refreshes replace the user object.
+  const userId = user?.id ?? null
   const [schools, setSchools] = useState<School[]>([])
   const [memberships, setMemberships] = useState<SchoolMember[]>([])
   const [activeSchoolId, setActiveSchoolId] = useState<string | null>(() => {
@@ -31,7 +33,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [loading, setLoading] = useState<boolean>(true)
 
   const reload = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setSchools([])
       setMemberships([])
       setLoading(false)
@@ -42,7 +44,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setLoading(true)
       const [schoolsRes, membershipsRes] = await Promise.all([
         supabase.from('schools').select('*').order('name'),
-        supabase.from('school_members').select('*').eq('user_id', user.id)
+        supabase.from('school_members').select('*').eq('user_id', userId)
       ])
 
       const fetchedSchools = schoolsRes.data || []
@@ -86,7 +88,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [userId])
 
   useEffect(() => {
     reload()
