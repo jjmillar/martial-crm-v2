@@ -7,7 +7,14 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 
 - **S1 Stack.** "la base de datos y backend este toda en supabase y el frontend en netlify". Frontend is a Vite + React 19 + TypeScript SPA deployed on Netlify (`netlify.toml`, SPA redirect). Database, auth, file storage and server logic live in Supabase: Postgres, Supabase Auth, Row Level Security, Storage, and Edge Functions or SQL RPCs when logic must run server-side. There is no separate Node/Express server.
 - **S2 Multi-school isolation.** "un crm para diferentes escuelas de artes marciales". Table `schools` is the tenant. Every school-owned row has a non-null `school_id` FK. RLS is enabled on every table in `public`; a user reads and writes only the rows of schools where they hold a membership. Access checks go through SQL helper functions (`is_school_member(school_id)`, `has_school_role(school_id, roles[])`), defined `security definer` with a fixed `search_path`; policies never copy the logic inline.
-- **S3 Profiles and roles.** "con perfiles y todo eso". `profiles` is 1:1 with `auth.users` and is created by a trigger on signup. `school_members(user_id, school_id, role)` has role `owner | admin | instructor | student`, so one user can belong to several schools and switch between them in the UI. Creating a school goes through RPC `create_school(...)`, which makes the caller its `owner` in the same transaction. Permissions: owner/admin manage everything in their school, instructor reads students and manages classes and attendance, student sees only their own data (student portal is a later module; the role exists from day one).
+- **S3 Profiles and roles.** "con perfiles y todo eso". Revised 2026-11-11 (L5): "Mi cuenta ... se va a loguear como una cuenta "CEO". Normalente los usuarios tendran cuenta de "administrador" y tambien abráb otros de "usuario"."
+  - `profiles` is 1:1 with `auth.users` and is created by a trigger on signup.
+  - **CEO** is a platform role, stored in `platform_admins(user_id)` and checked by `is_ceo()`. The CEO reads and manages every school, creates schools and invites their administrators. The CEO account is designated outside the repo with `select public.grant_ceo('<email>')`, which only `postgres`/`service_role` can execute. The CEO's email is never committed (S5).
+  - **School roles** live in `school_members(user_id, school_id, role)` with role `admin | user`, labelled "Administrador" and "Usuario" in the UI. One user can belong to several schools and switch between them.
+  - Administrador: manages everything in their school, including inviting and removing members.
+  - Usuario: works with the school's CRM data (students, classes, attendance) but cannot manage members, plans, payments confirmation or school settings. The exact per-module permissions are defined in each module task.
+  - A school always keeps at least one Administrador. A guard trigger blocks demoting or removing the last one, except when the school itself is deleted.
+  - Accounts are invitation-only, with public signup disabled. Edge Function `invite-member` uses `auth.admin.inviteUserByEmail`: the CEO can invite to any school with any role, an Administrador only to their own school. Students remain CRM records, not accounts.
 - **S4 Scalability.** "quiero que sea escalable porque quiero ir agregando y modificando muchas cosas". The rules:
   - Frontend code is organised by feature in `src/modules/<module>/` with `api.ts` (Supabase queries), `hooks.ts` (TanStack Query), `schema.ts` (Zod), `pages/` and `components/`.
   - Each module exports a manifest (routes, nav entry, required roles) registered in `src/modules/registry.ts`. Adding a module touches only its folder plus one registry line.
@@ -41,6 +48,10 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Layout: bento grids for dashboards; full-bleed photo cards where there are images.
   - Motion: short (opacity, 14–40px, scale .97, ~300ms ease-in-out), disabled under `prefers-reduced-motion`.
   - Themes and accessibility: dark first with a light theme; responsive from 320px with no horizontal scroll; accessible names on controls.
+- **S11 Landing + login.** "como es un CRM, crea una landing page para logear en la cuenta".
+  - Public route `/` is a landing page presenting the CRM, in the S8 language, with a clear "Ingresar" action. `/login` holds the email + password form, plus "¿Olvidaste tu contraseña?" (reset by email).
+  - Authenticated users who open `/` or `/login` are sent to `/app`.
+  - Invited users land on `/bienvenida` to set their password.
 - **S9 Copyright.** Any footer shows `© <current year>` (2026).
 
 ### Quality
@@ -52,8 +63,10 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | ID | Task | Specs | Route | Status | Evidence |
 |---|---|---|---|---|---|
 | T0 | Scaffold: Vite React TS, deps, Vitest, Supabase init, netlify.toml, this doc | S1 S4 S5 | inline (Claude) | done | initial commit |
-| T1 | DB foundation: `schools`, `profiles`, `school_members`, role enum, helper functions, RLS, signup trigger, `create_school` RPC, isolation tests | S2 S3 S5 S10 | Gentle Shell, risk: escalate (security) → Claude verifies | done | de133f5 + test:db 21/21 |
-| T2 | App shell: Supabase client, auth (login, signup, password reset), protected routes, active-school context + switcher, onboarding "crear escuela", module registry, layout (sidebar/dock), design tokens | S1 S3 S4 S8 S9 | Gentle Shell | pending | |
+| T1 | DB foundation (v1 roles; superseded by T1b): `schools`, `profiles`, `school_members`, role enum, helper functions, RLS, signup trigger, `create_school` RPC, isolation tests | S2 S3 S5 S10 | Gentle Shell, risk: escalate (security) → Claude verifies | done | de133f5 + test:db 21/21 |
+| T1b | Roles revision: CEO platform role, school roles admin/user, last-admin guard, CEO-only create_school, grant_ceo; update checks | S2 S3 S5 S10 | Gentle Shell, risk: escalate → Claude verifies | pending | |
+| T2 | App shell: Supabase client, auth (login, signup, password reset), protected routes, active-school context + switcher, module registry, layout (sidebar/dock), design tokens, CEO "Escuelas" page (create school, list) | S1 S3 S4 S8 S9 | Gentle Shell | pending | |
+| T2b | Landing page `/`, `/login`, password reset, `/bienvenida`, Edge Function `invite-member` + members page | S3 S8 S11 | Gentle Shell | pending | |
 | T3 | Catalogs: specialties + tags (DB + module) | S6 | Gentle Shell | pending | |
 | T4 | Students module | S6 S7 | Gentle Shell | pending | |
 | T5 | Teachers module | S6 | Gentle Shell | pending | |
@@ -65,7 +78,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T11 | Payments (transfer/cash + admin confirmation) | S6 S7 | Gentle Shell | pending | |
 | T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Gentle Shell | pending | |
 | T13 | Dashboard (bento) + data export | S6 S8 | Gentle Shell | pending | |
-| T14 | Deploy: link Supabase project, push migrations, Netlify env vars | S1 S5 | Claude + user | blocked: waits for the user's new Supabase project URL + anon key | |
+| T14 | Deploy: link Supabase project, push migrations, Netlify env vars | S1 S5 | Claude + user | blocked: waits for the user to run `supabase login` and `netlify login` (Claude creates both projects) | |
 
 ## Log
 
@@ -86,3 +99,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Claude fixed three pgTAP bugs: anon error is `42501` (no EXECUTE grant), not `P0001`; `update … returning` inside a subquery is invalid SQL; A cannot read school B's id under RLS, so it is captured as superuser first.
   - Open finding, not fixed (no spec covers it): an owner can demote or remove themselves, leaving a school with no owner. Proposed follow-up is a "last owner" guard trigger, pending user decision.
   - Next: T2 app shell.
+- **L5 (2026-11-11, user, verbatim):** "crea tu todo, incluido el push y todo. La idea tambien como es un CRM, crea una landing page para logear en la cuenta. Mi cuenta, de correo [correo del usuario, omitido: repo público], se va a loguear como una cuenta "CEO". Normalente los usuarios tendran cuenta de "administrador" y tambien abráb otros de "usuario"."
+  - Effect: S3 rewritten, S11 added, T1b and T2b added, and the last-admin guard accepted ("crea tu todo").
+  - The user's email is redacted from this public log (privacy over verbatim). It is not used in code or migrations: the CEO is granted from the live database (S5).
+  - T1's migration was never deployed, so T1b edits it in place instead of stacking an alter migration.
