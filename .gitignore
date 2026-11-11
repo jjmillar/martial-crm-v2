@@ -30,3 +30,6 @@ dist-ssr
 # supabase
 supabase/.branches
 supabase/.temp
+
+# Local Netlify folder
+.netlify
