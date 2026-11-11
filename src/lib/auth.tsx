@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import type { Profile } from './database.types'
@@ -13,6 +13,8 @@ interface AuthContextType {
   signOut: () => Promise<void>
   sendPasswordReset: (email: string) => Promise<{ error: Error | null }>
   updatePassword: (password: string) => Promise<{ error: Error | null }>
+  /** Re-reads the profile without toggling `loading` (so guarded pages stay mounted). */
+  reloadProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -23,9 +25,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isCeo, setIsCeo] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
+  // Only a different user blocks the UI. Token refreshes (hourly) and USER_UPDATED (password change) refresh in
+  // the background; otherwise RequireAuth would unmount the app and wipe any half-filled form.
+  const loadedFor = useRef<string | null>(null)
 
   const fetchUserData = async (currentUserId: string | undefined) => {
     if (!currentUserId) {
+      loadedFor.current = null
       setProfile(null)
       setIsCeo(false)
       setLoading(false)
@@ -33,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      setLoading(true)
+      if (loadedFor.current !== currentUserId) setLoading(true)
       const [profileRes, ceoRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', currentUserId).single(),
         supabase.rpc('is_ceo')
@@ -46,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setIsCeo(Boolean(ceoRes.data))
+      loadedFor.current = currentUserId
     } catch {
       setProfile(null)
       setIsCeo(false)
@@ -78,6 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const id = session.user.id
         setTimeout(() => fetchUserData(id), 0)
       } else {
+        loadedFor.current = null
         setProfile(null)
         setIsCeo(false)
         setLoading(false)
@@ -97,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await supabase.auth.signOut()
+    loadedFor.current = null
     setSession(null)
     setUser(null)
     setProfile(null)
@@ -108,6 +117,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       redirectTo: `${window.location.origin}/bienvenida`
     })
     return { error: error ? new Error(error.message) : null }
+  }
+
+  const reloadProfile = async () => {
+    if (!user?.id) return
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+    if (data) setProfile(data)
   }
 
   const updatePassword = async (password: string) => {
@@ -126,7 +141,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signOut,
         sendPasswordReset,
-        updatePassword
+        updatePassword,
+        reloadProfile
       }}
     >
       {children}

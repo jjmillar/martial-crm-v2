@@ -81,18 +81,6 @@
   min-height: 0;
 }
 
-.file-btn {
-  position: relative;
-  overflow: hidden;
-}
-
-.file-btn input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
 @media (max-width: 560px) {
   .student-row .pay-amount {
     margin-left: auto;

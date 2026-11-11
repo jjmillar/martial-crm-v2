@@ -298,3 +298,15 @@
 .link-plain:hover strong {
   text-decoration: underline;
 }
+
+.file-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.file-btn input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}

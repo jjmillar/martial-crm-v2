@@ -77,7 +77,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T9 | Calendar (day/week/month) | S6 | Claude | done | frontend only; browser QA 390 + 1440 |
 | T10 | Attendance | S6 | Claude | done | migration 20261112000006; test:db 158/158 (12 new); browser QA at 390 as user role |
 | T11 | Payments (transfer/cash + admin confirmation) | S6 S7 S12 | Claude | done | migrations 20261112000007–09; test:db 184/184 (20 new); live storage + email QA |
-| T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Gentle Shell | pending | |
+| T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Claude | done | live logo upload (public URL 200); browser QA as CEO + user role |
 | T13 | Dashboard (bento) + data export | S6 S8 | Gentle Shell | pending | |
 | T14 | Deploy: link Supabase project, push migrations, Netlify env vars | S1 S5 | Claude + user | done | Supabase `hjeholicsijqurubuntv` (sa-east-1); https://martialcrm-v2.netlify.app; live smoke test ok |
 | T15 | Resend: SMTP for auth + Spanish templates, `_shared/email.ts`, `send-email` (template `test`), `email_log` + RLS, Ajustes → Correos | S12 S5 | Claude + user | done (sender `onboarding@resend.dev` until the user has a domain) | test:db 49/49; live recovery email via Resend SMTP: HTTP 200 |
@@ -291,3 +291,10 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
       - New form prefills from the enrollment (instalment or matrícula fee), with method and receipt upload.
       - Detail: confirm, mark failed, refund, back to pending; signed-URL receipt viewer; email receipt.
       - Payments section on the student page.
+  - T12 Ajustes / Mi cuenta:
+    - Ajustes gained an "Escuela" section: name, city, address, phone, email, description, default calendar view, and a logo in the public `logos` bucket (the old file is removed).
+    - New "Mi cuenta" module for all roles: name, phone, password change (Spanish errors for same-password and weak), theme, and my schools with role.
+    - Bug found in QA: every Supabase auth event (incl. the hourly TOKEN_REFRESHED and USER_UPDATED after a password change) re-ran the profile load with `loading=true`, so RequireAuth unmounted the app and wiped any half-filled form.
+      - Fix: only a different user blocks the UI; other events refresh in the background.
+      - Added `reloadProfile()`.
+    - Member invitations already live in Miembros (T2b).

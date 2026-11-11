@@ -5,6 +5,7 @@ import { useSchool } from '../../lib/school'
 import { Icon } from '../../ui/Icon'
 import { listEmailLog, sendTemplate } from './api'
 import { Catalogo } from './Catalogo'
+import { EscuelaPerfil } from './EscuelaPerfil'
 import './ajustes.css'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
@@ -40,6 +41,8 @@ export function AjustesPage() {
         <h1>Ajustes</h1>
         <p className="hint">Configuración de la escuela. Irán apareciendo más secciones aquí.</p>
       </header>
+
+      <EscuelaPerfil key={activeSchool.id} school={activeSchool} />
 
       <section className="card ajustes__section" aria-labelledby="catalogos-h">
         <div className="ajustes__section-head">
