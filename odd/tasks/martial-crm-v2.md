@@ -183,3 +183,10 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Bug found in QA: `SchoolProvider.reload()` set the global `loading` flag, so `RequireRole` unmounted the page and the "escuela creada" notice was lost (this also happened before the change). Now only the first load for a user blocks the UI.
   - QA used a temporary CEO; the temporary user and schools were deleted afterwards.
   - Noted, not done: with 6+ modules the mobile dock overflows (CEO view). Proposal: a "Más" sheet.
+- **L14 (2026-11-11, user): "si, haz el boton Más y despues sigue con profesores"**
+  - Mobile dock:
+    - `MobileDock.tsx` shows the first 4 modules plus "Más".
+    - "Más" opens a bottom sheet (native `<dialog>`) with the remaining modules, the account and Salir.
+    - The sheet closes on navigation, Escape, the close button or a backdrop click; "Más" is highlighted when the current route is inside it.
+    - The dock no longer scrolls horizontally; items are flex 1.
+  - QA as a temporary CEO at 390 and 320 px: no overflow, and logout from the sheet works.

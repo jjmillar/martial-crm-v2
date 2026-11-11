@@ -6,6 +6,7 @@ import { modulesFor } from '../modules/registry'
 import { Icon } from '../ui/Icon'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import { Wordmark } from '../ui/Wordmark'
+import { MobileDock } from './MobileDock'
 import './app.css'
 
 export function AppLayout() {
@@ -60,19 +61,8 @@ export function AppLayout() {
         <footer className="app-footer">© {year} Martial CRM</footer>
       </div>
 
-      {/* Mobile: floating dock with the same entries as the sidebar */}
-      <nav className="dock" aria-label="Secciones">
-        {nav.map((m) => (
-          <NavLink key={m.id} to={m.path} className="dock__link">
-            {m.icon && <Icon name={m.icon} size={20} />}
-            <span>{m.label}</span>
-          </NavLink>
-        ))}
-        <button type="button" className="dock__link" onClick={signOut}>
-          <Icon name="logout" size={20} />
-          <span>Salir</span>
-        </button>
-      </nav>
+      {/* Mobile: floating dock (first modules) + "Más" sheet with the rest, account and logout */}
+      <MobileDock nav={nav} who={profile?.full_name || user?.email || ''} roleText={role ? roleLabel[role] : 'Sin rol asignado'} onSignOut={signOut} />
     </div>
   )
 }
