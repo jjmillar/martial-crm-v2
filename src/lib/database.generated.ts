@@ -14,6 +14,59 @@ export type Database = {
   };
   public: {
     Tables: {
+      attendance: {
+        Row: {
+          class_id: string;
+          created_at: string;
+          created_by: string | null;
+          date: string;
+          id: string;
+          school_id: string;
+          student_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          date?: string;
+          id?: string;
+          school_id: string;
+          student_id: string;
+        };
+        Update: {
+          class_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          date?: string;
+          id?: string;
+          school_id?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "attendance_class_id_school_id_fkey";
+            columns: ["class_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "attendance_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attendance_student_id_school_id_fkey";
+            columns: ["student_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       class_schedules: {
         Row: {
           class_id: string;

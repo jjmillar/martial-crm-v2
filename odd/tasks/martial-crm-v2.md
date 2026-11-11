@@ -75,7 +75,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T7 | Enrollments module | S6 | Claude | done | migration 20261112000004; test:db 125/125 (13 new); browser QA at 390 as user role |
 | T8 | Classes + schedule blocks | S6 | Claude | done | migration 20261112000005; test:db 146/146 (21 new); browser QA at 390 |
 | T9 | Calendar (day/week/month) | S6 | Claude | done | frontend only; browser QA 390 + 1440 |
-| T10 | Attendance | S6 | Gentle Shell | pending | |
+| T10 | Attendance | S6 | Claude | done | migration 20261112000006; test:db 158/158 (12 new); browser QA at 390 as user role |
 | T11 | Payments (transfer/cash + admin confirmation) | S6 S7 | Gentle Shell | pending | |
 | T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Gentle Shell | pending | |
 | T13 | Dashboard (bento) + data export | S6 S8 | Gentle Shell | pending | |
@@ -264,3 +264,11 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
     - Day view lists the classes; month view shows colour dots per day, and tapping a day opens the day view.
     - Every class links to "Asistencia" for that date.
     - New date helpers `startOfWeek`, `monthGrid` and `longDate`, with tests.
+  - T10 Asistencia:
+    - DB: `attendance` (one row = present), unique per class/student/date, composite FKs, no dates more than 1 day ahead, `created_by` trigger; any member marks and unmarks.
+    - Also dropped `teachers_id_school_unique`, a duplicate constraint added in T8.
+    - UI:
+      - Date stepper, then the classes scheduled that weekday, plus "Otra clase".
+      - Roster shows students with a current enrollment first; "Todos los alumnos" and search reveal the rest.
+      - One-tap optimistic toggles with rollback, and a present count against capacity.
+      - Calendar slots deep-link here with the class and date.
