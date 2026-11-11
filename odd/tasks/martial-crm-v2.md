@@ -49,10 +49,10 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Motion: short (opacity, 14–40px, scale .97, ~300ms ease-in-out), disabled under `prefers-reduced-motion`.
   - Themes and accessibility: dark first with a light theme; responsive from 320px with no horizontal scroll; accessible names on controls.
 - **S11 Landing + login.** "como es un CRM, crea una landing page para logear en la cuenta".
-- **S12 Email (Resend).** "instala altiro resend y vayamos probando todo esto. Porque igualmente se enviaran correos por pagos, informativos, etc.." Auth emails (invite, reset) go out via Resend SMTP with Spanish templates. App emails go through one Edge Function `send-email` with a template registry, and every send is logged in `email_log`.
   - Public route `/` is a landing page presenting the CRM, in the S8 language, with a clear "Ingresar" action. `/login` holds the email + password form, plus "¿Olvidaste tu contraseña?" (reset by email).
   - Authenticated users who open `/` or `/login` are sent to `/app`.
   - Invited users land on `/bienvenida` to set their password.
+- **S12 Email (Resend).** "instala altiro resend y vayamos probando todo esto. Porque igualmente se enviaran correos por pagos, informativos, etc.." Auth emails (invite, reset) go out via Resend SMTP with Spanish templates. App emails go through one Edge Function `send-email` with a template registry, and every send is logged in `email_log`.
 - **S9 Copyright.** Any footer shows `© <current year>` (2026).
 
 ### Quality
