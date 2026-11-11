@@ -4,8 +4,9 @@ import { miembros } from './miembros'
 import { escuelas } from './escuelas'
 import { ajustes } from './ajustes'
 import { alumnos } from './alumnos'
+import { profesores } from './profesores'
 
-// One line per module. Order here is the order in the navigation.
-export const modules: ModuleManifest[] = [inicio, alumnos, miembros, escuelas, ajustes]
+// One line per module. Order here is the order in the navigation; the first 4 also fill the mobile dock.
+export const modules: ModuleManifest[] = [inicio, alumnos, profesores, miembros, escuelas, ajustes]
 
 export const modulesFor = (role: AppRole | null) => (role ? modules.filter((m) => m.roles.includes(role)) : [])

@@ -7,7 +7,7 @@ import { formatRut } from '../../lib/rut'
 import type { Student } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { createStudent, deleteStudent, getStudent, studentsKey, updateStudent } from './api'
-import { beltSuggestions } from './belts'
+import { beltSuggestions } from '../../lib/belts'
 import { emptyForm, formFromStudent, parseStudent, type StudentForm } from './schema'
 
 type Errors = Partial<Record<keyof StudentForm, string>>

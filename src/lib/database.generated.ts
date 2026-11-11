@@ -350,6 +350,113 @@ export type Database = {
           },
         ];
       };
+      teacher_specialties: {
+        Row: {
+          school_id: string;
+          specialty_id: string;
+          teacher_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          school_id: string;
+          specialty_id: string;
+          teacher_id: string;
+        };
+        Update: {
+          school_id?: string;
+          specialty_id?: string;
+          teacher_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "teacher_specialties_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "teacher_specialties_specialty_id_school_id_fkey";
+            columns: ["specialty_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "specialties";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "teacher_specialties_teacher_id_school_id_fkey";
+            columns: ["teacher_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "teachers";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
+      teachers: {
+        Row: {
+          active: boolean;
+          belt: string | null;
+          belt_degree: number | null;
+          bio: string | null;
+          created_at: string;
+          email: string | null;
+          first_last_name: string;
+          first_name: string;
+          full_name: string | null;
+          id: string;
+          phone: string | null;
+          rut: string | null;
+          school_id: string;
+          second_last_name: string | null;
+          updated_at: string;
+          user_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          belt?: string | null;
+          belt_degree?: number | null;
+          bio?: string | null;
+          created_at?: string;
+          email?: string | null;
+          first_last_name: string;
+          first_name: string;
+          full_name?: never;
+          id?: string;
+          phone?: string | null;
+          rut?: string | null;
+          school_id: string;
+          second_last_name?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          belt?: string | null;
+          belt_degree?: number | null;
+          bio?: string | null;
+          created_at?: string;
+          email?: string | null;
+          first_last_name?: string;
+          first_name?: string;
+          full_name?: never;
+          id?: string;
+          phone?: string | null;
+          rut?: string | null;
+          school_id?: string;
+          second_last_name?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "teachers_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -390,6 +497,10 @@ export type Database = {
       is_ceo: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
+      set_teacher_specialties: {
+        Args: { p_specialty_ids: string[]; p_teacher_id: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       gender: "masculino" | "femenino" | "otro";

@@ -70,7 +70,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T2b | Landing page `/`, `/login`, password reset, `/bienvenida` (done in T2) + Edge Function `invite-member` + Miembros page | S3 S8 S11 | Gentle Shell (function) + Claude | done | 47d5931; test:db 40/40; landing/login screenshots 1440/390 |
 | T3 | Catalogs: specialties + tags (DB + module) | S6 | Claude (Gentle Shell hit quota) | done | migration 20261112000001; Ajustes → Catálogos; browser QA |
 | T4 | Students module | S6 S7 | Claude (Gentle Shell hit quota) | done | test:db 74/74 (25 new); 17 unit tests; browser QA 1440/390 on live DB with temp data, deleted |
-| T5 | Teachers module | S6 | Gentle Shell | pending | |
+| T5 | Teachers module | S6 | Claude (Gentle Shell skipped: quota) | done | migration 20261112000002; test:db 94/94 (20 new); 19 unit tests; browser QA as CEO + user role, 1440/390 |
 | T6 | Plans module | S6 S7 | Gentle Shell | pending | |
 | T7 | Enrollments module | S6 | Gentle Shell | pending | |
 | T8 | Classes + schedule blocks | S6 | Gentle Shell | pending | |
@@ -190,3 +190,22 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
     - The sheet closes on navigation, Escape, the close button or a backdrop click; "Más" is highlighted when the current route is inside it.
     - The dock no longer scrolls horizontally; items are flex 1.
   - QA as a temporary CEO at 390 and 320 px: no overflow, and logout from the sheet works.
+- **L15 (2026-11-11, Claude): T5 Profesores.**
+  - Gentle Shell was not tried after 4 straight quota failures.
+  - DB:
+    - `teachers` (name, RUT, contact, belt/degree, bio, optional `user_id` that must be a school member, active).
+    - `teacher_specialties` join with composite FKs `(id, school_id)`, so cross-school links are impossible.
+    - `set_teacher_specialties` RPC, security invoker, so RLS applies.
+    - Removing a member unlinks their teacher record.
+    - Members read; admins write.
+  - UI:
+    - Card grid with search, specialty filter and an inactive toggle.
+    - Form with specialty pick-chips and a linked-account select that hides accounts already linked.
+    - Users get a read-only form (disabled fieldset).
+  - Shared refactor:
+    - `src/ui/patterns.css` (toolbar, search, segmented, empty, avatar, belt, forms, pick-chips).
+    - `src/lib/belts.ts`.
+    - Alumnos also uses the round "+" once it has data (consistent with L13).
+    - A mobile `.belt` offset was leaking out of alumnos.css; it is now scoped.
+  - QA incident: a reused state file made cleanup miss the temporary CEO. It was found and deleted with a pattern sweep (`qa-*@example.com`, `qa-*` slugs). Live DB afterwards: 1 user, 1 platform admin.
+  - Next: T6 Planes.

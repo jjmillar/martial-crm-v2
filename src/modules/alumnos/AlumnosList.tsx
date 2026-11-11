@@ -6,7 +6,7 @@ import { formatRut } from '../../lib/rut'
 import { yearsSince } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from './api'
-import { beltSwatch } from './belts'
+import { beltSwatch } from '../../lib/belts'
 
 type Filter = 'activos' | 'inactivos' | 'todos'
 
@@ -50,7 +50,9 @@ export function AlumnosList() {
           <span className="eyebrow">{activeSchool.name}</span>
           <h1>Alumnos</h1>
         </div>
-        <Link className="btn" to="nuevo"><Icon name="plus" size={16} /> Nuevo alumno</Link>
+        {Boolean(students.data?.length) && (
+          <Link className="fab" to="nuevo" aria-label="Nuevo alumno" title="Nuevo alumno"><Icon name="plus" size={22} /></Link>
+        )}
       </header>
 
       <div className="toolbar">

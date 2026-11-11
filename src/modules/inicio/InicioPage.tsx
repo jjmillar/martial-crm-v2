@@ -5,7 +5,7 @@ import { roleLabel } from '../../lib/roles'
 import './inicio.css'
 
 // Modules from the v1 template still to be built (spec S6, tasks T3-T13).
-const upcoming = ['Profesores', 'Planes', 'Matrículas', 'Clases', 'Calendario', 'Asistencia', 'Pagos']
+const upcoming = ['Planes', 'Matrículas', 'Clases', 'Calendario', 'Asistencia', 'Pagos']
 
 export function InicioPage() {
   const { profile } = useAuth()

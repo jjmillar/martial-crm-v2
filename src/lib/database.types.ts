@@ -18,3 +18,5 @@ export type Student = Tables<'students'>
 export type StudentInsert = TablesInsert<'students'>
 export type StudentUpdate = TablesUpdate<'students'>
 
+export type Teacher = Tables<'teachers'>
+export type TeacherInsert = TablesInsert<'teachers'>
