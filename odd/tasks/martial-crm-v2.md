@@ -64,7 +64,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 |---|---|---|---|---|---|
 | T0 | Scaffold: Vite React TS, deps, Vitest, Supabase init, netlify.toml, this doc | S1 S4 S5 | inline (Claude) | done | initial commit |
 | T1 | DB foundation (v1 roles; superseded by T1b): `schools`, `profiles`, `school_members`, role enum, helper functions, RLS, signup trigger, `create_school` RPC, isolation tests | S2 S3 S5 S10 | Gentle Shell, risk: escalate (security) → Claude verifies | done | de133f5 + test:db 21/21 |
-| T1b | Roles revision: CEO platform role, school roles admin/user, last-admin guard, CEO-only create_school, grant_ceo; update checks | S2 S3 S5 S10 | Gentle Shell, risk: escalate → Claude verifies | pending | |
+| T1b | Roles revision: CEO platform role, school roles admin/user, last-admin guard, CEO-only create_school, grant_ceo; update checks | S2 S3 S5 S10 | Gentle Shell, risk: escalate → Claude verifies | done | 979100d + test:db 34/34 |
 | T2 | App shell: Supabase client, auth (login, signup, password reset), protected routes, active-school context + switcher, module registry, layout (sidebar/dock), design tokens, CEO "Escuelas" page (create school, list) | S1 S3 S4 S8 S9 | Gentle Shell | pending | |
 | T2b | Landing page `/`, `/login`, password reset, `/bienvenida`, Edge Function `invite-member` + members page | S3 S8 S11 | Gentle Shell | pending | |
 | T3 | Catalogs: specialties + tags (DB + module) | S6 | Gentle Shell | pending | |
@@ -103,3 +103,8 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Effect: S3 rewritten, S11 added, T1b and T2b added, and the last-admin guard accepted ("crea tu todo").
   - The user's email is redacted from this public log (privacy over verbatim). It is not used in code or migrations: the CEO is granted from the live database (S5).
   - T1's migration was never deployed, so T1b edits it in place instead of stacking an alter migration.
+- **L6 (2026-11-11, Claude): T1b verification.**
+  - Gentle Shell (attempt 3, 58s) rewrote the migration. PGlite checks 34/34 pass. Covered: CEO via `grant_ceo` (superuser only, case-insensitive), CEO-only school creation, isolation, admin vs user limits, last-admin guard including CEO, and cascade delete of a school passing the guard.
+  - Claude fixed the pgTAP file again: the CEO inserted into `schools` directly, which RLS forbids. It now uses `create_school`.
+  - The pgTAP files have not been executed (no Docker); the PGlite checks are the executed evidence.
+  - `supabase/config.toml`: `enable_signup = false` (invite-only, S3), local site URL set to Vite's port.
