@@ -75,6 +75,7 @@ export interface Database {
         Row: {
           id: string
           full_name: string | null
+          email: string | null
           avatar_url: string | null
           phone: string | null
           created_at: string
@@ -82,6 +83,7 @@ export interface Database {
         }
         Insert: {
           id: string
+          email?: string | null
           full_name?: string | null
           avatar_url?: string | null
           phone?: string | null
@@ -90,6 +92,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          email?: string | null
           full_name?: string | null
           avatar_url?: string | null
           phone?: string | null

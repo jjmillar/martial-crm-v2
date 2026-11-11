@@ -1,0 +1,66 @@
+.miembros {
+  display: grid;
+  gap: 24px;
+}
+
+.miembros__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+.miembros__form {
+  display: grid;
+  gap: 16px;
+}
+
+.miembros__form h2 {
+  font-size: 20px;
+}
+
+.miembros__list {
+  display: grid;
+  gap: 8px;
+}
+
+.member-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.member-row__who {
+  display: grid;
+  min-width: 0;
+}
+
+.member-row__who strong,
+.member-row__who .hint {
+  overflow-wrap: anywhere;
+}
+
+.member-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.member-row__role {
+  width: auto;
+  min-height: 40px;
+}
+
+.btn--danger {
+  background: var(--danger);
+  color: #19191c;
+}
+
+@media (max-width: 760px) {
+  .miembros__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

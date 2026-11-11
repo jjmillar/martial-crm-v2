@@ -66,7 +66,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T1 | DB foundation (v1 roles; superseded by T1b): `schools`, `profiles`, `school_members`, role enum, helper functions, RLS, signup trigger, `create_school` RPC, isolation tests | S2 S3 S5 S10 | Gentle Shell, risk: escalate (security) → Claude verifies | done | de133f5 + test:db 21/21 |
 | T1b | Roles revision: CEO platform role, school roles admin/user, last-admin guard, CEO-only create_school, grant_ceo; update checks | S2 S3 S5 S10 | Gentle Shell, risk: escalate → Claude verifies | done | 979100d + test:db 34/34 |
 | T2 | App shell: Supabase client, auth (login, signup, password reset), protected routes, active-school context + switcher, module registry, layout (sidebar/dock), design tokens, CEO "Escuelas" page (create school, list) | S1 S3 S4 S8 S9 | Gentle Shell (part 1) + Claude | done | e72b075 (GS) + T2 commit; lint 0 errors, 8 tests, build ok |
-| T2b | Landing page `/`, `/login`, password reset, `/bienvenida` (done in T2) + Edge Function `invite-member` + members page (pending) | S3 S8 S11 | Claude / Gentle Shell | in_progress | landing+login+bienvenida screenshots 1440/390, no overflow |
+| T2b | Landing page `/`, `/login`, password reset, `/bienvenida` (done in T2) + Edge Function `invite-member` + Miembros page | S3 S8 S11 | Gentle Shell (function) + Claude | done (live invite test pending T14) | 47d5931; test:db 40/40; landing/login screenshots 1440/390 |
 | T3 | Catalogs: specialties + tags (DB + module) | S6 | Gentle Shell | pending | |
 | T4 | Students module | S6 S7 | Gentle Shell | pending | |
 | T5 | Teachers module | S6 | Gentle Shell | pending | |
@@ -116,3 +116,11 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
     - The school reload depends on the user id, so token refreshes do not refetch.
     - A missing Supabase env no longer crashes the landing page.
   - Next: Edge Function `invite-member` and the Miembros page, then T14 deploy.
+- **L8 (2026-11-11, Claude): T2b.**
+  - Gentle Shell wrote `invite-member`. Its run ended with "Incomplete JSON segment", but the file was complete.
+  - Claude's fixes and additions:
+    - Removed an `any`.
+    - A lookup error no longer falls through to sending a second invitation.
+    - Added migration `20261111000001_members.sql`: `profiles.email` mirror and the service-only `find_user_id_by_email`, with 6/6 checks.
+    - Added the Miembros page: invite, change role, remove with inline confirmation; last-admin errors are shown in Spanish.
+  - Next: T14 deploy, which needs the user's `supabase login` and `netlify login`.
