@@ -1,0 +1,237 @@
+.alumnos,
+.alumno-form {
+  display: grid;
+  gap: 20px;
+}
+
+.page-head.page-head--row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-head--row > div {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.page-head--row h1 {
+  overflow-wrap: anywhere;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+}
+
+/* Toolbar: search + status filter */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.search {
+  position: relative;
+  flex: 1 1 280px;
+  min-width: 0;
+  color: var(--faint);
+}
+
+.search svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.search .input {
+  padding-left: 36px;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.segmented button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.segmented button span {
+  margin-left: 4px;
+  color: var(--faint);
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 32px;
+}
+
+.empty h2 {
+  font-size: 22px;
+}
+
+/* List */
+.student-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.student-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s ease;
+}
+
+.student-row:hover,
+.student-row:focus-visible {
+  border-color: var(--faint);
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.student-row__main {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.student-row__main strong,
+.student-row__main .hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.belt {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.belt i {
+  width: 18px;
+  height: 8px;
+  border-radius: 2px;
+  outline: 1px solid var(--line);
+}
+
+/* Form */
+.form-section {
+  display: grid;
+  gap: 16px;
+}
+
+.form-section h2 {
+  font-size: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 16px;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field__error {
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.switch {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.switch input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
+.switch > span {
+  display: grid;
+  gap: 2px;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-actions__danger {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+@media (max-width: 560px) {
+  .student-row {
+    flex-wrap: wrap;
+  }
+
+  .student-row__main strong {
+    white-space: normal;
+  }
+
+  .belt {
+    margin-left: 54px;
+  }
+}

@@ -54,11 +54,6 @@
   min-height: 40px;
 }
 
-.btn--danger {
-  background: var(--danger);
-  color: #19191c;
-}
-
 @media (max-width: 760px) {
   .miembros__grid {
     grid-template-columns: minmax(0, 1fr);

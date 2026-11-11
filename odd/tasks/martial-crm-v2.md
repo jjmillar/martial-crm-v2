@@ -68,8 +68,8 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T1b | Roles revision: CEO platform role, school roles admin/user, last-admin guard, CEO-only create_school, grant_ceo; update checks | S2 S3 S5 S10 | Gentle Shell, risk: escalate → Claude verifies | done | 979100d + test:db 34/34 |
 | T2 | App shell: Supabase client, auth (login, signup, password reset), protected routes, active-school context + switcher, module registry, layout (sidebar/dock), design tokens, CEO "Escuelas" page (create school, list) | S1 S3 S4 S8 S9 | Gentle Shell (part 1) + Claude | done | e72b075 (GS) + T2 commit; lint 0 errors, 8 tests, build ok |
 | T2b | Landing page `/`, `/login`, password reset, `/bienvenida` (done in T2) + Edge Function `invite-member` + Miembros page | S3 S8 S11 | Gentle Shell (function) + Claude | done | 47d5931; test:db 40/40; landing/login screenshots 1440/390 |
-| T3 | Catalogs: specialties + tags (DB + module) | S6 | Gentle Shell | pending | |
-| T4 | Students module | S6 S7 | Gentle Shell | pending | |
+| T3 | Catalogs: specialties + tags (DB + module) | S6 | Claude (Gentle Shell hit quota) | done | migration 20261112000001; Ajustes → Catálogos; browser QA |
+| T4 | Students module | S6 S7 | Claude (Gentle Shell hit quota) | done | test:db 74/74 (25 new); 17 unit tests; browser QA 1440/390 on live DB with temp data, deleted |
 | T5 | Teachers module | S6 | Gentle Shell | pending | |
 | T6 | Plans module | S6 S7 | Gentle Shell | pending | |
 | T7 | Enrollments module | S6 | Gentle Shell | pending | |
@@ -150,3 +150,26 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - A live recovery email was sent to the CEO.
   - Limitation: until a domain is verified in Resend, emails can only go to the Resend account owner.
   - Next: the user checks the email and the Ajustes → Correos test; then T3+.
+- **L12 (2026-11-11, user): "listo entré y todo bien"**
+  - The user confirmed CEO login and the email flow, so Claude continued with T3 and T4.
+  - Gentle Shell was asked for the migration and failed 3 times on Gemini's free quota (429, 250k input tokens/min), leaving no changes. Claude wrote it.
+  - One bug was caught by the PGlite checks: `concat_ws` is not immutable, so the generated `full_name` column now uses `||`.
+  - Built:
+    - `rut_is_valid` (modulo 11), with the RUT unique per school.
+    - `prevent_school_change` trigger on all three tables.
+    - Users can create and edit students; only admins delete them.
+    - Catalogs are managed by admins only.
+  - Architecture:
+    - Types are now generated (`database.generated.ts`), and `database.types.ts` only holds aliases (S4).
+    - Module routes are mounted as `<path>/*`, so a module owns its own sub-routes.
+    - Shared styles (`.tag`, `.btn--danger`, `.chips`, `.sr-only`) moved to `index.css`.
+  - "Improved" over v1 (S6):
+    - Accent-insensitive search by name, RUT or email.
+    - Active/inactive/all filter with counts.
+    - Belt colour swatch; age and years in the school.
+    - Inline field errors in Spanish; RUT formatted on blur.
+  - Browser QA found and fixed:
+    - The header row lost to `.page-head` in the CSS cascade.
+    - The mobile shell spread spare height into the top bar.
+    - RUT and weight were shown unformatted in the edit form.
+  - Next: T5 Profesores (uses specialties).

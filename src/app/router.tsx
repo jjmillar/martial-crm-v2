@@ -19,7 +19,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="inicio" replace /> },
       // Each module registers its own route (S4): adding a module never edits this file.
-      ...modules.map((m) => ({ path: m.path, element: <RequireRole roles={m.roles}>{m.element}</RequireRole> })),
+      // `/*` lets a module own sub-routes (list, new, detail) with its own <Routes>.
+      ...modules.map((m) => ({ path: `${m.path}/*`, element: <RequireRole roles={m.roles}>{m.element}</RequireRole> })),
     ],
   },
   { path: '*', element: <NotFound /> },

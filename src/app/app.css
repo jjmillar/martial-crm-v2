@@ -147,6 +147,8 @@
 @media (max-width: 760px) {
   .shell {
     grid-template-columns: minmax(0, 1fr);
+    /* top bar keeps its natural height; spare viewport height goes to the content */
+    grid-template-rows: auto 1fr;
   }
 
   .sidebar {

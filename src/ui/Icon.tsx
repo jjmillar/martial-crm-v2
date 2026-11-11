@@ -12,6 +12,10 @@ const paths = {
   moon: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
   mail: 'M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5zM3.5 6l8.5 7 8.5-7',
   settings: 'M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4',
+  user: 'M20 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-7A4.5 4.5 0 0 0 4 18.5V20M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+  search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4',
+  back: 'M19 12H5M11 6l-6 6 6 6',
+  trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
 } as const
 
 export type IconName = keyof typeof paths

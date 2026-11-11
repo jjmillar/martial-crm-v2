@@ -1,173 +1,20 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+// Thin layer over the generated types (S4). Regenerate with:
+//   npx supabase gen types --lang typescript --linked --schema public > src/lib/database.generated.ts
+// Add new table aliases here, never edit database.generated.ts by hand.
+import type { Enums, Tables, TablesInsert, TablesUpdate } from './database.generated'
 
-export type SchoolRole = 'admin' | 'user'
+export type { Database, Json, Tables, TablesInsert, TablesUpdate } from './database.generated'
 
-export interface Database {
-  public: {
-    Tables: {
-      schools: {
-        Row: {
-          id: string
-          name: string
-          slug: string
-          logo_url: string | null
-          address: string | null
-          city: string | null
-          phone: string | null
-          email: string | null
-          description: string | null
-          default_calendar_view: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          slug: string
-          logo_url?: string | null
-          address?: string | null
-          city?: string | null
-          phone?: string | null
-          email?: string | null
-          description?: string | null
-          default_calendar_view?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          slug?: string
-          logo_url?: string | null
-          address?: string | null
-          city?: string | null
-          phone?: string | null
-          email?: string | null
-          description?: string | null
-          default_calendar_view?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      email_log: {
-        Row: {
-          id: string
-          school_id: string | null
-          template: string
-          to_email: string
-          subject: string
-          status: 'sent' | 'failed'
-          provider_id: string | null
-          error: string | null
-          created_by: string | null
-          created_at: string
-        }
-        Insert: never
-        Update: never
-        Relationships: []
-      }
-      platform_admins: {
-        Row: {
-          user_id: string
-          created_at: string
-        }
-        Insert: {
-          user_id: string
-          created_at?: string
-        }
-        Update: {
-          user_id?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          id: string
-          full_name: string | null
-          email: string | null
-          avatar_url: string | null
-          phone: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id: string
-          email?: string | null
-          full_name?: string | null
-          avatar_url?: string | null
-          phone?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string | null
-          full_name?: string | null
-          avatar_url?: string | null
-          phone?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      school_members: {
-        Row: {
-          id: string
-          school_id: string
-          user_id: string
-          role: SchoolRole
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          school_id: string
-          user_id: string
-          role?: SchoolRole
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          school_id?: string
-          user_id?: string
-          role?: SchoolRole
-          created_at?: string
-        }
-        Relationships: []
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      create_school: {
-        Args: {
-          p_name: string
-          p_slug: string
-        }
-        Returns: Database['public']['Tables']['schools']['Row']
-      }
-      is_ceo: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-    }
-    Enums: {
-      school_role: SchoolRole
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+export type SchoolRole = Enums<'school_role'>
+export type Gender = Enums<'gender'>
 
-export type School = Database['public']['Tables']['schools']['Row']
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type SchoolMember = Database['public']['Tables']['school_members']['Row']
+export type School = Tables<'schools'>
+export type Profile = Tables<'profiles'>
+export type SchoolMember = Tables<'school_members'>
+export type EmailLog = Tables<'email_log'>
+export type Specialty = Tables<'specialties'>
+export type Tag = Tables<'tags'>
+export type Student = Tables<'students'>
+export type StudentInsert = TablesInsert<'students'>
+export type StudentUpdate = TablesUpdate<'students'>
+

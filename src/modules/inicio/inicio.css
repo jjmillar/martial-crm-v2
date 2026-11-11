@@ -46,23 +46,6 @@
   align-self: flex-start;
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.chips li {
-  padding: 6px 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-size: 13px;
-  color: var(--muted);
-}
-
 @media (max-width: 900px) {
   .bento {
     grid-template-columns: repeat(2, minmax(0, 1fr));

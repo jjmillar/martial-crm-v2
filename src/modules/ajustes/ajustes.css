@@ -75,16 +75,63 @@
   background: var(--danger);
 }
 
-.tag {
-  flex: none;
-  padding: 3px 8px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--muted);
-}
-
 .tag--failed {
   color: var(--danger);
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 24px;
+}
+
+.catalog {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.catalog h3 {
+  font-size: 16px;
+}
+
+.catalog__form {
+  display: flex;
+  gap: 8px;
+}
+
+.catalog__form .input {
+  min-width: 0;
+}
+
+.catalog__icon.input {
+  flex: 0 0 56px;
+  text-align: center;
+}
+
+.chips--catalog li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+}
+
+.chips--catalog li.is-off {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
+.chip-action {
+  padding: 0 0 0 6px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: none;
+  color: var(--faint);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chip-action:hover {
+  color: var(--text);
 }
