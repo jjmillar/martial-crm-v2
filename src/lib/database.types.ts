@@ -23,3 +23,5 @@ export type TeacherInsert = TablesInsert<'teachers'>
 export type Plan = Tables<'plans'>
 export type PlanInsert = TablesInsert<'plans'>
 export type BillingCycle = Enums<'billing_cycle'>
+export type Enrollment = Tables<'enrollments'>
+export type EnrollmentStatus = Enums<'enrollment_status'>

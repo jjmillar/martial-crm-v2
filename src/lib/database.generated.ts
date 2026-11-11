@@ -62,6 +62,77 @@ export type Database = {
           },
         ];
       };
+      enrollments: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          ends_at: string | null;
+          enrollment_fee: number;
+          id: string;
+          notes: string | null;
+          plan_id: string;
+          price: number;
+          school_id: string;
+          start_date: string;
+          status: Database["public"]["Enums"]["enrollment_status"];
+          student_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          ends_at?: string | null;
+          enrollment_fee?: number;
+          id?: string;
+          notes?: string | null;
+          plan_id: string;
+          price: number;
+          school_id: string;
+          start_date?: string;
+          status?: Database["public"]["Enums"]["enrollment_status"];
+          student_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          ends_at?: string | null;
+          enrollment_fee?: number;
+          id?: string;
+          notes?: string | null;
+          plan_id?: string;
+          price?: number;
+          school_id?: string;
+          start_date?: string;
+          status?: Database["public"]["Enums"]["enrollment_status"];
+          student_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_plan_id_school_id_fkey";
+            columns: ["plan_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "enrollments_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "enrollments_student_id_school_id_fkey";
+            columns: ["student_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       plans: {
         Row: {
           active: boolean;
@@ -577,6 +648,7 @@ export type Database = {
     };
     Enums: {
       billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";
+      enrollment_status: "activa" | "pausada" | "cancelada";
       gender: "masculino" | "femenino" | "otro";
       school_role: "admin" | "user";
     };
@@ -710,6 +782,7 @@ export const Constants = {
   public: {
     Enums: {
       billing_cycle: ["mensual", "trimestral", "semestral", "anual", "unico"],
+      enrollment_status: ["activa", "pausada", "cancelada"],
       gender: ["masculino", "femenino", "otro"],
       school_role: ["admin", "user"],
     },

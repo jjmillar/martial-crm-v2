@@ -1,0 +1,4 @@
+.matriculas {
+  display: grid;
+  gap: 16px;
+}

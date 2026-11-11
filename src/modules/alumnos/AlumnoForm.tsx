@@ -9,6 +9,7 @@ import { Icon } from '../../ui/Icon'
 import { createStudent, deleteStudent, getStudent, studentsKey, updateStudent } from './api'
 import { beltSuggestions } from '../../lib/belts'
 import { emptyForm, formFromStudent, parseStudent, type StudentForm } from './schema'
+import { StudentEnrollments } from './StudentEnrollments'
 
 type Errors = Partial<Record<keyof StudentForm, string>>
 
@@ -176,6 +177,8 @@ function AlumnoForm({ student }: { student?: Student }) {
           </span>
         </label>
       </section>
+
+      {student && <StudentEnrollments studentId={student.id} />}
 
       {serverError && <p className="alert" role="alert">{serverError}</p>}
       {saved && <p className="alert alert--ok" role="status">Cambios guardados.</p>}

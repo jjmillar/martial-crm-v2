@@ -21,3 +21,17 @@ export function yearsSince(iso: string | null | undefined, today = todayIso()): 
   if (tm < m || (tm === m && td < d)) years--
   return years
 }
+
+/** ISO date plus n days (calendar arithmetic in UTC, so no DST surprises). */
+export function addDays(iso: string, n: number): string {
+  const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + n)
+  return d.toISOString().slice(0, 10)
+}
+
+/** Whole days from today (Santiago) until an ISO date; negative when past. */
+export function daysUntil(iso: string, today = todayIso()): number {
+  const a = Date.parse(`${today}T00:00:00Z`)
+  const b = Date.parse(`${iso.slice(0, 10)}T00:00:00Z`)
+  return Math.round((b - a) / 86_400_000)
+}

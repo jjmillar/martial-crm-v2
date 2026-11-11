@@ -72,7 +72,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T4 | Students module | S6 S7 | Claude (Gentle Shell hit quota) | done | test:db 74/74 (25 new); 17 unit tests; browser QA 1440/390 on live DB with temp data, deleted |
 | T5 | Teachers module | S6 | Claude (Gentle Shell skipped: quota) | done | migration 20261112000002; test:db 94/94 (20 new); 19 unit tests; browser QA as CEO + user role, 1440/390 |
 | T6 | Plans module | S6 S7 | Claude | done | migration 20261112000003; test:db 112/112 (18 new); 25 unit tests; browser QA CEO + user role, 1440/390 |
-| T7 | Enrollments module | S6 | Gentle Shell | pending | |
+| T7 | Enrollments module | S6 | Claude | done | migration 20261112000004; test:db 125/125 (13 new); browser QA at 390 as user role |
 | T8 | Classes + schedule blocks | S6 | Gentle Shell | pending | |
 | T9 | Calendar (day/week/month) | S6 | Gentle Shell | pending | |
 | T10 | Attendance | S6 | Gentle Shell | pending | |
@@ -232,3 +232,17 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
     - `.field` uses `align-content: start`, which fixes inputs misaligned when sibling hints differ in height (all forms).
   - QA used an isolated temporary environment with its own state file, then a pattern sweep. Live DB afterwards: 1 user, 1 platform admin.
   - Next: T7 Matrículas (students ↔ plans).
+- **L17 (2026-11-11, user): "Voy a salir de este computador y quiero que implementes todo lo que tengas que implementar mientras no estoy y despues testeo mientras vayas comiteando voy testeando en mi celular. Asi que implementa todo lo necesario."**
+  - Effect: Claude works through T7–T13 autonomously. Each module is committed, deployed and announced on Telegram so the user can test on the phone.
+  - T7 Matrículas:
+    - DB:
+      - Price and fee are snapshotted at enrollment time.
+      - Composite FKs to the student and plan of the same school; a plan with enrollments cannot be deleted.
+      - One active enrollment per student and plan.
+      - `set_created_by` trigger (no spoofing).
+      - Members create and update; admins delete.
+    - UI:
+      - List with derived phases (vigente / por vencer ≤7 d / vencida / pausada / cancelada) and search.
+      - New form preselects the default plan and auto-fills price, fee and end date.
+      - Detail: renew (extends from the current end, or from today if expired), pause, reactivate and cancel.
+      - The student page shows the student's enrollments plus a "Matricular" shortcut.

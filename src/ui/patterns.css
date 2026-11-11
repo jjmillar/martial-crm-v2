@@ -255,3 +255,46 @@
   border-color: color-mix(in srgb, var(--accent) 60%, transparent);
   color: var(--accent);
 }
+
+/* Status tags shared by enrollments (and payments later) */
+.tag--phase-activa {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+}
+
+.tag--phase-por_vencer {
+  color: #e8c547;
+  border-color: color-mix(in srgb, #e8c547 45%, transparent);
+}
+
+.tag--phase-vencida,
+.tag--phase-cancelada {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.tag--phase-pausada {
+  color: var(--muted);
+}
+
+/* Long filter rows scroll sideways on phones instead of wrapping into many lines */
+@media (max-width: 560px) {
+  .segmented--scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .segmented--scroll button {
+    flex: none;
+  }
+}
+
+.link-plain {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link-plain:hover strong {
+  text-decoration: underline;
+}
