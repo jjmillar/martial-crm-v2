@@ -71,7 +71,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T3 | Catalogs: specialties + tags (DB + module) | S6 | Claude (Gentle Shell hit quota) | done | migration 20261112000001; Ajustes → Catálogos; browser QA |
 | T4 | Students module | S6 S7 | Claude (Gentle Shell hit quota) | done | test:db 74/74 (25 new); 17 unit tests; browser QA 1440/390 on live DB with temp data, deleted |
 | T5 | Teachers module | S6 | Claude (Gentle Shell skipped: quota) | done | migration 20261112000002; test:db 94/94 (20 new); 19 unit tests; browser QA as CEO + user role, 1440/390 |
-| T6 | Plans module | S6 S7 | Gentle Shell | pending | |
+| T6 | Plans module | S6 S7 | Claude | done | migration 20261112000003; test:db 112/112 (18 new); 25 unit tests; browser QA CEO + user role, 1440/390 |
 | T7 | Enrollments module | S6 | Gentle Shell | pending | |
 | T8 | Classes + schedule blocks | S6 | Gentle Shell | pending | |
 | T9 | Calendar (day/week/month) | S6 | Gentle Shell | pending | |
@@ -209,3 +209,26 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
     - A mobile `.belt` offset was leaking out of alumnos.css; it is now scoped.
   - QA incident: a reused state file made cleanup miss the temporary CEO. It was found and deleted with a pattern sweep (`qa-*@example.com`, `qa-*` slugs). Live DB afterwards: 1 user, 1 platform admin.
   - Next: T6 Planes.
+- **L16 (2026-11-11, user): "sigue con los planes, crearlos, editarlos, etc..."**
+  - DB:
+    - `billing_cycle` enum: mensual, trimestral, semestral, anual, unico.
+    - `plans`:
+      - CLP integers: price and enrollment_fee (matrícula).
+      - Duration, sessions per week, class pack, description.
+      - Flags: trial, default, active.
+      - Discipline is a same-school specialty through a composite FK, set to null when the specialty is deleted.
+    - Only one default plan per school (partial unique index plus a trigger that unmarks the previous one); the default cannot be inactive.
+    - Members read; admins write.
+  - UI:
+    - Pricing-card grid with a default badge and an inactive toggle.
+    - Editor:
+      - Cycle segmented control that auto-fills the duration until it is edited by hand.
+      - CLP formatting on blur and a sticky live preview card.
+      - Duplicate action (copy is never default).
+      - The default plan cannot be deactivated or deleted from the UI.
+    - Read-only for users.
+  - Shared:
+    - `lib/money.ts` (formatCLP/parseCLP).
+    - `.field` uses `align-content: start`, which fixes inputs misaligned when sibling hints differ in height (all forms).
+  - QA used an isolated temporary environment with its own state file, then a pattern sweep. Live DB afterwards: 1 user, 1 platform admin.
+  - Next: T7 Matrículas (students ↔ plans).

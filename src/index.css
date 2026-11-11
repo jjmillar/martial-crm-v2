@@ -173,6 +173,8 @@ a {
 /* Forms */
 .field {
   display: grid;
+  /* keep label + input at the top when a sibling field in the row is taller */
+  align-content: start;
   gap: 6px;
 }
 

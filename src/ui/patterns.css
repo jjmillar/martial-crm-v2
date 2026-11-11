@@ -244,3 +244,14 @@
     max-width: none;
   }
 }
+
+.segmented--wrap {
+  flex-wrap: wrap;
+  justify-self: start;
+  max-width: 100%;
+}
+
+.tag--accent {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  color: var(--accent);
+}

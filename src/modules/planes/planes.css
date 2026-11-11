@@ -1,0 +1,127 @@
+.planes {
+  display: grid;
+  gap: 20px;
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  padding: 24px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color var(--dur) var(--ease);
+}
+
+a.plan-card:hover,
+a.plan-card:focus-visible {
+  border-color: var(--faint);
+}
+
+.plan-card.is-default {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+}
+
+.plan-card.is-off {
+  opacity: 0.6;
+}
+
+.plan-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan-card__tags .eyebrow {
+  margin-right: auto;
+}
+
+.plan-card__name {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.plan-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: clamp(32px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.plan-card__price span {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.plan-card__features {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.plan-card__features li::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: var(--text);
+  vertical-align: middle;
+}
+
+.plan-card__desc {
+  margin-top: auto;
+}
+
+/* Editor: form + sticky live preview */
+.plan-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  gap: 20px;
+  align-items: start;
+}
+
+.plan-preview {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 8px;
+}
+
+.plan-flags {
+  gap: 18px;
+}
+
+@media (max-width: 1000px) {
+  .plan-editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .plan-preview {
+    position: static;
+    order: -1;
+  }
+}

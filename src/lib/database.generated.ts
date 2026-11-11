@@ -62,6 +62,79 @@ export type Database = {
           },
         ];
       };
+      plans: {
+        Row: {
+          active: boolean;
+          billing_cycle: Database["public"]["Enums"]["billing_cycle"];
+          class_count: number | null;
+          created_at: string;
+          description: string | null;
+          duration_days: number | null;
+          enrollment_fee: number;
+          id: string;
+          is_default: boolean;
+          is_trial: boolean;
+          name: string;
+          price: number;
+          school_id: string;
+          sessions_per_week: number | null;
+          specialty_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"];
+          class_count?: number | null;
+          created_at?: string;
+          description?: string | null;
+          duration_days?: number | null;
+          enrollment_fee?: number;
+          id?: string;
+          is_default?: boolean;
+          is_trial?: boolean;
+          name: string;
+          price: number;
+          school_id: string;
+          sessions_per_week?: number | null;
+          specialty_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          active?: boolean;
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"];
+          class_count?: number | null;
+          created_at?: string;
+          description?: string | null;
+          duration_days?: number | null;
+          enrollment_fee?: number;
+          id?: string;
+          is_default?: boolean;
+          is_trial?: boolean;
+          name?: string;
+          price?: number;
+          school_id?: string;
+          sessions_per_week?: number | null;
+          specialty_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plans_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "plans_specialty_id_school_id_fkey";
+            columns: ["specialty_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "specialties";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       platform_admins: {
         Row: {
           created_at: string;
@@ -503,6 +576,7 @@ export type Database = {
       };
     };
     Enums: {
+      billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";
       gender: "masculino" | "femenino" | "otro";
       school_role: "admin" | "user";
     };
@@ -635,6 +709,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      billing_cycle: ["mensual", "trimestral", "semestral", "anual", "unico"],
       gender: ["masculino", "femenino", "otro"],
       school_role: ["admin", "user"],
     },

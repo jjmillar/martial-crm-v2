@@ -20,3 +20,6 @@ export type StudentUpdate = TablesUpdate<'students'>
 
 export type Teacher = Tables<'teachers'>
 export type TeacherInsert = TablesInsert<'teachers'>
+export type Plan = Tables<'plans'>
+export type PlanInsert = TablesInsert<'plans'>
+export type BillingCycle = Enums<'billing_cycle'>
