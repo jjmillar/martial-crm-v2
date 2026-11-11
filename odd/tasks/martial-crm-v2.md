@@ -78,7 +78,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T10 | Attendance | S6 | Claude | done | migration 20261112000006; test:db 158/158 (12 new); browser QA at 390 as user role |
 | T11 | Payments (transfer/cash + admin confirmation) | S6 S7 S12 | Claude | done | migrations 20261112000007–09; test:db 184/184 (20 new); live storage + email QA |
 | T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Claude | done | live logo upload (public URL 200); browser QA as CEO + user role |
-| T13 | Dashboard (bento) + data export | S6 S8 | Gentle Shell | pending | |
+| T13 | Dashboard (bento) + data export | S6 S8 | Claude | done | browser QA CEO + user (no money for users); 4 CSV downloads verified |
 | T14 | Deploy: link Supabase project, push migrations, Netlify env vars | S1 S5 | Claude + user | done | Supabase `hjeholicsijqurubuntv` (sa-east-1); https://martialcrm-v2.netlify.app; live smoke test ok |
 | T15 | Resend: SMTP for auth + Spanish templates, `_shared/email.ts`, `send-email` (template `test`), `email_log` + RLS, Ajustes → Correos | S12 S5 | Claude + user | done (sender `onboarding@resend.dev` until the user has a domain) | test:db 49/49; live recovery email via Resend SMTP: HTTP 200 |
 
@@ -298,3 +298,16 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
       - Fix: only a different user blocks the UI; other events refresh in the background.
       - Added `reloadProfile()`.
     - Member invitations already live in Miembros (T2b).
+  - T13 Dashboard + export:
+    - Inicio is a bento with:
+      - Active students (+ new this month), current enrollments (+ expired), attendance this week.
+      - Collected this month and pending confirmation (admin/CEO only; users see no money).
+      - Today's classes with an attendance shortcut, and enrollments expiring within 7 days with a renew shortcut.
+      - Stat tiles pair up on phones.
+    - Ajustes → Exportar datos: CSV (`;`, BOM, CRLF) for students, enrollments, payments and attendance; opens directly in Excel (es-CL). `lib/csv.ts` has tests.
+  - Close of L17:
+    - All tasks T0–T14 are done. Totals: test:db 184/184 across 11 check files, 32 unit tests, lint 0 errors, build ok.
+    - QA data swept, including storage files. Live DB afterwards: 1 user, 1 platform admin, 1 school.
+    - Pending on the user:
+      - Buy and verify a domain in Resend, so emails reach anyone (now only the owner).
+      - Optional: link the Netlify site to GitHub for auto-deploys.

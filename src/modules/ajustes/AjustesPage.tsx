@@ -6,6 +6,7 @@ import { Icon } from '../../ui/Icon'
 import { listEmailLog, sendTemplate } from './api'
 import { Catalogo } from './Catalogo'
 import { EscuelaPerfil } from './EscuelaPerfil'
+import { Exportar } from './Exportar'
 import './ajustes.css'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
@@ -56,6 +57,8 @@ export function AjustesPage() {
           <Catalogo table="tags" schoolId={activeSchool.id} canEdit withIcon title="Etiquetas de clase" description="Para clasificar clases: niños, competición, principiantes…" placeholder="Ej: Niños" />
         </div>
       </section>
+
+      <Exportar schoolId={activeSchool.id} schoolName={activeSchool.name} />
 
       <section className="card ajustes__section" aria-labelledby="correos-h">
         <div className="ajustes__section-head">
