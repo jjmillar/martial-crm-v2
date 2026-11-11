@@ -173,3 +173,13 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
     - The mobile shell spread spare height into the top bar.
     - RUT and weight were shown unformatted in the edit form.
   - Next: T5 Profesores (uses specialties).
+- **L13 (2026-11-11, user): "Por UX, quiero que en el menu de escuelas, solo salga el cuadro grande de "nueva escuela" cuando no aya ninguna escuela creada, y despues que solo salga por ahi con in circulo blanco con el signo +."**
+  - Escuelas page:
+    - With no schools, the page is just the big "Nueva escuela" card.
+    - With schools, the list is full width and a round white "+" button (`.fab`) opens the same form in a native `<dialog>` (`.modal`).
+    - The dialog has autofocus and closes with Escape, Cancelar or a backdrop click; the form is empty on every open.
+    - The form was extracted to `SchoolForm.tsx`.
+  - `.fab`, `.modal` and `.page-head--row` are now shared styles for other modules.
+  - Bug found in QA: `SchoolProvider.reload()` set the global `loading` flag, so `RequireRole` unmounted the page and the "escuela creada" notice was lost (this also happened before the change). Now only the first load for a user blocks the UI.
+  - QA used a temporary CEO; the temporary user and schools were deleted afterwards.
+  - Noted, not done: with 6+ modules the mobile dock overflows (CEO view). Proposal: a "Más" sheet.

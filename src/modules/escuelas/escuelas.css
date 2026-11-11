@@ -3,11 +3,16 @@
   gap: 24px;
 }
 
-.escuelas__grid {
+/* First run: the big create card */
+.escuelas__first {
   display: grid;
-  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
-  gap: var(--gap);
-  align-items: start;
+  gap: 16px;
+  max-width: 520px;
+}
+
+.escuelas__first h2,
+.modal h2 {
+  font-size: 20px;
 }
 
 .escuelas__form {
@@ -15,8 +20,10 @@
   gap: 16px;
 }
 
-.escuelas__form h2 {
-  font-size: 20px;
+.escuelas__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .escuelas__list {
@@ -48,10 +55,4 @@
   font-size: 13px;
   color: var(--ok);
   white-space: nowrap;
-}
-
-@media (max-width: 760px) {
-  .escuelas__grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }

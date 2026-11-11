@@ -4,24 +4,6 @@
   gap: 20px;
 }
 
-.page-head.page-head--row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.page-head--row > div {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-}
-
-.page-head--row h1 {
-  overflow-wrap: anywhere;
-}
-
 .back-link {
   display: inline-flex;
   align-items: center;

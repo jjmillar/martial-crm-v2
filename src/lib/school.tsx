@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from './supabase'
 import { useAuth } from './auth'
 import type { School, SchoolMember } from './database.types'
@@ -31,6 +31,8 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   })
   const [loading, setLoading] = useState<boolean>(true)
+  // Only the first load for a user blocks the UI; later reloads refresh in the background so pages stay mounted.
+  const loadedFor = useRef<string | null>(null)
 
   const reload = useCallback(async () => {
     if (!userId) {
@@ -41,7 +43,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     try {
-      setLoading(true)
+      if (loadedFor.current !== userId) setLoading(true)
       const [schoolsRes, membershipsRes] = await Promise.all([
         supabase.from('schools').select('*').order('name'),
         supabase.from('school_members').select('*').eq('user_id', userId)
@@ -86,6 +88,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setSchools([])
       setMemberships([])
     } finally {
+      loadedFor.current = userId
       setLoading(false)
     }
   }, [userId])

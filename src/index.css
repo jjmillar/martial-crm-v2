@@ -301,3 +301,73 @@ textarea.input {
   font-size: 13px;
   color: var(--muted);
 }
+
+/* Round primary action ("+"): white circle on dark, inverts on light theme via the button tokens */
+.fab {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+
+.fab:hover {
+  transform: scale(1.06);
+}
+
+.fab:active {
+  transform: scale(0.97);
+}
+
+.fab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Native <dialog> modal */
+.modal {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.modal::backdrop {
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.modal[open] {
+  animation: modal-in var(--dur) var(--ease);
+}
+
+.modal__body {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab,
+  .modal[open] {
+    transition: none;
+    animation: none;
+  }
+}
