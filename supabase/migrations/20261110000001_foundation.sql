@@ -1,8 +1,8 @@
 -- Migration: Foundation schema for Martial CRM v2
--- Includes enum school_role, tables schools, profiles, school_members, triggers, helper functions, create_school RPC, and RLS policies.
+-- Includes enum school_role ('admin', 'user'), tables schools, platform_admins, profiles, school_members, triggers, helper functions, create_school RPC, guard_last_admin trigger, and RLS policies.
 
 -- 1. Create school_role enum
-create type public.school_role as enum ('owner', 'admin', 'instructor', 'student');
+create type public.school_role as enum ('admin', 'user');
 
 -- 2. Create schools table
 create table public.schools (
@@ -20,7 +20,13 @@ create table public.schools (
     updated_at timestamptz not null default now()
 );
 
--- 3. Create profiles table
+-- 3. Create platform_admins table
+create table public.platform_admins (
+    user_id uuid primary key references auth.users(id) on delete cascade,
+    created_at timestamptz not null default now()
+);
+
+-- 4. Create profiles table
 create table public.profiles (
     id uuid primary key references auth.users(id) on delete cascade,
     full_name text,
@@ -30,12 +36,12 @@ create table public.profiles (
     updated_at timestamptz not null default now()
 );
 
--- 4. Create school_members table
+-- 5. Create school_members table
 create table public.school_members (
     id uuid primary key default gen_random_uuid(),
     school_id uuid not null references public.schools(id) on delete cascade,
     user_id uuid not null references auth.users(id) on delete cascade,
-    role public.school_role not null default 'student',
+    role public.school_role not null default 'user',
     created_at timestamptz not null default now(),
     constraint school_members_school_id_user_id_key unique (school_id, user_id)
 );
@@ -44,7 +50,7 @@ create table public.school_members (
 create index idx_school_members_user_id on public.school_members(user_id);
 create index idx_school_members_school_id on public.school_members(school_id);
 
--- 5. Updated_at trigger function and triggers
+-- 6. Updated_at trigger function and triggers
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -67,7 +73,7 @@ create trigger set_profiles_updated_at
     for each row
     execute function public.set_updated_at();
 
--- 6. Automatic profile creation on user signup
+-- 7. Automatic profile creation on user signup
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -86,8 +92,8 @@ create trigger on_auth_user_created
     for each row
     execute function public.handle_new_user();
 
--- 7. Helper security definer functions for membership and role checks
-create or replace function public.is_school_member(p_school_id uuid)
+-- 8. CEO check function
+create or replace function public.is_ceo()
 returns boolean
 language sql
 stable
@@ -95,6 +101,49 @@ security definer
 set search_path = ''
 as $$
     select exists (
+        select 1
+        from public.platform_admins
+        where user_id = auth.uid()
+    );
+$$;
+
+-- 9. Grant CEO function (only postgres / service_role can run)
+create or replace function public.grant_ceo(p_email text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_user_id uuid;
+begin
+    select id into v_user_id
+    from auth.users
+    where lower(email) = lower(p_email);
+
+    if v_user_id is null then
+        raise exception 'user not found';
+    end if;
+
+    insert into public.platform_admins (user_id)
+    values (v_user_id)
+    on conflict do nothing;
+end;
+$$;
+
+revoke execute on function public.grant_ceo(text) from public;
+revoke execute on function public.grant_ceo(text) from anon;
+revoke execute on function public.grant_ceo(text) from authenticated;
+
+-- 10. Helper security definer functions for membership and role checks
+create or replace function public.is_school_member(p_school_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+    select public.is_ceo() or exists (
         select 1
         from public.school_members
         where school_id = p_school_id
@@ -109,7 +158,7 @@ stable
 security definer
 set search_path = ''
 as $$
-    select exists (
+    select public.is_ceo() or exists (
         select 1
         from public.school_members
         where school_id = p_school_id
@@ -118,7 +167,46 @@ as $$
     );
 $$;
 
--- 8. create_school RPC function
+-- 11. Last-admin guard trigger function and trigger
+create or replace function public.guard_last_admin()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    if (
+        (TG_OP = 'DELETE' and old.role = 'admin')
+        or
+        (TG_OP = 'UPDATE' and old.role = 'admin' and (new.role <> 'admin' or new.school_id <> old.school_id))
+    ) then
+        if exists (select 1 from public.schools where id = old.school_id) then
+            if not exists (
+                select 1
+                from public.school_members
+                where school_id = old.school_id
+                  and role = 'admin'
+                  and id <> old.id
+            ) then
+                raise exception 'a school must keep at least one admin';
+            end if;
+        end if;
+    end if;
+
+    if TG_OP = 'DELETE' then
+        return old;
+    else
+        return new;
+    end if;
+end;
+$$;
+
+create trigger trg_guard_last_admin
+    before update or delete on public.school_members
+    for each row
+    execute function public.guard_last_admin();
+
+-- 12. create_school RPC function
 create or replace function public.create_school(p_name text, p_slug text)
 returns public.schools
 language plpgsql
@@ -132,12 +220,13 @@ begin
         raise exception 'not authenticated';
     end if;
 
+    if not public.is_ceo() then
+        raise exception 'only the CEO can create schools';
+    end if;
+
     insert into public.schools (name, slug)
     values (p_name, p_slug)
     returning * into v_school;
-
-    insert into public.school_members (school_id, user_id, role)
-    values (v_school.id, auth.uid(), 'owner');
 
     return v_school;
 end;
@@ -147,30 +236,37 @@ revoke execute on function public.create_school(text, text) from public;
 revoke execute on function public.create_school(text, text) from anon;
 grant execute on function public.create_school(text, text) to authenticated;
 
--- 9. Enable Row Level Security on all foundation tables
+-- 13. Enable Row Level Security on all foundation tables
 alter table public.schools enable row level security;
+alter table public.platform_admins enable row level security;
 alter table public.profiles enable row level security;
 alter table public.school_members enable row level security;
 
--- 10. RLS Policies for schools
+-- 14. RLS Policies for platform_admins
+create policy "platform_admins_select_policy" on public.platform_admins
+    for select
+    using (user_id = auth.uid());
+
+-- 15. RLS Policies for schools
 create policy "schools_select_policy" on public.schools
     for select
     using (public.is_school_member(id));
 
 create policy "schools_update_policy" on public.schools
     for update
-    using (public.has_school_role(id, array['owner', 'admin']::public.school_role[]))
-    with check (public.has_school_role(id, array['owner', 'admin']::public.school_role[]));
+    using (public.has_school_role(id, array['admin']::public.school_role[]))
+    with check (public.has_school_role(id, array['admin']::public.school_role[]));
 
 create policy "schools_delete_policy" on public.schools
     for delete
-    using (public.has_school_role(id, array['owner']::public.school_role[]));
+    using (public.is_ceo());
 
--- 11. RLS Policies for profiles
+-- 16. RLS Policies for profiles
 create policy "profiles_select_policy" on public.profiles
     for select
     using (
         id = auth.uid()
+        or public.is_ceo()
         or exists (
             select 1
             from public.school_members sm1
@@ -185,32 +281,20 @@ create policy "profiles_update_policy" on public.profiles
     using (id = auth.uid())
     with check (id = auth.uid());
 
--- 12. RLS Policies for school_members
+-- 17. RLS Policies for school_members
 create policy "school_members_select_policy" on public.school_members
     for select
     using (public.is_school_member(school_id));
 
 create policy "school_members_insert_policy" on public.school_members
     for insert
-    with check (
-        public.has_school_role(school_id, array['owner', 'admin']::public.school_role[])
-        and (role <> 'owner' or public.has_school_role(school_id, array['owner']::public.school_role[]))
-    );
+    with check (public.has_school_role(school_id, array['admin']::public.school_role[]));
 
 create policy "school_members_update_policy" on public.school_members
     for update
-    using (
-        public.has_school_role(school_id, array['owner', 'admin']::public.school_role[])
-        and (role <> 'owner' or public.has_school_role(school_id, array['owner']::public.school_role[]))
-    )
-    with check (
-        public.has_school_role(school_id, array['owner', 'admin']::public.school_role[])
-        and (role <> 'owner' or public.has_school_role(school_id, array['owner']::public.school_role[]))
-    );
+    using (public.has_school_role(school_id, array['admin']::public.school_role[]))
+    with check (public.has_school_role(school_id, array['admin']::public.school_role[]));
 
 create policy "school_members_delete_policy" on public.school_members
     for delete
-    using (
-        public.has_school_role(school_id, array['owner', 'admin']::public.school_role[])
-        and (role <> 'owner' or public.has_school_role(school_id, array['owner']::public.school_role[]))
-    );
+    using (public.has_school_role(school_id, array['admin']::public.school_role[]));
