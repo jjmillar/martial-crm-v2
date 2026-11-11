@@ -247,11 +247,6 @@
     opacity: 0.45;
   }
 
-  /* Pulse twice on load so it is noticed as a separate, movable control */
-  .menu-fab.is-ready:not(.is-dragging) {
-    animation: fab-hint 1.4s var(--ease) 0.4s 2;
-  }
-
   .menu-fab:active {
     scale: 0.96;
   }
@@ -337,18 +332,6 @@
 
 .sheet__who strong {
   overflow-wrap: anywhere;
-}
-
-@keyframes fab-hint {
-  0%, 100% {
-    scale: 1;
-  }
-  30% {
-    scale: 1.08;
-  }
-  60% {
-    scale: 0.98;
-  }
 }
 
 @keyframes sheet-in {
