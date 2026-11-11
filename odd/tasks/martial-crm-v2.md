@@ -49,6 +49,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Motion: short (opacity, 14–40px, scale .97, ~300ms ease-in-out), disabled under `prefers-reduced-motion`.
   - Themes and accessibility: dark first with a light theme; responsive from 320px with no horizontal scroll; accessible names on controls.
 - **S11 Landing + login.** "como es un CRM, crea una landing page para logear en la cuenta".
+- **S12 Email (Resend).** "instala altiro resend y vayamos probando todo esto. Porque igualmente se enviaran correos por pagos, informativos, etc.." Auth emails (invite, reset) go out via Resend SMTP with Spanish templates. App emails go through one Edge Function `send-email` with a template registry, and every send is logged in `email_log`.
   - Public route `/` is a landing page presenting the CRM, in the S8 language, with a clear "Ingresar" action. `/login` holds the email + password form, plus "¿Olvidaste tu contraseña?" (reset by email).
   - Authenticated users who open `/` or `/login` are sent to `/app`.
   - Invited users land on `/bienvenida` to set their password.
@@ -79,6 +80,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Gentle Shell | pending | |
 | T13 | Dashboard (bento) + data export | S6 S8 | Gentle Shell | pending | |
 | T14 | Deploy: link Supabase project, push migrations, Netlify env vars | S1 S5 | Claude + user | done | Supabase `hjeholicsijqurubuntv` (sa-east-1); https://martialcrm-v2.netlify.app; live smoke test ok |
+| T15 | Resend: SMTP for auth + Spanish templates, `_shared/email.ts`, `send-email` (template `test`), `email_log` + RLS, Ajustes → Correos | S12 S5 | Claude | in progress: waits for the Resend API key | test:db 49/49 |
 
 ## Log
 
@@ -136,3 +138,8 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
     - A user who is not a member sees 0 schools; `is_ceo` returns false; `create_school` is refused.
     - `invite-member` returns 403 for someone who is not an admin.
   - Next: T3+ modules.
+- **L10 (2026-11-11, user): "instala altiro resend y vayamos probando todo esto. Porque igualmente se enviaran correos por pagos, informativos, etc.. asi vamos testeando altiro."**
+  - Effect: S12 and T15 were added. The Ajustes module (T12) starts with its Correos section.
+  - Claude implemented it without Gentle Shell because the user asked for it right away ("altiro"), and Gemini's quota cuts long pedidos.
+  - The migration has 9 new checks, so test:db passes 49/49.
+  - Blocked on the user: create a Resend account and an API key. A verified domain is needed before emails can go to people other than the account owner.

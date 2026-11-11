@@ -56,6 +56,23 @@ export interface Database {
         }
         Relationships: []
       }
+      email_log: {
+        Row: {
+          id: string
+          school_id: string | null
+          template: string
+          to_email: string
+          subject: string
+          status: 'sent' | 'failed'
+          provider_id: string | null
+          error: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       platform_admins: {
         Row: {
           user_id: string
