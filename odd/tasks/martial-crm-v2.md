@@ -76,7 +76,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T8 | Classes + schedule blocks | S6 | Claude | done | migration 20261112000005; test:db 146/146 (21 new); browser QA at 390 |
 | T9 | Calendar (day/week/month) | S6 | Claude | done | frontend only; browser QA 390 + 1440 |
 | T10 | Attendance | S6 | Claude | done | migration 20261112000006; test:db 158/158 (12 new); browser QA at 390 as user role |
-| T11 | Payments (transfer/cash + admin confirmation) | S6 S7 S12 | Claude | done | migrations 20261112000007–09; test:db 184/184 (20 new); live storage + email QA |
+| T11 | Payments (transfer/cash + admin confirmation) | S6 S7 S12 | Claude | done | migrations 20261112000007–09; test:db 178/178 (20 new); live storage + email QA |
 | T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Claude | done | live logo upload (public URL 200); browser QA as CEO + user role |
 | T13 | Dashboard (bento) + data export | S6 S8 | Claude | done | browser QA CEO + user (no money for users); 4 CSV downloads verified |
 | T14 | Deploy: link Supabase project, push migrations, Netlify env vars | S1 S5 | Claude + user | done | Supabase `hjeholicsijqurubuntv` (sa-east-1); https://martialcrm-v2.netlify.app; live smoke test ok |
@@ -306,7 +306,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
       - Stat tiles pair up on phones.
     - Ajustes → Exportar datos: CSV (`;`, BOM, CRLF) for students, enrollments, payments and attendance; opens directly in Excel (es-CL). `lib/csv.ts` has tests.
   - Close of L17:
-    - All tasks T0–T14 are done. Totals: test:db 184/184 across 11 check files, 32 unit tests, lint 0 errors, build ok.
+    - All tasks T0–T14 are done. Totals: test:db 178/178 across 10 check files, 32 unit tests, lint 0 errors, build ok.
     - QA data swept, including storage files. Live DB afterwards: 1 user, 1 platform admin, 1 school.
     - Pending on the user:
       - Buy and verify a domain in Resend, so emails reach anyone (now only the owner).
