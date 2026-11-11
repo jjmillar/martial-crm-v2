@@ -6,7 +6,7 @@ import { modulesFor } from '../modules/registry'
 import { Icon } from '../ui/Icon'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import { Wordmark } from '../ui/Wordmark'
-import { MobileDock } from './MobileDock'
+import { MobileMenu } from './MobileMenu'
 import './app.css'
 
 export function AppLayout() {
@@ -61,8 +61,8 @@ export function AppLayout() {
         <footer className="app-footer">© {year} Martial CRM</footer>
       </div>
 
-      {/* Mobile: floating dock (first modules) + "Más" sheet with the rest, account and logout */}
-      <MobileDock nav={nav} who={profile?.full_name || user?.email || ''} roleText={role ? roleLabel[role] : 'Sin rol asignado'} onSignOut={signOut} />
+      {/* Mobile: draggable floating menu button + sheet with every module, account and logout */}
+      <MobileMenu nav={nav} who={profile?.full_name || user?.email || ''} roleText={role ? roleLabel[role] : 'Sin rol asignado'} onSignOut={signOut} />
     </div>
   )
 }

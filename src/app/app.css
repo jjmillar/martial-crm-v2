@@ -158,11 +158,11 @@
   color: var(--faint);
 }
 
-.dock {
+.menu-fab {
   display: none;
 }
 
-/* Mobile: sidebar becomes a top bar, navigation moves to a floating dock */
+/* Mobile: sidebar becomes a top bar, navigation moves to a draggable floating menu button */
 @media (max-width: 760px) {
   .shell {
     grid-template-columns: minmax(0, 1fr);
@@ -192,46 +192,49 @@
     padding: 16px 16px 96px;
   }
 
-  .dock {
+  .menu-fab {
     position: fixed;
-    left: 50%;
-    bottom: 12px;
+    top: 0;
+    left: 0;
     z-index: 10;
-    display: flex;
-    gap: 2px;
-    width: max-content;
-    max-width: calc(100vw - 24px);
-    padding: 4px;
-    translate: -50% 0;
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-card);
-  }
-
-  .dock__link {
     display: grid;
-    justify-items: center;
-    gap: 2px;
-    flex: 1 1 0;
-    min-width: 60px;
-    padding: 6px 8px;
-    border: 0;
-    border-radius: 8px;
-    background: none;
-    color: var(--muted);
-    font: 500 11px/1.2 var(--font);
-    text-decoration: none;
-    cursor: pointer;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--btn-text) 18%, transparent);
+    border-radius: 50%;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: scale var(--dur) var(--ease);
   }
 
-  .dock__link.active {
-    color: var(--text);
-    background: var(--surface-2);
+  .menu-fab.is-ready {
+    transition: transform 260ms var(--ease), scale var(--dur) var(--ease);
+  }
+
+  .menu-fab.is-ready.is-dragging {
+    cursor: grabbing;
+    scale: 1.08;
+    transition: scale var(--dur) var(--ease);
+  }
+
+  .menu-fab:active {
+    scale: 0.96;
+  }
+
+  .menu-fab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
   }
 }
 
-/* "Más" bottom sheet (mobile dock overflow) */
+/* Mobile menu bottom sheet */
 .sheet {
   width: 100%;
   max-width: 100%;
@@ -316,7 +319,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sheet[open] {
+  .sheet[open],
+  .menu-fab {
     animation: none;
+    transition: none;
   }
 }

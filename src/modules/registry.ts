@@ -13,7 +13,7 @@ import { asistencia } from './asistencia'
 import { pagos } from './pagos'
 import { cuenta } from './cuenta'
 
-// One line per module. Order here is the order in the navigation; the first 4 also fill the mobile dock.
+// One line per module. Order here is the order in the navigation.
 export const modules: ModuleManifest[] = [inicio, alumnos, asistencia, pagos, matriculas, calendario, clases, profesores, planes, miembros, escuelas, ajustes, cuenta]
 
 export const modulesFor = (role: AppRole | null) => (role ? modules.filter((m) => m.roles.includes(role)) : [])
