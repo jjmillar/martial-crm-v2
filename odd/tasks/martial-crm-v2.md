@@ -80,7 +80,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Gentle Shell | pending | |
 | T13 | Dashboard (bento) + data export | S6 S8 | Gentle Shell | pending | |
 | T14 | Deploy: link Supabase project, push migrations, Netlify env vars | S1 S5 | Claude + user | done | Supabase `hjeholicsijqurubuntv` (sa-east-1); https://martialcrm-v2.netlify.app; live smoke test ok |
-| T15 | Resend: SMTP for auth + Spanish templates, `_shared/email.ts`, `send-email` (template `test`), `email_log` + RLS, Ajustes → Correos | S12 S5 | Claude | in progress: waits for the Resend API key | test:db 49/49 |
+| T15 | Resend: SMTP for auth + Spanish templates, `_shared/email.ts`, `send-email` (template `test`), `email_log` + RLS, Ajustes → Correos | S12 S5 | Claude + user | done (sender `onboarding@resend.dev` until the user has a domain) | test:db 49/49; live recovery email via Resend SMTP: HTTP 200 |
 
 ## Log
 
@@ -143,3 +143,10 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Claude implemented it without Gentle Shell because the user asked for it right away ("altiro"), and Gemini's quota cuts long pedidos.
   - The migration has 9 new checks, so test:db passes 49/49.
   - Blocked on the user: create a Resend account and an API key. A verified domain is needed before emails can go to people other than the account owner.
+- **L11 (2026-11-11, user): "no tengo dominio propio aun" / "listo lo de la api"**
+  - The Resend key (sending-only) is stored outside the repo.
+  - Secrets set: `RESEND_API_KEY` and `EMAIL_FROM`, which is `onboarding@resend.dev` for now.
+  - `config push` enabled the SMTP and the Spanish invite, recovery and magic-link templates.
+  - A live recovery email was sent to the CEO.
+  - Limitation: until a domain is verified in Resend, emails can only go to the Resend account owner.
+  - Next: the user checks the email and the Ajustes → Correos test; then T3+.
