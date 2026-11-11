@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, daysUntil, formatDate, todayIso, yearsSince } from './dates'
+import { addDays, daysUntil, formatDate, monthGrid, startOfWeek, todayIso, yearsSince } from './dates'
 
 describe('dates', () => {
   it('formats ISO as dd-mm-aaaa', () => {
@@ -26,5 +26,19 @@ describe('date arithmetic', () => {
   it('counts days until a date', () => {
     expect(daysUntil('2026-11-18', '2026-11-11')).toBe(7)
     expect(daysUntil('2026-11-01', '2026-11-11')).toBe(-10)
+  })
+})
+
+describe('calendar helpers', () => {
+  it('finds the Monday of the week', () => {
+    expect(startOfWeek('2026-11-11')).toBe('2026-11-09') // Wednesday -> Monday
+    expect(startOfWeek('2026-11-15')).toBe('2026-11-09') // Sunday belongs to the same ISO week
+    expect(startOfWeek('2026-11-09')).toBe('2026-11-09')
+  })
+  it('builds a Monday-first 6-week month grid', () => {
+    const g = monthGrid('2026-11-20')
+    expect(g).toHaveLength(42)
+    expect(g[0]).toBe('2026-10-26')
+    expect(g).toContain('2026-11-30')
   })
 })

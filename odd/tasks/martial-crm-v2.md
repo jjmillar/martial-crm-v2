@@ -74,7 +74,7 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 | T6 | Plans module | S6 S7 | Claude | done | migration 20261112000003; test:db 112/112 (18 new); 25 unit tests; browser QA CEO + user role, 1440/390 |
 | T7 | Enrollments module | S6 | Claude | done | migration 20261112000004; test:db 125/125 (13 new); browser QA at 390 as user role |
 | T8 | Classes + schedule blocks | S6 | Claude | done | migration 20261112000005; test:db 146/146 (21 new); browser QA at 390 |
-| T9 | Calendar (day/week/month) | S6 | Gentle Shell | pending | |
+| T9 | Calendar (day/week/month) | S6 | Claude | done | frontend only; browser QA 390 + 1440 |
 | T10 | Attendance | S6 | Gentle Shell | pending | |
 | T11 | Payments (transfer/cash + admin confirmation) | S6 S7 | Gentle Shell | pending | |
 | T12 | Settings: profile, school profile, logo upload (Storage), member invitations | S3 S6 | Gentle Shell | pending | |
@@ -258,3 +258,9 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
       - Class cards with a colour stripe, slot chips and tags; filter by weekday and search.
       - Editor with a colour swatch picker, editable weekly blocks and tag pick-chips.
       - A brand-new class whose schedule fails is rolled back.
+  - T9 Calendario (frontend only, derived from active classes' weekly blocks):
+    - View and date live in the URL; the default view comes from `schools.default_calendar_view`.
+    - Desktop week is an hour grid with colour blocks; phones get a 7-day agenda.
+    - Day view lists the classes; month view shows colour dots per day, and tapping a day opens the day view.
+    - Every class links to "Asistencia" for that date.
+    - New date helpers `startOfWeek`, `monthGrid` and `longDate`, with tests.
