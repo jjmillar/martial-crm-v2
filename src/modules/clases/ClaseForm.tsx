@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from '../../lib/nav'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { hhmm, weekdays } from '../../lib/weekdays'

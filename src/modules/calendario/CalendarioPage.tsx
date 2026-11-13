@@ -1,12 +1,11 @@
 import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { addDays, dayMonth, longDate, monthGrid, monthTitle, startOfWeek, todayIso } from '../../lib/dates'
 import { hhmm, isoWeekday, weekdayShort } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
-import './calendario.css'
 
 type View = 'day' | 'week' | 'month'
 type Slot = { id: string; cls: ClassFull; start: string; end: string; weekday: number }

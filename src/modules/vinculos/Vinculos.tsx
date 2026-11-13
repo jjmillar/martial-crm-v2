@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '../../lib/nav'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
@@ -9,7 +9,6 @@ import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { listMembers, inviteMember } from '../miembros/api'
 import { listTeachers, teachersKey, type TeacherWithSpecialties } from '../profesores/api'
-import './vinculos.css'
 
 // Card item 6: one person can be a student, a teacher and a member (account) at the same time.
 // Links: students.user_id (portal account), teachers.student_id, teachers.user_id (member account).

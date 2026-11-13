@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import type { IconName } from '../ui/Icon'
 
 // 'alumno': a student with a portal account (students.user_id), not a staff member.
@@ -10,7 +9,6 @@ export type ModuleManifest = {
   label: string
   path: string
   roles: AppRole[]
-  element: ReactNode
   icon?: IconName
   navGroup?: 'principal' | 'gestion'
   /** Route only (kept for old links), never shown in the navigation. */

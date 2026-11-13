@@ -1,13 +1,11 @@
 import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import { Icon, type IconName } from '../../ui/Icon'
 import { EscuelaPerfil } from '../ajustes/EscuelaPerfil'
 import { SchoolForm } from './SchoolForm'
-import '../ajustes/ajustes.css'
-import './escuelas.css'
 
 type Stats = { school_id: string; students_active: number; teachers_active: number; classes_active: number; members: number; attendance_30d: number }
 

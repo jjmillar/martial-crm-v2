@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from '../../lib/nav'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
@@ -13,7 +13,6 @@ import { Catalogo } from './Catalogo'
 import { EscuelaPerfil } from './EscuelaPerfil'
 import { LandingSettings } from './LandingSettings'
 import { Exportar } from './Exportar'
-import './ajustes.css'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
 

@@ -6,7 +6,6 @@ import { roleLabel } from '../../lib/roles'
 import type { SchoolRole } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { inviteMember, listCeos, listMembers, removeMember, updateRole } from './api'
-import './miembros.css'
 
 export function MiembrosPage() {
   const { activeSchool } = useSchool()

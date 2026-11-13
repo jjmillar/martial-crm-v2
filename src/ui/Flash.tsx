@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { clearNavState, useLocation } from '../lib/nav'
 import { Icon } from './Icon'
 import { motion } from './motion'
 
@@ -10,17 +10,22 @@ export function Flash() {
   const [msg, setMsg] = useState<{ text: string; key: string; out?: boolean } | null>(null)
   const text = (location.state as { flash?: string } | null)?.flash
 
+  // Show it once and drop it from the navigation state, so going back or forward never repeats it.
   useEffect(() => {
     if (!text) return
     setMsg({ text, key: location.key })
-    try {
-      const h = window.history.state as { usr?: unknown } | null
-      if (h && typeof h === 'object') window.history.replaceState({ ...h, usr: undefined }, '')
-    } catch { /* ignore */ }
-    const t = setTimeout(() => setMsg((m) => (m ? { ...m, out: true } : m)), 3500)
-    const t2 = setTimeout(() => setMsg(null), 3500 + motion.exit)
-    return () => { clearTimeout(t); clearTimeout(t2) }
+    clearNavState()
   }, [text, location.key])
+
+  // Its own clock: it leaves after 3.5 s with the standard exit even if the user has already moved on.
+  const msgKey = msg?.key
+  const leaving = Boolean(msg?.out)
+  useEffect(() => {
+    if (!msgKey) return
+    const t = setTimeout(() => setMsg((m) => (m && m.key === msgKey ? { ...m, out: true } : m)), leaving ? 0 : 3500)
+    const t2 = leaving ? setTimeout(() => setMsg((m) => (m && m.key === msgKey ? null : m)), motion.exit) : undefined
+    return () => { clearTimeout(t); if (t2) clearTimeout(t2) }
+  }, [msgKey, leaving])
 
   if (!msg) return null
   return (

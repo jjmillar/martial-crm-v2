@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from '../lib/nav'
 import { enterFrames, motion, reducedMotion } from './motion'
 
 // Standard page transition: every route change fades the new page in while it rises.
