@@ -5,5 +5,8 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# Next.js runs on Netlify through its official adapter (detected automatically): public pages are
-# rendered on the server, the signed-in app runs in the browser; data and auth stay in Supabase.
+# Next.js on Netlify: the official adapter turns the build into server functions (public pages rendered on
+# the server) plus static assets. Declared explicitly because this site was created for a Vite build.
+# Data and auth stay in Supabase.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
