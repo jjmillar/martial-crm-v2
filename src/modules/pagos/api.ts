@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase'
-import type { Payment, PaymentMethod, PaymentStatus } from '../../lib/database.types'
+import type { Payment, PaymentKind, PaymentMethod, PaymentStatus } from '../../lib/database.types'
 
 export type PaymentRow = Payment & {
   student: { id: string; full_name: string | null; email: string | null } | null
@@ -39,6 +39,7 @@ export type PaymentInput = {
   concept: string
   amount: number
   method: PaymentMethod
+  kind: PaymentKind
   status: PaymentStatus
   due_date: string | null
   notes: string | null
@@ -98,5 +99,6 @@ export async function emailReceipt(schoolId: string, paymentId: string): Promise
   }
 }
 
+export const kindLabel: Record<PaymentKind, string> = { plan: 'Mensualidad / plan', matricula: 'Matrícula', otro: 'Otro' }
 export const methodLabel: Record<PaymentMethod, string> = { transferencia: 'Transferencia', efectivo: 'Efectivo', tarjeta: 'Tarjeta', otro: 'Otro' }
 export const statusLabel: Record<PaymentStatus, string> = { pendiente: 'Pendiente', pagado: 'Pagado', fallido: 'Fallido', reembolsado: 'Reembolsado' }

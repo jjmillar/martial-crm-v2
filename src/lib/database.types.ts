@@ -31,3 +31,4 @@ export type ClassLevel = Enums<'class_level'>
 export type Payment = Tables<'payments'>
 export type PaymentMethod = Enums<'payment_method'>
 export type PaymentStatus = Enums<'payment_status'>
+export type PaymentKind = Enums<'payment_kind'>

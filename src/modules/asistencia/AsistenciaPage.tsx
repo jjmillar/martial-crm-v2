@@ -150,7 +150,7 @@ export function AsistenciaPage() {
           {over && <p className="alert">Se superó el cupo de la clase.</p>}
           {roster.length === 0 && (
             <p className="hint">
-              {enrolledIds.size === 0 && !showAll ? 'No hay alumnos con matrícula vigente. Activa "Todos los alumnos" para marcar a cualquiera.' : 'Sin resultados.'}
+              {enrolledIds.size === 0 && !showAll ? 'No hay alumnos con inscripción vigente. Activa "Todos los alumnos" para marcar a cualquiera.' : 'Sin resultados.'}
             </p>
           )}
           <ul className="att-list">
@@ -161,7 +161,7 @@ export function AsistenciaPage() {
                   <button type="button" className="att-student" aria-pressed={on} onClick={() => toggle.mutate({ studentId: s.id, on: !on })}>
                     <span className="att-check" aria-hidden="true">{on && <Icon name="check" size={16} />}</span>
                     <span className="att-student__name">{s.full_name}</span>
-                    {!enrolledIds.has(s.id) && <span className="tag">Sin matrícula</span>}
+                    {!enrolledIds.has(s.id) && <span className="tag">Sin inscripción</span>}
                   </button>
                 </li>
               )

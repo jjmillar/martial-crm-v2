@@ -35,24 +35,24 @@ export function MatriculasList() {
     return withPhase.filter((e) => matches(filter, e.phase) && (!needle || normalize(`${e.student?.full_name ?? ''} ${e.plan?.name ?? ''}`).includes(needle)))
   }, [withPhase, filter, search])
 
-  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus matrículas.</p>
+  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus inscripciones.</p>
 
   return (
     <div className="matriculas">
       <header className="page-head page-head--row">
         <div>
           <span className="eyebrow">{activeSchool.name}</span>
-          <h1>Matrículas</h1>
+          <h1>Inscripciones</h1>
         </div>
-        {Boolean(q.data?.length) && <Link className="fab" to="nueva" aria-label="Nueva matrícula" title="Nueva matrícula"><Icon name="plus" size={22} /></Link>}
+        {Boolean(q.data?.length) && <Link className="fab" to="nueva" aria-label="Nueva inscripción" title="Nueva inscripción"><Icon name="plus" size={22} /></Link>}
       </header>
 
       {q.isLoading && <p className="hint">Cargando…</p>}
-      {q.isError && <p className="alert">No se pudieron cargar las matrículas.</p>}
+      {q.isError && <p className="alert">No se pudieron cargar las inscripciones.</p>}
       {q.data?.length === 0 && (
         <div className="card empty">
-          <h2>Aún no hay matrículas</h2>
-          <p className="hint">Una matrícula une a un alumno con un plan: fija su precio y calcula el vencimiento.</p>
+          <h2>Aún no hay inscripciones</h2>
+          <p className="hint">Una inscripción une a un alumno con un plan: fija su precio y calcula el vencimiento.</p>
           <Link className="btn" to="nueva"><Icon name="plus" size={16} /> Matricular alumno</Link>
         </div>
       )}
@@ -62,7 +62,7 @@ export function MatriculasList() {
           <div className="toolbar">
             <label className="search">
               <Icon name="search" size={16} />
-              <span className="sr-only">Buscar matrícula</span>
+              <span className="sr-only">Buscar inscripción</span>
               <input className="input" type="search" placeholder="Buscar por alumno o plan" value={search} onChange={(e) => setSearch(e.target.value)} />
             </label>
           </div>
@@ -75,7 +75,7 @@ export function MatriculasList() {
           </div>
         </>
       )}
-      {Boolean(q.data?.length) && rows.length === 0 && <p className="hint">No hay matrículas en este filtro.</p>}
+      {Boolean(q.data?.length) && rows.length === 0 && <p className="hint">No hay inscripciones en este filtro.</p>}
 
       <ul className="student-list">
         {rows.map((e) => {

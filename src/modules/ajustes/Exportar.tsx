@@ -29,8 +29,8 @@ export function Exportar({ schoolId, schoolName }: { schoolId: string; schoolNam
       } else if (kind === 'matriculas') {
         const rows = await listEnrollments(schoolId)
         downloadCsv(file(kind), toCsv(
-          ['Alumno', 'Plan', 'Estado', 'Inicio', 'Vencimiento', 'Precio', 'Matrícula', 'Notas'],
-          rows.map((e) => [e.student?.full_name, e.plan?.name, phaseLabel[phaseOf(e)], formatDate(e.start_date), formatDate(e.ends_at), e.price, e.enrollment_fee, e.notes]),
+          ['Alumno', 'Plan', 'Estado', 'Inicio', 'Vencimiento', 'Precio', 'Notas'],
+          rows.map((e) => [e.student?.full_name, e.plan?.name, phaseLabel[phaseOf(e)], formatDate(e.start_date), formatDate(e.ends_at), e.price, e.notes]),
         ))
       } else if (kind === 'pagos') {
         const rows = await listPayments(schoolId)
@@ -58,7 +58,7 @@ export function Exportar({ schoolId, schoolName }: { schoolId: string; schoolNam
 
   const items: { k: Kind; label: string }[] = [
     { k: 'alumnos', label: 'Alumnos' },
-    { k: 'matriculas', label: 'Matrículas' },
+    { k: 'matriculas', label: 'Inscripciones' },
     { k: 'pagos', label: 'Pagos' },
     { k: 'asistencia', label: 'Asistencia' },
   ]

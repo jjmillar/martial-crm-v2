@@ -24,7 +24,7 @@ function friendly(message: string): string {
   if (message.includes('plans_school_id_name_key')) return 'Ya existe un plan con ese nombre.'
   if (message.includes('plans_default_active')) return 'El plan predeterminado debe estar activo. Marca otro como predeterminado antes de desactivarlo.'
   if (message.includes('row-level security')) return 'Solo los administradores pueden editar planes.'
-  if (message.includes('violates foreign key') && message.includes('plans')) return 'Este plan tiene matrículas asociadas: desactívalo en vez de eliminarlo.'
+  if (message.includes('violates foreign key') && message.includes('plans')) return 'Este plan tiene inscripciones asociadas: desactívalo en vez de eliminarlo.'
   return 'No se pudo guardar. Revisa los datos e intenta de nuevo.'
 }
 

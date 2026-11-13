@@ -162,3 +162,18 @@
   object-fit: contain;
   background: #fff;
 }
+
+/* Enrollment fee settings inside the school profile */
+.fee-box {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+
+.fee-box legend {
+  padding: 0 6px;
+  font-weight: 700;
+}

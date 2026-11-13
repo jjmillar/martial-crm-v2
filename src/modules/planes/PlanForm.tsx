@@ -161,8 +161,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
             </div>
             <div className="form-grid">
               {field('price', 'Precio (CLP) *', <input {...inputProps('price')} inputMode="numeric" placeholder="$35.000" onBlur={moneyBlur('price')} />, form.billing_cycle === 'unico' ? 'Se cobra una vez.' : `Se cobra ${cycleInfo(form.billing_cycle).per.replace('/ ', 'por ')}.`)}
-              {field('enrollment_fee', 'Matrícula (CLP)', <input {...inputProps('enrollment_fee')} inputMode="numeric" placeholder="$0" onBlur={moneyBlur('enrollment_fee')} />, 'Cobro único al inscribirse. Vacío = sin matrícula.')}
-              {field('duration_days', 'Vigencia (días)', <input {...inputProps('duration_days')} inputMode="numeric" placeholder={form.billing_cycle === 'unico' ? 'Sin vencimiento' : ''} />, 'Se usa para calcular el vencimiento de la matrícula.')}
+              {field('duration_days', 'Vigencia (días)', <input {...inputProps('duration_days')} inputMode="numeric" placeholder={form.billing_cycle === 'unico' ? 'Sin vencimiento' : ''} />, 'Se usa para calcular el vencimiento de la inscripción.')}
             </div>
           </section>
 
@@ -194,7 +193,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
               <input id="p-active" type="checkbox" checked={form.active} disabled={form.is_default} onChange={(e) => set('active', e.target.checked)} />
               <span>
                 <strong>Plan activo</strong>
-                <span className="hint">{form.is_default ? 'El predeterminado siempre está activo.' : 'Los inactivos no se ofrecen en nuevas matrículas; las existentes siguen igual.'}</span>
+                <span className="hint">{form.is_default ? 'El predeterminado siempre está activo.' : 'Los inactivos no se ofrecen en nuevas inscripciones; las existentes siguen igual.'}</span>
               </span>
             </label>
             {errors.active && <span className="field__error">{errors.active}</span>}
@@ -217,7 +216,6 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
             {preview && (
               <ul className="plan-card__features">
                 {planFeatures({ ...preview, billing_cycle: form.billing_cycle, duration_days: preview.duration_days ?? null, sessions_per_week: preview.sessions_per_week ?? null, class_count: preview.class_count ?? null }).map((f) => <li key={f}>{f}</li>)}
-                {(preview.enrollment_fee ?? 0) > 0 && <li>Matrícula {formatCLP(preview.enrollment_fee ?? 0)}</li>}
               </ul>
             )}
           </div>

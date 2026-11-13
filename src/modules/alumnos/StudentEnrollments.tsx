@@ -11,11 +11,11 @@ export function StudentEnrollments({ studentId }: { studentId: string }) {
   return (
     <section className="card form-section">
       <div className="ajustes__section-head">
-        <h2>Matrículas</h2>
+        <h2>Inscripciones</h2>
         <Link className="btn btn--ghost" to={`/app/matriculas/nueva?alumno=${studentId}`}><Icon name="plus" size={16} /> Matricular</Link>
       </div>
       {q.isLoading && <p className="hint">Cargando…</p>}
-      {q.data?.length === 0 && <p className="hint">Sin matrículas todavía.</p>}
+      {q.data?.length === 0 && <p className="hint">Sin inscripciones todavía.</p>}
       {Boolean(q.data?.length) && (
         <ul className="email-log">
           {q.data!.map((e) => {

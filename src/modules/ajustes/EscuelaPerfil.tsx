@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import type { School } from '../../lib/database.types'
+import { formatCLP, parseCLP } from '../../lib/money'
 
 const MAX_LOGO = 2 * 1024 * 1024
 type CalView = 'day' | 'week' | 'month'
@@ -14,6 +15,7 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
   const [f, setF] = useState({
     name: school.name, address: school.address ?? '', city: school.city ?? '', phone: school.phone ?? '',
     email: school.email ?? '', description: school.description ?? '', default_calendar_view: school.default_calendar_view as CalView,
+    enrollment_fee: school.enrollment_fee ? formatCLP(school.enrollment_fee) : '', enrollment_fee_months: String(school.enrollment_fee_months),
   })
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const set = (k: keyof typeof f, v: string) => { setF((x) => ({ ...x, [k]: v })); setMsg(null) }
@@ -22,11 +24,18 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
     mutationFn: async () => {
       if (!f.name.trim()) throw new Error('La escuela necesita un nombre.')
       if (f.email.trim() && !/^\S+@\S+\.\S+$/.test(f.email.trim())) throw new Error('Correo inválido.')
+      const fee = f.enrollment_fee.trim() ? parseCLP(f.enrollment_fee) : 0
+      if (fee === null || Number.isNaN(fee) || fee < 0) throw new Error('Matrícula inválida: usa pesos enteros, ej: 30.000.')
+      const months = Number(f.enrollment_fee_months)
+      if (!Number.isInteger(months) || months < 1 || months > 60) throw new Error('La matrícula se cobra cada 1 a 60 meses.')
       const { error } = await supabase.from('schools').update({
         name: f.name.trim(), address: f.address.trim() || null, city: f.city.trim() || null, phone: f.phone.trim() || null,
         email: f.email.trim().toLowerCase() || null, description: f.description.trim() || null, default_calendar_view: f.default_calendar_view,
+        enrollment_fee: fee, enrollment_fee_months: months,
       }).eq('id', school.id)
       if (error) throw new Error('No se pudo guardar. Solo los administradores editan la escuela.')
+      // Create any charge that is already due (e.g. anniversaries today). Idempotent.
+      if (fee > 0) await supabase.rpc('generate_enrollment_fees', { p_school_id: school.id })
       await reload()
     },
     onSuccess: () => setMsg({ ok: true, text: 'Datos de la escuela guardados.' }),
@@ -86,6 +95,23 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
         </div>
         <div className="field field--wide"><label htmlFor="sc-desc">Descripción</label><textarea id="sc-desc" className="input" rows={3} value={f.description} onChange={(e) => set('description', e.target.value)} /></div>
       </div>
+      <fieldset className="fee-box">
+        <legend>Matrícula</legend>
+        <p className="hint">Cobro periódico aparte del plan. Se genera solo como pago pendiente: al crear un alumno nuevo y cada vez que se cumple el plazo. Los alumnos que ya existían se cobran en su próximo aniversario de inscripción. Vacío o $0 = sin matrícula.</p>
+        <div className="form-grid">
+          <div className="field">
+            <label htmlFor="sc-fee">Monto (CLP)</label>
+            <input id="sc-fee" className="input" inputMode="numeric" placeholder="$0" value={f.enrollment_fee} onChange={(e) => set('enrollment_fee', e.target.value)} onBlur={() => { const n = parseCLP(f.enrollment_fee); if (n !== null && !Number.isNaN(n)) set('enrollment_fee', n ? formatCLP(n) : '') }} />
+          </div>
+          <div className="field">
+            <label htmlFor="sc-fee-months">Se cobra cada</label>
+            <select id="sc-fee-months" className="input" value={f.enrollment_fee_months} onChange={(e) => set('enrollment_fee_months', e.target.value)}>
+              {[1, 3, 6, 12, 24].map((m) => <option key={m} value={m}>{m === 12 ? '12 meses (anual)' : m === 1 ? '1 mes' : `${m} meses`}</option>)}
+              {![1, 3, 6, 12, 24].includes(Number(f.enrollment_fee_months)) && <option value={f.enrollment_fee_months}>{f.enrollment_fee_months} meses</option>}
+            </select>
+          </div>
+        </div>
+      </fieldset>
       {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}
       <div className="form-actions"><button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : 'Guardar datos'}</button></div>
     </form>

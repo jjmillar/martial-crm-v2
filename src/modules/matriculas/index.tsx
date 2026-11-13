@@ -3,7 +3,7 @@ import { MatriculasRoutes } from './MatriculasRoutes'
 
 export const matriculas: ModuleManifest = {
   id: 'matriculas',
-  label: 'Matrículas',
+  label: 'Inscripciones',
   path: 'matriculas',
   roles: ['ceo', 'admin', 'user'],
   element: <MatriculasRoutes />,

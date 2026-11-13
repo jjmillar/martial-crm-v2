@@ -82,7 +82,7 @@ export function InicioPage() {
           </Link>
 
           <Link className="tile tile--link rise" to="/app/matriculas" style={{ animationDelay: '80ms' }}>
-            <span className="eyebrow">Matrículas vigentes</span>
+            <span className="eyebrow">Inscripciones vigentes</span>
             <p className="tile__big">{d.current}</p>
             <p className="hint">{d.expired ? `${d.expired} vencidas por renovar` : 'Ninguna vencida'}</p>
           </Link>
@@ -124,10 +124,10 @@ export function InicioPage() {
           <section className="tile tile--wide rise" style={{ animationDelay: '240ms' }}>
             <div className="tile__head">
               <span className="eyebrow">Por vencer (7 días)</span>
-              <Link className="link-btn" to="/app/matriculas">Matrículas</Link>
+              <Link className="link-btn" to="/app/matriculas">Inscripciones</Link>
             </div>
             {d.expiring.length === 0 ? (
-              <p className="hint">Ninguna matrícula vence esta semana.</p>
+              <p className="hint">Ninguna inscripción vence esta semana.</p>
             ) : (
               <ul className="today-list">
                 {d.expiring.slice(0, 6).map((e) => {

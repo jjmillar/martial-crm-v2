@@ -77,7 +77,6 @@ export function PlanesList() {
                 </p>
                 <ul className="plan-card__features">
                   {planFeatures(p).map((f) => <li key={f}>{f}</li>)}
-                  {p.enrollment_fee > 0 && <li>Matrícula {formatCLP(p.enrollment_fee)}</li>}
                 </ul>
                 {p.description && <p className="hint plan-card__desc">{p.description}</p>}
               </Link>

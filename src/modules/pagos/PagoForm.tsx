@@ -4,17 +4,18 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { formatDate, monthTitle, santiagoDate, todayIso } from '../../lib/dates'
 import { formatCLP, parseCLP } from '../../lib/money'
-import type { PaymentMethod, PaymentStatus } from '../../lib/database.types'
+import type { PaymentKind, PaymentMethod, PaymentStatus } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { listStudentEnrollments, phaseOf } from '../matriculas/api'
 import {
-  attachReceipt, createPayment, deletePayment, emailReceipt, getPayment, methodLabel, paymentsKey, receiptUrl, statusLabel, updatePayment, uploadReceipt,
+  attachReceipt, createPayment, deletePayment, emailReceipt, getPayment, kindLabel, methodLabel, paymentsKey, receiptUrl, statusLabel, updatePayment, uploadReceipt,
   type PaymentRow,
 } from './api'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 const methods: PaymentMethod[] = ['transferencia', 'efectivo', 'tarjeta', 'otro']
+const kinds: PaymentKind[] = ['plan', 'matricula', 'otro']
 
 /** /pagos/nuevo (optionally ?alumno=<id>) and /pagos/:id */
 export function PagoEditor() {
@@ -41,6 +42,7 @@ function NuevoPago() {
   const enrollments = useQuery({ queryKey: ['student-enrollments', studentId], queryFn: () => listStudentEnrollments(studentId), enabled: Boolean(studentId) })
   const current = useMemo(() => (enrollments.data ?? []).filter((e) => phaseOf(e) !== 'cancelada'), [enrollments.data])
   const [enrollmentId, setEnrollmentId] = useState('')
+  const [kind, setKind] = useState<PaymentKind>('plan')
   const [concept, setConcept] = useState('')
   const [amount, setAmount] = useState('')
   const [method, setMethod] = useState<PaymentMethod>('transferencia')
@@ -55,16 +57,22 @@ function NuevoPago() {
     return (students.data ?? []).filter((s) => s.active && (!needle || normalize(s.full_name ?? '').includes(needle)))
   }, [students.data, search])
 
-  function pickEnrollment(id: string, kind: 'cuota' | 'matricula' = 'cuota') {
+  function pickEnrollment(id: string) {
     setEnrollmentId(id)
     const e = current.find((x) => x.id === id)
     if (!e) return
-    if (kind === 'matricula') {
-      setConcept(`Matrícula ${e.plan?.name ?? ''}`.trim())
-      setAmount(formatCLP(e.enrollment_fee))
-    } else {
-      setConcept(`${e.plan?.name ?? 'Mensualidad'} · ${monthTitle(todayIso())}`)
-      setAmount(formatCLP(e.price))
+    setKind('plan')
+    setConcept(`${e.plan?.name ?? 'Mensualidad'} · ${monthTitle(todayIso())}`)
+    setAmount(formatCLP(e.price))
+  }
+
+  // "Matrícula" uses the school's configured fee (Ajustes); the other kinds keep what was typed.
+  function pickKind(k: PaymentKind) {
+    setKind(k)
+    if (k === 'matricula') {
+      setEnrollmentId('')
+      setConcept(`Matrícula ${todayIso().slice(0, 4)}`)
+      if (activeSchool?.enrollment_fee) setAmount(formatCLP(activeSchool.enrollment_fee))
     }
   }
 
@@ -78,7 +86,7 @@ function NuevoPago() {
       const id = crypto.randomUUID()
       const receipt_path = file ? await uploadReceipt(schoolId!, id, file) : null
       return createPayment(schoolId!, {
-        id, receipt_path, student_id: studentId, enrollment_id: enrollmentId || null, concept: concept.trim(), amount: n, method,
+        id, receipt_path, student_id: studentId, enrollment_id: kind === 'plan' ? enrollmentId || null : null, kind, concept: concept.trim(), amount: n, method,
         status: isAdmin ? status : 'pendiente', due_date: due || null, notes: notes.trim() || null,
       })
     },
@@ -97,7 +105,6 @@ function NuevoPago() {
   }
 
   if (!activeSchool) return <p className="page-note">Selecciona una escuela.</p>
-  const selectedEnrollment = current.find((e) => e.id === enrollmentId)
 
   return (
     <form className="alumno-form" onSubmit={onSubmit} noValidate>
@@ -122,18 +129,13 @@ function NuevoPago() {
               {studentId && !options.some((s) => s.id === studentId) && <option value={studentId}>{students.data?.find((s) => s.id === studentId)?.full_name ?? 'Alumno'}</option>}
             </select>
           </div>
-          {studentId && (
+          {studentId && kind !== 'matricula' && (
             <div className="field">
-              <label htmlFor="pg-enr">Matrícula</label>
+              <label htmlFor="pg-enr">Inscripción</label>
               <select id="pg-enr" className="input" value={enrollmentId} onChange={(e) => pickEnrollment(e.target.value)}>
-                <option value="">Sin matrícula asociada</option>
+                <option value="">Sin inscripción asociada</option>
                 {current.map((e) => <option key={e.id} value={e.id}>{e.plan?.name} · {formatCLP(e.price)}</option>)}
               </select>
-              {selectedEnrollment && selectedEnrollment.enrollment_fee > 0 && (
-                <button type="button" className="link-btn" onClick={() => pickEnrollment(selectedEnrollment.id, 'matricula')}>
-                  Cobrar la matrícula ({formatCLP(selectedEnrollment.enrollment_fee)}) en vez de la cuota
-                </button>
-              )}
             </div>
           )}
         </div>
@@ -141,6 +143,13 @@ function NuevoPago() {
 
       <section className="card form-section">
         <h2>Pago</h2>
+        <div className="field">
+          <span className="field__label" id="pg-kind">Tipo</span>
+          <div className="segmented" role="group" aria-labelledby="pg-kind">
+            {kinds.map((k) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => pickKind(k)}>{kindLabel[k]}</button>)}
+          </div>
+          {kind === 'matricula' && !activeSchool.enrollment_fee && <span className="hint">La escuela no tiene matrícula configurada (Ajustes): escribe el monto.</span>}
+        </div>
         <div className="form-grid">
           <div className="field">
             <label htmlFor="pg-concept">Concepto *</label>
@@ -248,7 +257,7 @@ function PagoDetalle({ p }: { p: PaymentRow }) {
           <div><dt>Registrado</dt><dd>{formatDate(santiagoDate(p.created_at))}</dd></div>
           <div><dt>Pagado</dt><dd>{p.paid_at ? formatDate(santiagoDate(p.paid_at)) : '—'}</dd></div>
           {p.due_date && <div><dt>Vence</dt><dd>{formatDate(p.due_date)}</dd></div>}
-          {p.enrollment?.plan && <div><dt>Matrícula</dt><dd><Link to={`/app/matriculas/${p.enrollment.id}`}>{p.enrollment.plan.name}</Link></dd></div>}
+          {p.enrollment?.plan && <div><dt>Inscripción</dt><dd><Link to={`/app/matriculas/${p.enrollment.id}`}>{p.enrollment.plan.name}</Link></dd></div>}
           {p.notes && <div className="facts__wide"><dt>Notas</dt><dd>{p.notes}</dd></div>}
         </dl>
       </section>

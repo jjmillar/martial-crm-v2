@@ -21,7 +21,7 @@ export async function boot(repo) {
     alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
   `)
   const dir = join(repo, 'supabase', 'migrations')
-  for (const f of readdirSync(dir).filter(f => f.endsWith('.sql') && !f.includes('_storage')).sort() /* storage schema doesn't exist in PGlite */) {
+  for (const f of readdirSync(dir).filter(f => f.endsWith('.sql') && !f.includes('_storage') && !f.includes('_cron')).sort() /* storage schema and pg_cron don't exist in PGlite */) {
     try { await db.exec(readFileSync(join(dir, f), 'utf8')) } catch (e) { throw new Error(`migration ${f}: ${e.message}`) }
   }
   return db

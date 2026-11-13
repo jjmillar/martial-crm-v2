@@ -354,6 +354,7 @@ export type Database = {
           due_date: string | null;
           enrollment_id: string | null;
           id: string;
+          kind: Database["public"]["Enums"]["payment_kind"];
           method: Database["public"]["Enums"]["payment_method"];
           notes: string | null;
           paid_at: string | null;
@@ -373,6 +374,7 @@ export type Database = {
           due_date?: string | null;
           enrollment_id?: string | null;
           id?: string;
+          kind?: Database["public"]["Enums"]["payment_kind"];
           method?: Database["public"]["Enums"]["payment_method"];
           notes?: string | null;
           paid_at?: string | null;
@@ -391,6 +393,7 @@ export type Database = {
           due_date?: string | null;
           enrollment_id?: string | null;
           id?: string;
+          kind?: Database["public"]["Enums"]["payment_kind"];
           method?: Database["public"]["Enums"]["payment_method"];
           notes?: string | null;
           paid_at?: string | null;
@@ -585,6 +588,9 @@ export type Database = {
           default_calendar_view: string;
           description: string | null;
           email: string | null;
+          enrollment_fee: number;
+          enrollment_fee_months: number;
+          enrollment_fee_since: string | null;
           id: string;
           logo_url: string | null;
           name: string;
@@ -600,6 +606,9 @@ export type Database = {
           default_calendar_view?: string;
           description?: string | null;
           email?: string | null;
+          enrollment_fee?: number;
+          enrollment_fee_months?: number;
+          enrollment_fee_since?: string | null;
           id?: string;
           logo_url?: string | null;
           name: string;
@@ -614,6 +623,9 @@ export type Database = {
           default_calendar_view?: string;
           description?: string | null;
           email?: string | null;
+          enrollment_fee?: number;
+          enrollment_fee_months?: number;
+          enrollment_fee_since?: string | null;
           id?: string;
           logo_url?: string | null;
           name?: string;
@@ -910,6 +922,9 @@ export type Database = {
           default_calendar_view: string;
           description: string | null;
           email: string | null;
+          enrollment_fee: number;
+          enrollment_fee_months: number;
+          enrollment_fee_since: string | null;
           id: string;
           logo_url: string | null;
           name: string;
@@ -924,7 +939,12 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      enrollment_fee_due: { Args: { p_student_id: string }; Returns: string };
       find_user_id_by_email: { Args: { p_email: string }; Returns: string };
+      generate_enrollment_fees: {
+        Args: { p_school_id?: string };
+        Returns: number;
+      };
       grant_ceo: { Args: { p_email: string }; Returns: undefined };
       has_school_role: {
         Args: {
@@ -968,6 +988,7 @@ export type Database = {
         | "competicion";
       enrollment_status: "activa" | "pausada" | "cancelada";
       gender: "masculino" | "femenino" | "otro";
+      payment_kind: "plan" | "matricula" | "otro";
       payment_method: "transferencia" | "efectivo" | "tarjeta" | "otro";
       payment_status: "pendiente" | "pagado" | "fallido" | "reembolsado";
       school_role: "admin" | "user";
@@ -1112,6 +1133,7 @@ export const Constants = {
       ],
       enrollment_status: ["activa", "pausada", "cancelada"],
       gender: ["masculino", "femenino", "otro"],
+      payment_kind: ["plan", "matricula", "otro"],
       payment_method: ["transferencia", "efectivo", "tarjeta", "otro"],
       payment_status: ["pendiente", "pagado", "fallido", "reembolsado"],
       school_role: ["admin", "user"],

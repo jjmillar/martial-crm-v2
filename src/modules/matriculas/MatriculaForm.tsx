@@ -24,7 +24,7 @@ export function MatriculaEditor() {
   const q = useQuery({ queryKey: ['enrollment', id], queryFn: () => getEnrollment(id!), enabled: !isNew })
   if (isNew) return <NuevaMatricula />
   if (q.isLoading) return <p className="hint">Cargando…</p>
-  if (!q.data) return <p className="alert">No encontramos esa matrícula. <Link to="..">Volver</Link></p>
+  if (!q.data) return <p className="alert">No encontramos esa inscripción. <Link to="..">Volver</Link></p>
   return <MatriculaDetalle key={q.data.id} e={q.data} />
 }
 
@@ -44,7 +44,6 @@ function NuevaMatricula() {
   const [start, setStart] = useState(todayIso())
   const [ends, setEnds] = useState('')
   const [price, setPrice] = useState('')
-  const [fee, setFee] = useState('')
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -54,7 +53,6 @@ function NuevaMatricula() {
     const def = activePlans.find((p) => p.is_default) ?? activePlans[0]
     setPlanId(def.id)
     setPrice(formatCLP(def.price))
-    setFee(def.enrollment_fee ? formatCLP(def.enrollment_fee) : '')
     setEnds(endsFor(def, start))
   }
 
@@ -63,7 +61,6 @@ function NuevaMatricula() {
     setPlanId(id)
     if (p) {
       setPrice(formatCLP(p.price))
-      setFee(p.enrollment_fee ? formatCLP(p.enrollment_fee) : '')
       setEnds(endsFor(p, start))
     }
   }
@@ -79,18 +76,17 @@ function NuevaMatricula() {
 
   const save = useMutation({
     mutationFn: () => {
-      const p = parseCLP(price), f = parseCLP(fee)
+      const p = parseCLP(price)
       if (!studentId) throw new Error('Elige un alumno.')
       if (!planId) throw new Error('Elige un plan.')
       if (p === null || Number.isNaN(p)) throw new Error('Precio inválido: usa pesos enteros, ej: 35.000.')
-      if (f !== null && Number.isNaN(f)) throw new Error('Matrícula inválida: usa pesos enteros.')
       if (ends && ends < start) throw new Error('El vencimiento no puede ser anterior al inicio.')
-      return createEnrollment(schoolId!, { student_id: studentId, plan_id: planId, start_date: start, ends_at: ends || null, price: p, enrollment_fee: f ?? 0, notes: notes.trim() || null })
+      return createEnrollment(schoolId!, { student_id: studentId, plan_id: planId, start_date: start, ends_at: ends || null, price: p, enrollment_fee: 0, notes: notes.trim() || null })
     },
     onSuccess: (e) => {
       qc.invalidateQueries({ queryKey: enrollmentsKey(schoolId) })
       qc.invalidateQueries({ queryKey: ['student-enrollments', e.student_id] })
-      navigate('..', { replace: true, state: { flash: 'Matrícula creada.' } })
+      navigate('..', { replace: true, state: { flash: 'Inscripción creada.' } })
     },
     onError: (e: Error) => setError(e.message),
   })
@@ -108,8 +104,8 @@ function NuevaMatricula() {
   return (
     <form className="alumno-form" onSubmit={onSubmit} noValidate>
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Matrículas</Link>
-        <h1>Nueva matrícula</h1>
+        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Inscripciones</Link>
+        <h1>Nueva inscripción</h1>
       </header>
 
       {noPlans && <p className="alert">No hay planes activos. <Link to="/app/planes">Crea un plan</Link> primero.</p>}
@@ -163,15 +159,11 @@ function NuevaMatricula() {
 
       <section className="card form-section">
         <h2>Precio acordado</h2>
-        <p className="hint">Se copia del plan y queda fijo en esta matrícula. Cámbialo si aplicas un descuento.</p>
+        <p className="hint">Se copia del plan y queda fijo en esta inscripción. Cámbialo si aplicas un descuento.</p>
         <div className="form-grid">
           <div className="field">
             <label htmlFor="m-price">Precio (CLP) *</label>
             <input id="m-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} onBlur={() => { const n = parseCLP(price); if (n !== null && !Number.isNaN(n)) setPrice(formatCLP(n)) }} />
-          </div>
-          <div className="field">
-            <label htmlFor="m-fee">Matrícula (CLP)</label>
-            <input id="m-fee" className="input" inputMode="numeric" placeholder="$0" value={fee} onChange={(e) => setFee(e.target.value)} onBlur={() => { const n = parseCLP(fee); if (n !== null && !Number.isNaN(n)) setFee(formatCLP(n)) }} />
           </div>
           <div className="field field--wide">
             <label htmlFor="m-notes">Notas</label>
@@ -238,8 +230,8 @@ function MatriculaDetalle({ e }: { e: EnrollmentRow }) {
   return (
     <div className="alumno-form">
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Matrículas</Link>
-        <h1>{e.student?.full_name ?? 'Matrícula'}</h1>
+        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Inscripciones</Link>
+        <h1>{e.student?.full_name ?? 'Inscripción'}</h1>
         <p className="hint">
           <span className={`tag tag--phase-${phase}`}>{phaseLabel[phase]}</span> {e.plan?.name} · {formatCLP(e.price)} · desde {formatDate(e.start_date)}{e.ends_at ? ` hasta ${formatDate(e.ends_at)}` : ''}
         </p>
@@ -254,22 +246,22 @@ function MatriculaDetalle({ e }: { e: EnrollmentRow }) {
             </button>
           )}
           {e.status === 'activa' && (
-            <button type="button" className="btn btn--ghost" disabled={patch.isPending} onClick={() => patch.mutate({ status: 'pausada', label: 'Matrícula pausada.' })}>Pausar</button>
+            <button type="button" className="btn btn--ghost" disabled={patch.isPending} onClick={() => patch.mutate({ status: 'pausada', label: 'Inscripción pausada.' })}>Pausar</button>
           )}
           {e.status !== 'activa' && (
-            <button type="button" className="btn" disabled={patch.isPending} onClick={() => patch.mutate({ status: 'activa', label: 'Matrícula reactivada.' })}>Reactivar</button>
+            <button type="button" className="btn" disabled={patch.isPending} onClick={() => patch.mutate({ status: 'activa', label: 'Inscripción reactivada.' })}>Reactivar</button>
           )}
           {e.status !== 'cancelada' && (confirm === 'cancelar' ? (
             <>
-              <span className="hint">¿Cancelar la matrícula?</span>
-              <button type="button" className="btn btn--danger" onClick={() => patch.mutate({ status: 'cancelada', label: 'Matrícula cancelada.' })}>Sí, cancelar</button>
+              <span className="hint">¿Cancelar la inscripción?</span>
+              <button type="button" className="btn btn--danger" onClick={() => patch.mutate({ status: 'cancelada', label: 'Inscripción cancelada.' })}>Sí, cancelar</button>
               <button type="button" className="btn btn--ghost" onClick={() => setConfirm(null)}>No</button>
             </>
           ) : (
-            <button type="button" className="btn btn--ghost" onClick={() => setConfirm('cancelar')}>Cancelar matrícula</button>
+            <button type="button" className="btn btn--ghost" onClick={() => setConfirm('cancelar')}>Cancelar inscripción</button>
           ))}
         </div>
-        <p className="hint">Pausar conserva la matrícula sin contarla como vigente. Para registrar el pago, ve a Pagos.</p>
+        <p className="hint">Pausar conserva la inscripción sin contarla como vigente. Para registrar el pago, ve a Pagos.</p>
       </section>
 
       <section className="card form-section">

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import { formatDate, monthTitle, santiagoDate, todayIso } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
@@ -19,9 +20,18 @@ const filters: { id: Filter; label: string }[] = [
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
 export function PagosList() {
-  const { activeSchool } = useSchool()
+  const { activeSchool, role } = useSchool()
   const schoolId = activeSchool?.id
-  const q = useQuery({ queryKey: paymentsKey(schoolId), queryFn: () => listPayments(schoolId!), enabled: Boolean(schoolId) })
+  const isAdmin = role === 'admin' || role === 'ceo'
+  // Admins: make sure due enrollment fees exist before listing (the daily job does the same; this is idempotent).
+  const fees = useQuery({
+    queryKey: ['enrollment-fees-run', schoolId],
+    queryFn: async () => { const { error } = await supabase.rpc('generate_enrollment_fees', { p_school_id: schoolId! }); return !error },
+    enabled: Boolean(schoolId) && isAdmin && Boolean(activeSchool?.enrollment_fee),
+    staleTime: 10 * 60_000,
+  })
+  const feesReady = !isAdmin || !activeSchool?.enrollment_fee || fees.isFetched
+  const q = useQuery({ queryKey: paymentsKey(schoolId), queryFn: () => listPayments(schoolId!), enabled: Boolean(schoolId) && feesReady })
   const [filter, setFilter] = useState<Filter>('pendiente')
   const [search, setSearch] = useState('')
 
@@ -103,6 +113,7 @@ export function PagosList() {
                 <strong>{p.student?.full_name ?? 'Alumno'}</strong>
                 <span className="hint">{p.concept} · {methodLabel[p.method]} · {formatDate(santiagoDate(p.paid_at ?? p.created_at))}{p.receipt_path ? ' · 📎' : ''}</span>
               </span>
+              {p.kind === 'matricula' && <span className="tag">Matrícula</span>}
               <span className="pay-amount">{formatCLP(p.amount)}</span>
               <span className={`tag tag--pay-${p.status}`}>{statusLabel[p.status]}</span>
             </Link>

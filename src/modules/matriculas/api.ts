@@ -30,7 +30,7 @@ export async function getEnrollment(id: string): Promise<EnrollmentRow | null> {
 }
 
 function friendly(message: string): string {
-  if (message.includes('enrollments_one_active')) return 'Este alumno ya tiene una matrícula activa en ese plan.'
+  if (message.includes('enrollments_one_active')) return 'Este alumno ya tiene una inscripción activa en ese plan.'
   if (message.includes('enrollments_dates')) return 'El vencimiento no puede ser anterior al inicio.'
   if (message.includes('row-level security')) return 'No tienes permiso para esta acción.'
   return 'No se pudo guardar. Revisa los datos e intenta de nuevo.'
@@ -62,7 +62,7 @@ export async function updateEnrollment(id: string, patch: Partial<EnrollmentInpu
 export async function deleteEnrollment(id: string): Promise<void> {
   const { error, count } = await supabase.from('enrollments').delete({ count: 'exact' }).eq('id', id)
   if (error) throw new Error(friendly(error.message))
-  if (count === 0) throw new Error('Solo los administradores pueden eliminar matrículas.')
+  if (count === 0) throw new Error('Solo los administradores pueden eliminar inscripciones.')
 }
 
 /** What the UI shows: the stored status plus "por vencer" / "vencida" derived from ends_at. */
