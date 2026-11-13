@@ -5,7 +5,7 @@ export const cuenta: ModuleManifest = {
   id: 'cuenta',
   label: 'Mi cuenta',
   path: 'cuenta',
-  roles: ['ceo', 'admin', 'user'],
+  roles: ['ceo', 'admin', 'user', 'alumno'],
   element: <CuentaPage />,
   icon: 'user',
   navGroup: 'gestion',

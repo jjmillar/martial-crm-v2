@@ -5,7 +5,7 @@ export const asistencia: ModuleManifest = {
   id: 'asistencia',
   label: 'Asistencia',
   path: 'asistencia',
-  roles: ['ceo', 'admin', 'user'],
+  roles: ['ceo', 'admin', 'user', 'alumno'],
   element: <AsistenciaPage />,
   icon: 'check',
   navGroup: 'principal',

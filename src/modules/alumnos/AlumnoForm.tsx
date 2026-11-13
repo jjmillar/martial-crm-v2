@@ -11,6 +11,7 @@ import { beltSuggestions } from '../../lib/belts'
 import { emptyForm, formFromStudent, parseStudent, type StudentForm } from './schema'
 import { StudentEnrollments } from './StudentEnrollments'
 import { StudentPayments } from './StudentPayments'
+import { StudentLinks } from '../vinculos/Vinculos'
 
 type Errors = Partial<Record<keyof StudentForm, string>>
 
@@ -181,6 +182,7 @@ function AlumnoForm({ student }: { student?: Student }) {
 
       {student && <StudentEnrollments studentId={student.id} />}
       {student && <StudentPayments studentId={student.id} />}
+      {student && <StudentLinks student={student} />}
 
       {serverError && <p className="alert" role="alert">{serverError}</p>}
       {saved && <p className="alert alert--ok" role="status">Cambios guardados.</p>}

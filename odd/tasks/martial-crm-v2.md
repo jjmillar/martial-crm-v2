@@ -311,3 +311,12 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
     - Pending on the user:
       - Buy and verify a domain in Resend, so emails reach anyone (now only the owner).
       - Optional: link the Netlify site to GitHub for auto-deploys.
+- L18 (2026-11-13) — Trello card "[Martial CRM] Tareas" (worked by Claude, Gentle Shell not used):
+  1. Mobile menu button: drag no longer ends as a tap (drag position in a ref, open only on click); grip dots removed.
+  2–3. Escuelas as cards (logo, city, 4 icon stats via `school_stats()`), tap opens EscuelaPerfil in a pop-up.
+  4. Enrollment fee ("matrícula") moved to the school: amount + every N months; `generate_enrollment_fees()` (trigger on new students, daily pg_cron, run on Pagos load); no back-billing. Enrollments shown as "Inscripciones" in the UI.
+  5. Creating anything returns to its list with a one-shot toast (ui/Flash).
+  6. Links student ↔ teacher ↔ member (`students.user_id`, `teachers.student_id`), suggestions by RUT/email; Edge Function `student-access` creates or links a student login (admin-set password, no email needed).
+  7. Student portal (role "alumno", not a school member): home with level/XP/skills, self check-in (`check_in` / `undo_check_in`), staff confirm in Asistencia (teacher's class auto-selected); 10 XP per confirmed attendance, 100 XP per level, skills = XP per class tag; tags can be renamed.
+  - Checks: test:db 13 files / 228 checks, 32 unit tests, lint 0 errors, build ok; phone QA end to end with temp qa-* data, swept.
+

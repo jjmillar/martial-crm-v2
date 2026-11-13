@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
@@ -13,27 +14,32 @@ const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyl
 
 export function AjustesPage() {
   const { activeSchool } = useSchool()
+  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus ajustes.</p>
+  return <AjustesBody />
+}
+
+// Split so the hash scroll runs once the page content exists.
+function AjustesBody() {
+  const { activeSchool } = useSchool()
   const { user } = useAuth()
   const qc = useQueryClient()
-  const schoolId = activeSchool?.id
+  const schoolId = activeSchool!.id
   const key = ['email_log', schoolId]
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-
-  const log = useQuery({ queryKey: key, queryFn: () => listEmailLog(schoolId!), enabled: Boolean(schoolId) })
-
+  const location = useLocation()
+  useEffect(() => {
+    if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: 'start' })
+  }, [location.hash])
+  const log = useQuery({ queryKey: key, queryFn: () => listEmailLog(schoolId), enabled: Boolean(schoolId) })
   const test = useMutation({
-    mutationFn: () => sendTemplate('test', schoolId!),
-    onMutate: () => {
-      setNotice(null)
-      setError(null)
-    },
+    mutationFn: () => sendTemplate('test', schoolId),
+    onMutate: () => { setNotice(null); setError(null) },
     onSuccess: () => setNotice(`Enviado a ${user?.email}. Revisa tu bandeja (y spam).`),
     onError: (e: Error) => setError(e.message),
     onSettled: () => qc.invalidateQueries({ queryKey: key }),
   })
-
-  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus ajustes.</p>
+  if (!activeSchool) return null
 
   return (
     <div className="ajustes">
@@ -45,7 +51,7 @@ export function AjustesPage() {
 
       <EscuelaPerfil key={activeSchool.id} school={activeSchool} />
 
-      <section className="card ajustes__section" aria-labelledby="catalogos-h">
+      <section id="catalogos" className="card ajustes__section" aria-labelledby="catalogos-h">
         <div className="ajustes__section-head">
           <div>
             <h2 id="catalogos-h">Catálogos</h2>
@@ -54,7 +60,7 @@ export function AjustesPage() {
         </div>
         <div className="catalog-grid">
           <Catalogo table="specialties" schoolId={activeSchool.id} canEdit title="Especialidades" description="Disciplinas que enseñan los profesores." placeholder="Ej: Jiu-jitsu brasileño" />
-          <Catalogo table="tags" schoolId={activeSchool.id} canEdit withIcon title="Etiquetas de clase" description="Para clasificar clases: niños, competición, principiantes…" placeholder="Ej: Niños" />
+          <Catalogo table="tags" schoolId={activeSchool.id} canEdit withIcon title="Etiquetas de clase (skills)" description="Clasifican las clases y son las skills de los alumnos: cada asistencia confirmada suma XP a las etiquetas de esa clase." placeholder="Ej: Guardia, Derribos" />
         </div>
       </section>
 

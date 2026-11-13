@@ -5,4 +5,5 @@ export const roleLabel: Record<AppRole, string> = {
   ceo: 'CEO',
   admin: 'Administrador',
   user: 'Usuario',
+  alumno: 'Alumno',
 }

@@ -1,0 +1,192 @@
+/* Student portal (card item 7): RPG-style level, XP and skills */
+
+.level-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+}
+
+.level-badge {
+  --pct: 0%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  /* ring = progress to the next level */
+  background: conic-gradient(var(--accent) var(--pct), color-mix(in srgb, var(--text) 10%, transparent) 0);
+}
+
+.level-badge__inner {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: var(--surface);
+  line-height: 1;
+}
+
+.level-badge__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.level-badge strong {
+  font-size: 38px;
+  letter-spacing: -0.03em;
+}
+
+.xp {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.xp__bar,
+.skills__bar {
+  display: block;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.xp__bar span,
+.skills__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 70%, #f5b041), var(--accent));
+  transition: width 600ms var(--ease);
+}
+
+.skills {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skills li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'name lvl' 'bar bar' 'xp xp';
+  gap: 4px 8px;
+}
+
+.skills__name {
+  grid-area: name;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.skills__lvl {
+  grid-area: lvl;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.skills__bar {
+  grid-area: bar;
+  height: 8px;
+}
+
+.skills__xp {
+  grid-area: xp;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.checkin-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkin-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--class-color, var(--line));
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.checkin-list .btn,
+.checkin-list .checkin-state,
+.checkin-list .tag {
+  margin-left: auto;
+}
+
+.checkin-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mini-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mini-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tile__big--sm {
+  font-size: 22px;
+}
+
+.portal-att {
+  display: grid;
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .level-card {
+    grid-column: 1 / -1;
+  }
+
+  .bento > .tile:not(.tile--hero):not(.tile--wide):not(.level-card) {
+    grid-column: 1 / -1;
+  }
+
+  .level-badge {
+    width: 88px;
+    height: 88px;
+  }
+
+  .level-badge__inner {
+    width: 72px;
+    height: 72px;
+  }
+
+  .level-badge strong {
+    font-size: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp__bar span,
+  .skills__bar span {
+    transition: none;
+  }
+}

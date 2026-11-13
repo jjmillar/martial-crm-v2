@@ -1,0 +1,58 @@
+/* Card item 6: links between student, teacher and member */
+.links {
+  display: grid;
+  gap: 14px;
+}
+
+.links__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.links__row:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.links__row > svg {
+  flex: none;
+  color: var(--muted);
+}
+
+.links__body {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 200px;
+}
+
+.links__suggest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+.links__form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: end;
+  gap: 12px;
+}
+
+.links__form .btn {
+  justify-self: start;
+}
+
+.links__pick {
+  max-width: 420px;
+}

@@ -174,6 +174,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
 
         <section className="card form-section">
           <h2>Etiquetas y notas</h2>
+          <p className="hint">Las etiquetas son las <b>skills</b> que suben los alumnos al asistir a esta clase. {canEdit && <Link to="/app/ajustes#catalogos">Crear o editar etiquetas</Link>}</p>
           {tags.data?.length ? (
             <div className="pick-chips" role="group" aria-label="Etiquetas">
               {tags.data.filter((t) => t.active || tagIds.includes(t.id)).map((t) => (
@@ -182,7 +183,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
                 </button>
               ))}
             </div>
-          ) : <p className="hint">Sin etiquetas. {canEdit && <>Créalas en <Link to="/app/ajustes">Ajustes → Catálogos</Link>.</>}</p>}
+          ) : <p className="hint">Sin etiquetas todavía.</p>}
           <div className="field">
             <label htmlFor="c-notes">Notas</label>
             <textarea id="c-notes" className="input" rows={2} maxLength={400} value={notes} onChange={(e) => { setNotes(e.target.value); touch() }} placeholder="Ej: traer gi, protector bucal" />

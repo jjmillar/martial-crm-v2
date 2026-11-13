@@ -12,6 +12,7 @@ import { listStudents, studentsKey } from '../alumnos/api'
 import { classesKey, listClasses } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { listPayments, paymentsKey } from '../pagos/api'
+import { StudentHome } from '../portal/StudentPortal'
 import './inicio.css'
 
 async function weekAttendance(schoolId: string, from: string): Promise<number> {
@@ -20,8 +21,13 @@ async function weekAttendance(schoolId: string, from: string): Promise<number> {
   return count ?? 0
 }
 
-// Dashboard (S6, S8 bento). Money tiles only for admins/CEO.
+// Dashboard (S6, S8 bento). Money tiles only for admins/CEO. Students get their own portal home.
 export function InicioPage() {
+  const { role } = useSchool()
+  return role === 'alumno' ? <StudentHome /> : <StaffHome />
+}
+
+function StaffHome() {
   const { profile } = useAuth()
   const { activeSchool, role, schools } = useSchool()
   const schoolId = activeSchool?.id

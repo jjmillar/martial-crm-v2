@@ -6,7 +6,7 @@ import { RequireRole } from './RequireRole'
 import { modulesFor } from '../modules/registry'
 
 const auth = { session: null as unknown, loading: false }
-const school = { role: null as 'ceo' | 'admin' | 'user' | null, loading: false }
+const school = { role: null as 'ceo' | 'admin' | 'user' | 'alumno' | null, loading: false }
 vi.mock('../lib/auth', () => ({ useAuth: () => auth }))
 vi.mock('../lib/school', () => ({ useSchool: () => school }))
 vi.mock('../lib/supabase', () => ({ supabase: {}, supabaseConfigured: true, configError: '' }))

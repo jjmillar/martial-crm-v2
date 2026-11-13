@@ -5,7 +5,7 @@ export const inicio: ModuleManifest = {
   id: 'inicio',
   label: 'Inicio',
   path: 'inicio',
-  roles: ['ceo', 'admin', 'user'],
+  roles: ['ceo', 'admin', 'user', 'alumno'],
   element: <InicioPage />,
   icon: 'home',
   navGroup: 'principal',

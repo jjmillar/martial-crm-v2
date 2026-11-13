@@ -35,6 +35,7 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
   const [text, setText] = useState('')
   const [icon, setIcon] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [editing, setEditing] = useState<{ id: string; text: string; icon: string } | null>(null)
   const done = () => qc.invalidateQueries({ queryKey: key })
   const fail = (e: Error) => setError(e.message)
 
@@ -57,6 +58,18 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
       if (error) throw new Error(friendly(error.message))
     },
     onSuccess: done,
+    onError: fail,
+  })
+
+  // Rename (and change the icon of) an item in place; history keeps pointing at the same id.
+  const rename = useMutation({
+    mutationFn: async (v: { id: string; text: string; icon: string }) => {
+      if (!v.text.trim()) throw new Error('Escribe un nombre.')
+      const patch = table === 'tags' ? { label: v.text.trim(), icon: v.icon.trim() || null } : { name: v.text.trim() }
+      const { error } = await supabase.from(table).update(patch as never).eq('id', v.id)
+      if (error) throw new Error(friendly(error.message))
+    },
+    onSuccess: () => { setEditing(null); done() },
     onError: fail,
   })
 
@@ -86,9 +99,23 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
       <ul className="chips chips--catalog">
         {items.data?.map((it) => (
           <li key={it.id} className={it.active ? '' : 'is-off'}>
-            {it.icon && <span aria-hidden="true">{it.icon}</span>}
-            {it.text}
-            {canEdit && (
+            {editing?.id === it.id ? (
+              <span className="chip-edit">
+                {withIcon && <input className="input catalog__icon" aria-label="Ícono" maxLength={8} value={editing.icon} onChange={(e) => setEditing({ ...editing, icon: e.target.value })} />}
+                <input className="input" aria-label={`Nombre de ${it.text}`} maxLength={60} value={editing.text} autoFocus onChange={(e) => setEditing({ ...editing, text: e.target.value })} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); rename.mutate(editing) } if (e.key === 'Escape') setEditing(null) }} />
+                <button type="button" className="chip-action" disabled={rename.isPending} onClick={() => rename.mutate(editing)}>Guardar</button>
+                <button type="button" className="chip-action" onClick={() => setEditing(null)}>Cancelar</button>
+              </span>
+            ) : (
+              <>
+                {it.icon && <span aria-hidden="true">{it.icon}</span>}
+                {it.text}
+              </>
+            )}
+            {canEdit && editing?.id !== it.id && (
+              <button type="button" className="chip-action" onClick={() => { setError(null); setEditing({ id: it.id, text: it.text, icon: it.icon ?? '' }) }} aria-label={`Editar ${it.text}`}>Editar</button>
+            )}
+            {canEdit && editing?.id !== it.id && (
               <button type="button" className="chip-action" onClick={() => toggle.mutate(it)} aria-label={`${it.active ? 'Desactivar' : 'Activar'} ${it.text}`}>
                 {it.active ? 'Desactivar' : 'Activar'}
               </button>

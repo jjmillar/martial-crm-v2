@@ -17,30 +17,39 @@ export type Database = {
       attendance: {
         Row: {
           class_id: string;
+          confirmed_at: string | null;
+          confirmed_by: string | null;
           created_at: string;
           created_by: string | null;
           date: string;
           id: string;
           school_id: string;
+          self_marked: boolean;
           student_id: string;
         };
         ComputedFields: never;
         Insert: {
           class_id: string;
+          confirmed_at?: string | null;
+          confirmed_by?: string | null;
           created_at?: string;
           created_by?: string | null;
           date?: string;
           id?: string;
           school_id: string;
+          self_marked?: boolean;
           student_id: string;
         };
         Update: {
           class_id?: string;
+          confirmed_at?: string | null;
+          confirmed_by?: string | null;
           created_at?: string;
           created_by?: string | null;
           date?: string;
           id?: string;
           school_id?: string;
+          self_marked?: boolean;
           student_id?: string;
         };
         Relationships: [
@@ -694,6 +703,7 @@ export type Database = {
           school_id: string;
           second_last_name: string | null;
           updated_at: string;
+          user_id: string | null;
           weight_kg: number | null;
         };
         ComputedFields: never;
@@ -722,6 +732,7 @@ export type Database = {
           school_id: string;
           second_last_name?: string | null;
           updated_at?: string;
+          user_id?: string | null;
           weight_kg?: number | null;
         };
         Update: {
@@ -749,6 +760,7 @@ export type Database = {
           school_id?: string;
           second_last_name?: string | null;
           updated_at?: string;
+          user_id?: string | null;
           weight_kg?: number | null;
         };
         Relationships: [
@@ -854,6 +866,7 @@ export type Database = {
           rut: string | null;
           school_id: string;
           second_last_name: string | null;
+          student_id: string | null;
           updated_at: string;
           user_id: string | null;
         };
@@ -873,6 +886,7 @@ export type Database = {
           rut?: string | null;
           school_id: string;
           second_last_name?: string | null;
+          student_id?: string | null;
           updated_at?: string;
           user_id?: string | null;
         };
@@ -891,6 +905,7 @@ export type Database = {
           rut?: string | null;
           school_id?: string;
           second_last_name?: string | null;
+          student_id?: string | null;
           updated_at?: string;
           user_id?: string | null;
         };
@@ -902,6 +917,13 @@ export type Database = {
             referencedRelation: "schools";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "teachers_student_fk";
+            columns: ["student_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "school_id"];
+          },
         ];
       };
     };
@@ -912,6 +934,27 @@ export type Database = {
       attach_payment_receipt: {
         Args: { p_path: string; p_payment_id: string };
         Returns: undefined;
+      };
+      check_in: {
+        Args: { p_class_id: string };
+        Returns: {
+          class_id: string;
+          confirmed_at: string | null;
+          confirmed_by: string | null;
+          created_at: string;
+          created_by: string | null;
+          date: string;
+          id: string;
+          school_id: string;
+          self_marked: boolean;
+          student_id: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "attendance";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       create_school: {
         Args: { p_name: string; p_slug: string };
@@ -955,6 +998,8 @@ export type Database = {
       };
       is_ceo: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
+      is_student_user: { Args: { p_school_id: string }; Returns: boolean };
+      my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
       school_stats: {
         Args: Record<PropertyKey, never>;
@@ -976,6 +1021,8 @@ export type Database = {
         Returns: undefined;
       };
       storage_school_id: { Args: { p_name: string }; Returns: string };
+      student_progress: { Args: { p_student_id: string }; Returns: Json };
+      undo_check_in: { Args: { p_class_id: string }; Returns: undefined };
     };
     Enums: {
       billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";

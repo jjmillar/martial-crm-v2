@@ -8,6 +8,7 @@ import { Icon } from '../../ui/Icon'
 import { listMembers } from '../miembros/api'
 import { deleteTeacher, getTeacher, listSpecialties, listTeachers, saveTeacher, specialtiesKey, teachersKey, type TeacherWithSpecialties } from './api'
 import { emptyTeacher, formFromTeacher, parseTeacher, type TeacherForm } from './schema'
+import { TeacherLinks } from '../vinculos/Vinculos'
 
 type Errors = Partial<Record<keyof TeacherForm, string>>
 
@@ -43,6 +44,8 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
   // Accounts already linked to another teacher are not offered again.
   const taken = new Set((teachers.data ?? []).filter((t) => t.id !== teacher?.id && t.user_id).map((t) => t.user_id))
   const linkable = (members.data ?? []).filter((m) => !taken.has(m.user_id))
+  // Card item 6: a member with the same email is probably this teacher.
+  const mailMatch = !form.user_id && form.email.trim() ? linkable.find((m) => m.profile?.email?.toLowerCase() === form.email.trim().toLowerCase()) : undefined
 
   const set = <K extends keyof TeacherForm>(k: K, v: TeacherForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }))
@@ -167,6 +170,12 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
               {linkable.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email || 'Miembro'}</option>)}
             </select>
           ))}
+          {mailMatch && (
+            <div className="links__suggest" role="status">
+              <span>El correo coincide con el miembro <b>{mailMatch.profile?.full_name || mailMatch.profile?.email}</b>. ¿Es su cuenta?</span>
+              <button type="button" className="btn" onClick={() => set('user_id', mailMatch.user_id)}>Vincular</button>
+            </div>
+          )}
         </section>
 
         <section className="card form-section">
@@ -179,6 +188,8 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
           </label>
         </section>
       </fieldset>
+
+      {teacher && <TeacherLinks teacher={teacher} />}
 
       {serverError && <p className="alert" role="alert">{serverError}</p>}
       {saved && <p className="alert alert--ok" role="status">Cambios guardados.</p>}

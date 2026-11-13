@@ -89,8 +89,9 @@
 /* Big tap targets: one tap marks / unmarks */
 .att-student {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   width: 100%;
   min-height: 52px;
   padding: 8px 12px;
@@ -126,7 +127,36 @@
 }
 
 .att-student__name {
-  flex: 1;
-  min-width: 0;
+  /* keep the name readable; tags drop to the next line when space runs out */
+  flex: 1 1 10ch;
+  min-width: 10ch;
   overflow-wrap: anywhere;
+}
+
+/* Self check-in waiting for staff confirmation (card item 7) */
+.att-student.is-pending {
+  border-color: color-mix(in srgb, #e8c547 60%, var(--line));
+  background: color-mix(in srgb, #e8c547 10%, var(--bg));
+}
+
+.att-student.is-pending .att-check {
+  border-color: #e8c547;
+  background: transparent;
+  color: #e8c547;
+}
+
+.att-student .tag {
+  white-space: nowrap;
+}
+
+.att-pending {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, #e8c547 50%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, #e8c547 8%, transparent);
 }

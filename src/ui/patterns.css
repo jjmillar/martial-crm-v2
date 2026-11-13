@@ -350,3 +350,16 @@
     animation: none;
   }
 }
+
+.tag--ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+}
+
+.tag--wait {
+  color: #e8c547;
+  border-color: color-mix(in srgb, #e8c547 45%, transparent);
+}
