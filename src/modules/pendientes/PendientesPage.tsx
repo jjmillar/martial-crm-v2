@@ -60,7 +60,7 @@ export function PendientesPage() {
       <header className="page-head">
         <span className="eyebrow">Solicitudes</span>
         <h1>Pendientes</h1>
-        <p className="hint">Cuentas creadas en la página de registro. Nadie tiene acceso hasta que lo apruebes.</p>
+        <p className="hint">Cuentas creadas en la página de registro. Nadie tiene acceso hasta que lo apruebes. Solo el CEO ve esta lista.</p>
       </header>
       {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}
       {reqs.isLoading && <p className="hint">Cargando…</p>}

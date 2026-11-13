@@ -27,11 +27,13 @@ check('a student request needs a RUT', noRut === false)
 check('pending accounts have no access', (await as(db, S2, `select count(*)::int c from public.classes`)).rows[0].c === 0 && (await as(db, M1, `select count(*)::int c from public.students`)).rows[0].c === 0)
 check('applicant sees only their own request', (await as(db, S2, `select kind from public.account_requests`)).rows.map((r) => r.kind).join() === 'alumno')
 check('CEO sees every pending request', (await as(db, CEO, `select count(*)::int c from public.account_requests where status='pendiente'`)).rows[0].c === 4)
-check('school admin sees only their school', (await as(db, A, `select count(*)::int c from public.account_requests`)).rows[0].c === 3)
+check('school admins do not see requests (CEO only)', (await as(db, A, `select count(*)::int c from public.account_requests`)).rows[0].c === 0)
 check('user role sees none', (await as(db, U, `select count(*)::int c from public.account_requests`)).rows[0].c === 0)
 
 const uDec = await tryAs(db, U, `select public.decide_account_request($1, true)`, [r2])
 check('user role cannot approve', !uDec.ok, uDec.err)
+const aDec = await tryAs(db, A, `select public.decide_account_request($1, true)`, [r2])
+check('school admin cannot approve (CEO only)', !aDec.ok, aDec.err)
 const xDec = await tryAs(db, X, `select public.decide_account_request($1, true)`, [r2])
 check('admin of another school cannot approve', !xDec.ok, xDec.err)
 
@@ -41,7 +43,7 @@ check('the linked student reaches the portal', (await as(db, S1, `select count(*
 const newId = (await as(db, CEO, `select public.decide_account_request($1, true) id`, [r2])).rows[0].id
 const ns = (await db.query(`select first_name, rut, user_id from public.students where id=$1`, [newId])).rows[0]
 check('CEO approves a student by creating a new record', ns.first_name === 'Nuevo' && ns.rut === '7654321-6' && ns.user_id === S2, ns)
-await as(db, A, `select public.decide_account_request($1, true, null, 'user')`, [r3])
+await as(db, CEO, `select public.decide_account_request($1, true, null, 'user')`, [r3])
 check('approving a member adds them to the school with the chosen role', (await db.query(`select role from public.school_members where user_id=$1 and school_id=$2`, [M1, s1])).rows[0]?.role === 'user')
 check('the approved member now sees school data', (await as(db, M1, `select count(*)::int c from public.students`)).rows[0].c === 2)
 await as(db, CEO, `select public.decide_account_request($1, false)`, [r4])

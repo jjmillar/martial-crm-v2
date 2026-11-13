@@ -5,7 +5,7 @@ export const pendientes: ModuleManifest = {
   id: 'pendientes',
   label: 'Pendientes',
   path: 'pendientes',
-  roles: ['ceo', 'admin'],
+  roles: ['ceo'],
   element: <PendientesPage />,
   icon: 'mail',
   navGroup: 'gestion',
