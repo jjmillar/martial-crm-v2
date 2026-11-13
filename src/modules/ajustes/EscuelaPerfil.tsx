@@ -93,7 +93,7 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
       </div>
       <fieldset className="fee-box">
         <legend>Matrícula</legend>
-        <p className="hint">Cobro anual por año calendario (Matrícula 2026, 2027…), aparte del plan. El 1 de enero se genera sola como pago pendiente para todos los alumnos activos. Los que entran durante el año no se cobran automáticamente: si corresponde, regístrala en Pagos con tipo Matrícula. Si la activas ahora, el primer cobro automático es el próximo 1 de enero. Vacío o $0 = sin matrícula.</p>
+        <p className="hint">Cobro anual por año calendario (Matrícula 2026, 2027…), aparte del plan: aparece como pago pendiente en el perfil del alumno. Se genera sola al inscribir a un alumno nuevo (la del año en curso) y cada 1 de enero para todos los alumnos activos. Si la activas ahora, a los alumnos que ya existían se les cobra desde el próximo 1 de enero. Vacío o $0 = sin matrícula.</p>
         <div className="form-grid">
           <div className="field">
             <label htmlFor="sc-fee">Monto (CLP)</label>

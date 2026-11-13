@@ -23,32 +23,39 @@ check('CEO is not a membership row (never counts as school admin)', (await db.qu
 await as(db, A, `insert into public.students (school_id, first_name, first_last_name) values ($1,'Antiguo','Uno'), ($1,'Otro','Dos')`, [s1])
 await as(db, A, `insert into public.students (school_id, first_name, first_last_name, active) values ($1,'Inactivo','Tres', false)`, [s1])
 check('no fee configured → nothing', (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 1}-01-01`])).rows[0].n === 0)
+check('no fee configured → new students not charged', (await fees(s1)).length === 0)
 
 const uSet = await tryAs(db, U, `update public.schools set enrollment_fee=30000 where id=$1`, [s1])
 check('user role cannot set the fee', !uSet.ok || uSet.affected === 0, uSet.err)
 await as(db, A, `update public.schools set enrollment_fee=30000 where id=$1`, [s1])
 check('turning the fee on stamps the start date', (await db.query(`select enrollment_fee_since::text d from public.schools where id=$1`, [s1])).rows[0].d === today)
+check('turning it on mid-year does not bill students who already existed', (await as(db, A, `select public.generate_enrollment_fees($1) n`, [s1])).rows[0].n === 0 && (await fees(s1)).length === 0)
 
+// A student who joins during the year owes that year's fee, charged right away as its own payment.
 await as(db, U, `insert into public.students (school_id, first_name, first_last_name) values ($1,'Nuevo','Cuatro')`, [s1])
-check('creating a student does NOT charge a fee', (await fees(s1)).length === 0)
-check('turning it on mid-year does not bill the current year', (await as(db, A, `select public.generate_enrollment_fees($1) n`, [s1])).rows[0].n === 0 && (await fees(s1)).length === 0)
-
-const n = (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 1}-01-01`])).rows[0].n
 let f = await fees(s1)
-check('Jan 1st: every active student gets "Matrícula <year>"', n === 3 && f.length === 3 && f.every((r) => r.concept === `Matrícula ${year + 1}` && r.due === `${year + 1}-01-01` && r.amount === 30000 && r.status === 'pendiente'), { n, f })
+check("new student gets this year's fee right away, separate from the plan", f.length === 1 && f[0].first_name === 'Nuevo' && f[0].concept === `Matrícula ${year}` && f[0].due === today && f[0].status === 'pendiente' && f[0].amount === 30000, f)
+await as(db, U, `insert into public.students (school_id, first_name, first_last_name, active) values ($1,'NuevoInactivo','X', false)`, [s1])
+check('an inactive new student is not charged', (await fees(s1)).length === 1)
+check('the yearly job does not charge the new student twice this year', (await as(db, A, `select public.generate_enrollment_fees($1) n`, [s1])).rows[0].n === 0)
+await db.query(`delete from public.students where first_name='NuevoInactivo'`)
+
+// Jan 1st of next year: everyone active that existed on that day.
+const n = (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 1}-01-01`])).rows[0].n
+f = (await fees(s1)).filter((r) => r.concept === `Matrícula ${year + 1}`)
+check('Jan 1st: every active student gets "Matrícula <year>"', n === 3 && f.length === 3 && f.every((r) => r.due === `${year + 1}-01-01` && r.amount === 30000 && r.status === 'pendiente'), { n, f })
 check('inactive students are not charged', f.every((r) => r.first_name !== 'Inactivo'))
 check('running again the same year creates nothing', (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 1}-03-15`])).rows[0].n === 0)
 
-// A student who joins during the year is not charged automatically that year, but is the next one.
-await db.query(`insert into public.students (school_id, first_name, first_last_name, created_at) values ($1,'Marzo','Cinco', $2::date)`, [s1, `${year + 1}-03-01`])
-check('student who joined mid-year: no automatic charge that year', (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 1}-06-01`])).rows[0].n === 0)
-const n2 = (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 2}-01-02`])).rows[0].n
-check('next year (even a day late) everyone active is charged once', n2 === 4, n2)
+// The yearly job only covers students that existed on Jan 1 (later ones are charged at sign-up).
+const marzo = (await db.query(`insert into public.students (school_id, first_name, first_last_name, created_at) values ($1,'Marzo','Cinco', $2::date) returning id`, [s1, `${year + 1}-03-01`])).rows[0].id
+await db.query(`delete from public.payments where student_id=$1`, [marzo]) // the sign-up trigger used the real date; drop it for this simulation
+check('yearly job never charges students created after Jan 1 of that year', (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 1}-06-01`])).rows[0].n === 0)
+check('next year (even a day late) everyone active is charged once', (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 2}-01-02`])).rows[0].n === 4)
 
-// A manual payment for the year counts as paid for that year.
-await as(db, A, `insert into public.students (school_id, first_name, first_last_name) values ($1,'Manual','Seis')`, [s1])
-const manual = (await db.query(`select id from public.students where first_name='Manual'`)).rows[0].id
-await db.query(`update public.students set created_at=$2::date where id=$1`, [manual, `${year + 2}-01-01`])
+// A manual fee payment for the year counts as paid for that year.
+const manual = (await db.query(`insert into public.students (school_id, first_name, first_last_name, created_at) values ($1,'Manual','Seis', $2::date) returning id`, [s1, `${year + 2}-01-01`])).rows[0].id
+await db.query(`delete from public.payments where student_id=$1`, [manual])
 await as(db, A, `insert into public.payments (school_id, student_id, kind, concept, amount, status, due_date) values ($1,$2,'matricula','Matrícula a mano',30000,'pagado',$3::date)`, [s1, manual, `${year + 2}-02-01`])
 check('a manual fee payment for the year prevents a duplicate', (await asJob(`select public.generate_enrollment_fees(null, $1::date) n`, [`${year + 2}-02-02`])).rows[0].n === 0)
 
