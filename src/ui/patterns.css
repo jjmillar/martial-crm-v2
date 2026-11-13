@@ -363,3 +363,101 @@
   color: #e8c547;
   border-color: color-mix(in srgb, #e8c547 45%, transparent);
 }
+
+/* Accordion (Ajustes) */
+.acc {
+  padding: 0;
+  overflow: clip;
+}
+
+.acc__summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  list-style: none;
+  min-height: 56px;
+}
+
+.acc__summary::-webkit-details-marker {
+  display: none;
+}
+
+.acc__summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.acc__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--surface-2, rgba(127, 127, 127, 0.1));
+  color: var(--muted);
+}
+
+.acc__title {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.acc__title strong {
+  font-size: 16px;
+}
+
+.acc__chev {
+  display: grid;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+.acc[open] .acc__chev {
+  transform: rotate(180deg);
+}
+
+.acc__body {
+  display: grid;
+  gap: 16px;
+  padding: 4px 20px 20px;
+  border-top: 1px solid var(--line);
+}
+
+.acc__body > .card {
+  padding: 16px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.acc__body > * > h2:first-child,
+.acc__body > * > .ajustes__section-head > div > h2 {
+  display: none;
+}
+
+.acc-group {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acc__chev {
+    transition: none;
+  }
+}
+
+.btn--sm {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 13px;
+}

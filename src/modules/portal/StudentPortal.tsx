@@ -127,7 +127,7 @@ export function StudentHome() {
       </section>
 
       {incomplete.data && (
-        <Link className="tile tile--wide tile--link tile--alert rise" to="/app/cuenta#ficha">
+        <Link className="tile tile--wide tile--link tile--alert rise" to="/app/ajustes#ficha">
           <span className="eyebrow">Tu ficha</span>
           <p className="tile__big tile__big--sm">Completa tus datos</p>
           <p className="hint">Teléfono, fecha de nacimiento y contacto de emergencia para tu escuela.</p>

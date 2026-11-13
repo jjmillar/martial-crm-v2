@@ -340,3 +340,19 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+.agenda__slot.is-off strong {
+  color: var(--muted);
+}
+
+.agenda__add {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.agenda__add .btn {
+  grid-column: 1 / -1;
+  justify-self: start;
+}

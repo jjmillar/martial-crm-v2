@@ -11,6 +11,7 @@ export type Landing = {
   photos: { path: string; caption: string | null }[]
   schedule: { weekday: number; start: string; end: string; name: string; color: string; level: string; discipline: string | null }[] | null
   plans: { name: string; price: number; cycle: string; description: string | null; trial: boolean }[] | null
+  trial: { note: string | null; slots: { slot_id: string; date: string; start: string; end: string; free: number }[] } | null
 }
 
 export function useLanding(slug: string | undefined) {

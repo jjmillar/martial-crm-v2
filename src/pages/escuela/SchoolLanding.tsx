@@ -7,6 +7,7 @@ import { cycleInfo } from '../../modules/planes/cycles'
 import { levelLabel } from '../../modules/clases/api'
 import { Icon } from '../../ui/Icon'
 import { brandStyle, igLink, photoUrl, useLanding, waLink, type Landing } from './api'
+import { TrialBooking } from './TrialBooking'
 import './escuela.css'
 
 // Public page of a school (/e/<slug>): what the CEO chose to show, in the school's colors, plus the
@@ -89,6 +90,8 @@ function Page({ s }: { s: Landing }) {
           </section>
         )}
 
+        {s.trial && <TrialBooking s={s} />}
+
         <section className="sp-section sp-cta" aria-labelledby="sp-join">
           <h2 id="sp-join">¿Entrenas con nosotros?</h2>
           <p>Crea tu cuenta de alumno para marcar tu asistencia, ver tu nivel y tus skills, y revisar tus pagos.</p>
@@ -152,7 +155,7 @@ function Hero({ s }: { s: Landing }) {
         <h1>{s.name}</h1>
         {s.tagline && <p className="sp-tagline">{s.tagline}</p>}
         <div className="sp-hero__actions">
-          <Link className="sp-btn sp-btn--lg" to={`/e/${s.slug}/registro`}>Únete</Link>
+          {s.trial ? <a className="sp-btn sp-btn--lg" href="#prueba">Clase de prueba gratis</a> : <Link className="sp-btn sp-btn--lg" to={`/e/${s.slug}/registro`}>Únete</Link>}
           {s.whatsapp && <a className="sp-btn sp-btn--ghost sp-btn--lg" href={waLink(s.whatsapp, `Hola ${s.name}, quiero información`)} target="_blank" rel="noopener noreferrer">WhatsApp</a>}
         </div>
       </div>

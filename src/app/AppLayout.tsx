@@ -9,7 +9,7 @@ import { Wordmark } from '../ui/Wordmark'
 import { Flash } from '../ui/Flash'
 import { MobileMenu } from './MobileMenu'
 import { PendingSignup } from '../modules/portal/PendingSignup'
-import { usePendingCount } from '../modules/pendientes/api'
+import { usePendingCount } from '../modules/tareas/api'
 import './app.css'
 
 export function AppLayout() {
@@ -43,7 +43,7 @@ export function AppLayout() {
             <NavLink key={m.id} to={m.path} className="nav__link">
               {m.icon && <Icon name={m.icon} />}
               <span>{m.label}</span>
-              {m.id === 'pendientes' && pending > 0 && <span className="nav-badge" aria-label={`${pending} pendientes`}>{pending}</span>}
+              {m.id === 'tareas' && pending > 0 && <span className="nav-badge" aria-label={`${pending} pendientes`}>{pending}</span>}
             </NavLink>
           ))}
         </nav>

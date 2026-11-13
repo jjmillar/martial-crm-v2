@@ -8,13 +8,13 @@ import { roleLabel } from '../../lib/roles'
 import type { SchoolRole } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { listPending, pendingKey, type Req } from './api'
-import './pendientes.css'
 
 type Free = { id: string; school_id: string; full_name: string | null; rut: string | null; email: string | null }
 
 const rutKey = (r: string | null | undefined) => (r ? r.replace(/[^0-9kK]/g, '').toUpperCase() : '')
 
-export function PendientesPage() {
+// Account requests from the sign-up pages, shown on top of Tareas. Only the CEO sees and decides them.
+export function Aprobaciones() {
   const { schools } = useSchool()
   const qc = useQueryClient()
   const reqs = useQuery({ queryKey: pendingKey, queryFn: listPending })
@@ -56,15 +56,14 @@ export function PendientesPage() {
   const schoolName = (id: string) => schools.find((s) => s.id === id)?.name ?? 'Escuela'
 
   return (
-    <div className="pendientes">
-      <header className="page-head">
-        <span className="eyebrow">Solicitudes</span>
-        <h1>Pendientes</h1>
-        <p className="hint">Cuentas creadas en la página de registro. Nadie tiene acceso hasta que lo apruebes. Solo el CEO ve esta lista.</p>
-      </header>
+    <section className="tareas__approvals" aria-labelledby="aprob-h">
+      <div className="tareas__section-head">
+        <h2 id="aprob-h">Aprobaciones {Boolean(reqs.data?.length) && <span className="nav-badge">{reqs.data!.length}</span>}</h2>
+        <p className="hint">Cuentas creadas en la página de registro. Nadie tiene acceso hasta que lo apruebes.</p>
+      </div>
       {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}
       {reqs.isLoading && <p className="hint">Cargando…</p>}
-      {reqs.isSuccess && reqs.data.length === 0 && <p className="card hint">No hay solicitudes pendientes. 🎉</p>}
+      {reqs.isSuccess && reqs.data.length === 0 && <p className="hint">No hay cuentas por aprobar.</p>}
       <ul className="req-list">
         {reqs.data?.map((r) => {
           const name = `${r.first_name} ${r.first_last_name}`
@@ -106,6 +105,6 @@ export function PendientesPage() {
           )
         })}
       </ul>
-    </div>
+    </section>
   )
 }

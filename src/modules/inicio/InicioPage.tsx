@@ -13,7 +13,7 @@ import { classesKey, listClasses } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { listPayments, paymentsKey } from '../pagos/api'
 import { StudentHome } from '../portal/StudentPortal'
-import { usePendingCount } from '../pendientes/api'
+import { useApprovalsCount } from '../tareas/api'
 import './inicio.css'
 
 async function weekAttendance(schoolId: string, from: string): Promise<number> {
@@ -29,7 +29,7 @@ export function InicioPage() {
 }
 
 function StaffHome() {
-  const pending = usePendingCount()
+  const pending = useApprovalsCount()
   const { profile } = useAuth()
   const { activeSchool, role, schools } = useSchool()
   const schoolId = activeSchool?.id
@@ -82,8 +82,8 @@ function StaffHome() {
       </section>
 
       {pending > 0 && (
-        <Link className="tile tile--wide tile--link tile--alert rise" to="/app/pendientes">
-          <span className="eyebrow">Pendientes</span>
+        <Link className="tile tile--wide tile--link tile--alert rise" to="/app/tareas">
+          <span className="eyebrow">Aprobaciones</span>
           <p className="tile__big tile__big--sm">{pending} {pending === 1 ? 'cuenta nueva por aprobar' : 'cuentas nuevas por aprobar'}</p>
           <p className="hint">Personas que se registraron en la página. Revísalas para darles acceso.</p>
         </Link>

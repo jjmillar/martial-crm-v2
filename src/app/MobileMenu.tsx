@@ -160,7 +160,7 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
               <NavLink key={m.id} to={m.path} className="sheet__link">
                 {m.icon && <Icon name={m.icon} size={22} />}
                 <span>{m.label}</span>
-                {m.id === 'pendientes' && pending > 0 && <span className="nav-badge sheet__badge">{pending}</span>}
+                {m.id === 'tareas' && pending > 0 && <span className="nav-badge sheet__badge">{pending}</span>}
               </NavLink>
             ))}
           </nav>

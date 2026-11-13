@@ -9,4 +9,5 @@ export const cuenta: ModuleManifest = {
   element: <CuentaPage />,
   icon: 'user',
   navGroup: 'gestion',
+  hidden: true,
 }

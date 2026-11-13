@@ -507,3 +507,119 @@
     transition: none;
   }
 }
+
+/* Free trial class booking */
+.sp-trial {
+  scroll-margin-top: 80px;
+}
+
+.sp-trial__form {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--brand) 5%, var(--surface));
+}
+
+.sp-trial__note {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand-2) 14%, transparent);
+  font-size: 14px;
+}
+
+.sp-trial__days {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x proximity;
+}
+
+.sp-trial__day,
+.sp-trial__time {
+  display: grid;
+  flex: none;
+  place-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.sp-trial__day span,
+.sp-trial__day small,
+.sp-trial__time small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sp-trial__day.is-on,
+.sp-trial__time.is-on {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+.sp-trial__day.is-on span,
+.sp-trial__time.is-on small {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.sp-trial__day:disabled,
+.sp-trial__time:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sp-trial__times {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.sp-trial__time {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sp-trial__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 12px;
+}
+
+.sp-trial__fields label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sp-trial__form .sp-btn {
+  justify-self: start;
+  max-width: 100%;
+  white-space: normal;
+}
+
+.sp-trial__done {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--brand) 10%, var(--surface));
+  color: var(--text);
+}
+
+.sp-trial__done svg {
+  color: var(--brand);
+}

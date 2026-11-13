@@ -1,0 +1,282 @@
+/* Tareas: approvals (CEO) + fixed kanban board */
+.tareas {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.tareas__approvals {
+  display: grid;
+  gap: 12px;
+}
+
+.tareas__section-head {
+  display: grid;
+  gap: 4px;
+}
+
+.tareas__section-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.tareas__section-head .nav-badge {
+  margin-left: 0;
+}
+
+.tareas__board-wrap {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.tareas__new {
+  display: flex;
+  gap: 8px;
+}
+
+.tareas__new .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.board__col {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.board__col.is-over {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.board__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.board__count {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.board__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.board__empty,
+.board__more {
+  font-size: 13px;
+}
+
+.task.card {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.task.is-open {
+  cursor: default;
+}
+
+.task--auto {
+  border-left: 3px solid var(--accent);
+}
+
+.task__main {
+  display: grid;
+  gap: 4px;
+  padding: 12px 12px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.task__kind {
+  justify-self: start;
+}
+
+.task__title {
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.task__notes {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: pre-line;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+}
+
+.task__date {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.task__moves {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+}
+
+.task__move {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.task__move:hover,
+.task__move:focus-visible {
+  color: var(--accent);
+}
+
+.task__move--next {
+  margin-left: auto;
+}
+
+.task__edit {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.task__contact,
+.task__edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.task__delete {
+  margin-left: auto;
+}
+
+/* Phone: columns side by side, swiped like Trello */
+@media (max-width: 760px) {
+  .board {
+    grid-template-columns: none;
+    grid-auto-columns: 86%;
+    grid-auto-flow: column;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+  }
+
+  .board__col {
+    scroll-snap-align: start;
+  }
+}
+
+.req-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.req {
+  display: grid;
+  gap: 12px;
+}
+
+.req__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.req__who {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.req__who strong {
+  font-size: 17px;
+}
+
+.req__match {
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+.req__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.req__actions .input {
+  width: auto;
+  max-width: 100%;
+}
+
+.req__done {
+  opacity: 0.7;
+}
+
+.nav-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: auto;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}

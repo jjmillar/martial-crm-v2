@@ -735,6 +735,8 @@ export type Database = {
           owner_id: string | null;
           phone: string | null;
           slug: string;
+          trial_enabled: boolean;
+          trial_note: string | null;
           updated_at: string;
         };
         ComputedFields: never;
@@ -764,6 +766,8 @@ export type Database = {
           owner_id?: string | null;
           phone?: string | null;
           slug: string;
+          trial_enabled?: boolean;
+          trial_note?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -792,6 +796,8 @@ export type Database = {
           owner_id?: string | null;
           phone?: string | null;
           slug?: string;
+          trial_enabled?: boolean;
+          trial_note?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -961,6 +967,64 @@ export type Database = {
           },
         ];
       };
+      tasks: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: string;
+          notes: string | null;
+          position: number;
+          school_id: string;
+          status: string;
+          title: string;
+          trial_booking_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: string;
+          notes?: string | null;
+          position?: number;
+          school_id: string;
+          status?: string;
+          title: string;
+          trial_booking_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: string;
+          notes?: string | null;
+          position?: number;
+          school_id?: string;
+          status?: string;
+          title?: string;
+          trial_booking_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tasks_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_trial_booking_id_fkey";
+            columns: ["trial_booking_id"];
+            isOneToOne: false;
+            referencedRelation: "trial_bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       teacher_specialties: {
         Row: {
           school_id: string;
@@ -1078,6 +1142,109 @@ export type Database = {
           },
         ];
       };
+      trial_bookings: {
+        Row: {
+          created_at: string;
+          date: string;
+          email: string | null;
+          end_time: string;
+          id: string;
+          name: string;
+          notes: string | null;
+          phone: string;
+          school_id: string;
+          slot_id: string | null;
+          start_time: string;
+          status: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          date: string;
+          email?: string | null;
+          end_time: string;
+          id?: string;
+          name: string;
+          notes?: string | null;
+          phone: string;
+          school_id: string;
+          slot_id?: string | null;
+          start_time: string;
+          status?: string;
+        };
+        Update: {
+          created_at?: string;
+          date?: string;
+          email?: string | null;
+          end_time?: string;
+          id?: string;
+          name?: string;
+          notes?: string | null;
+          phone?: string;
+          school_id?: string;
+          slot_id?: string | null;
+          start_time?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trial_bookings_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trial_bookings_slot_id_fkey";
+            columns: ["slot_id"];
+            isOneToOne: false;
+            referencedRelation: "trial_slots";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      trial_slots: {
+        Row: {
+          active: boolean;
+          capacity: number;
+          created_at: string;
+          end_time: string;
+          id: string;
+          school_id: string;
+          start_time: string;
+          weekday: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          capacity?: number;
+          created_at?: string;
+          end_time: string;
+          id?: string;
+          school_id: string;
+          start_time: string;
+          weekday: number;
+        };
+        Update: {
+          active?: boolean;
+          capacity?: number;
+          created_at?: string;
+          end_time?: string;
+          id?: string;
+          school_id?: string;
+          start_time?: string;
+          weekday?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trial_slots_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -1086,6 +1253,18 @@ export type Database = {
       attach_payment_receipt: {
         Args: { p_path: string; p_payment_id: string };
         Returns: undefined;
+      };
+      book_trial: {
+        Args: {
+          p_date: string;
+          p_email?: string;
+          p_name: string;
+          p_notes?: string;
+          p_phone: string;
+          p_slot_id: string;
+          p_slug: string;
+        };
+        Returns: string;
       };
       check_in: {
         Args: { p_class_id: string };
@@ -1136,6 +1315,8 @@ export type Database = {
           owner_id: string | null;
           phone: string | null;
           slug: string;
+          trial_enabled: boolean;
+          trial_note: string | null;
           updated_at: string;
         };
         SetofOptions: {
@@ -1219,6 +1400,7 @@ export type Database = {
       };
       storage_school_id: { Args: { p_name: string }; Returns: string };
       student_progress: { Args: { p_student_id: string }; Returns: Json };
+      trial_availability: { Args: { p_school_id: string }; Returns: Json };
       undo_check_in: { Args: { p_class_id: string }; Returns: undefined };
       update_my_student: {
         Args: {

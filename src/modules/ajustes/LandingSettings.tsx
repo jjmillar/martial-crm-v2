@@ -56,7 +56,7 @@ export function LandingSettings({ school }: { school: School }) {
   }
 
   return (
-    <section className="card ajustes__section landing-settings" aria-labelledby="landing-h" id="landing">
+    <section className="card ajustes__section landing-settings" aria-labelledby="landing-h">
       <div className="ajustes__section-head">
         <div>
           <h2 id="landing-h">Landing page</h2>
@@ -127,7 +127,7 @@ export function LandingSettings({ school }: { school: School }) {
         <label className="switch"><input type="checkbox" checked={f.landing_show_schedule} onChange={(e) => set('landing_show_schedule', e.target.checked)} /><span><strong>Mostrar horarios</strong><span className="hint">Clases activas con sus días y horas.</span></span></label>
         <label className="switch"><input type="checkbox" checked={f.landing_show_plans} onChange={(e) => set('landing_show_plans', e.target.checked)} /><span><strong>Mostrar planes y precios</strong><span className="hint">Planes activos y la matrícula anual.</span></span></label>
       </div>
-      <p className="hint">La dirección, teléfono, correo, ciudad y logo se toman de los datos de la escuela (arriba).</p>
+      <p className="hint">La dirección, teléfono, correo, ciudad y logo se toman de Datos de la escuela.</p>
 
       {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}
       <div className="form-actions"><button type="button" className="btn" disabled={save.isPending} onClick={() => save.mutate()}>{save.isPending ? 'Guardando…' : 'Guardar página'}</button></div>

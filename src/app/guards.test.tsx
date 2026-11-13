@@ -55,4 +55,13 @@ describe('modulesFor', () => {
     expect(modulesFor('admin').map((m) => m.id)).not.toContain('escuelas')
     expect(modulesFor(null)).toEqual([])
   })
+  it('puts Mi cuenta inside Ajustes for every role and shows Tareas to staff only', () => {
+    for (const r of ['ceo', 'admin', 'user', 'alumno'] as const) {
+      const ids = modulesFor(r).map((m) => m.id)
+      expect(ids).toContain('ajustes')
+      expect(ids).not.toContain('cuenta')
+      expect(ids).not.toContain('pendientes')
+      expect(ids.includes('tareas')).toBe(r !== 'alumno')
+    }
+  })
 })

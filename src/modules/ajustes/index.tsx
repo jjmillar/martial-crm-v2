@@ -5,7 +5,7 @@ export const ajustes: ModuleManifest = {
   id: 'ajustes',
   label: 'Ajustes',
   path: 'ajustes',
-  roles: ['ceo', 'admin'],
+  roles: ['ceo', 'admin', 'user', 'alumno'],
   element: <AjustesPage />,
   icon: 'settings',
   navGroup: 'gestion',

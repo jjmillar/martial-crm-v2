@@ -1,15 +1,22 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
 import { roleLabel } from '../../lib/roles'
 import { ThemeToggle } from '../../ui/ThemeToggle'
+import { Acc } from '../../ui/Accordion'
 import { MiFicha } from './MiFicha'
 
-// Personal settings for every role (S6 "personal profile").
+// "Mi cuenta" now lives inside Ajustes; old links (/app/cuenta#ficha) keep working.
 export function CuentaPage() {
+  const { hash } = useLocation()
+  return <Navigate to={`/app/ajustes${hash || '#cuenta'}`} replace />
+}
+
+// Personal settings for every role (S6 "personal profile"), as accordions inside Ajustes.
+export function CuentaSections() {
   const { user, profile, reloadProfile, updatePassword } = useAuth()
   const { role, schools, memberships } = useSchool()
   const [name, setName] = useState(profile?.full_name ?? '')
@@ -18,12 +25,6 @@ export function CuentaPage() {
   const [pw2, setPw2] = useState('')
   const [profileMsg, setProfileMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null)
-  const location = useLocation()
-  useEffect(() => {
-    if (!location.hash) return
-    const t = setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: 'start' }), 300)
-    return () => clearTimeout(t)
-  }, [location.hash])
 
   const saveProfile = useMutation({
     mutationFn: async () => {
@@ -53,13 +54,9 @@ export function CuentaPage() {
   const onPw = (e: FormEvent) => { e.preventDefault(); setPwMsg(null); savePw.mutate() }
 
   return (
-    <div className="alumno-form">
-      <header className="page-head">
-        <span className="eyebrow">{role ? roleLabel[role] : 'Cuenta'}</span>
-        <h1>Mi cuenta</h1>
-        <p className="hint">{user?.email}</p>
-      </header>
-
+    <>
+      <h2 className="acc-group" id="cuenta">Mi cuenta</h2>
+      <Acc id="perfil" icon="user" title="Perfil" hint={`${user?.email ?? ''}${role ? ` · ${roleLabel[role]}` : ''}`}>
       <form className="card form-section" onSubmit={onProfile} noValidate>
         <h2>Perfil</h2>
         <div className="form-grid">
@@ -80,9 +77,11 @@ export function CuentaPage() {
         {profileMsg && <p className={`alert${profileMsg.ok ? ' alert--ok' : ''}`} role={profileMsg.ok ? 'status' : 'alert'}>{profileMsg.text}</p>}
         <div className="form-actions"><button className="btn" type="submit" disabled={saveProfile.isPending}>Guardar perfil</button></div>
       </form>
+      </Acc>
 
-      {role === 'alumno' && <MiFicha />}
+      {role === 'alumno' && <Acc id="mi-ficha" icon="enroll" title="Mi ficha de alumno" hint="Contacto, emergencia y salud"><MiFicha /></Acc>}
 
+      <Acc id="contrasena" icon="eye" title="Contraseña">
       <form className="card form-section" onSubmit={onPw} noValidate>
         <h2>Contraseña</h2>
         <div className="form-grid">
@@ -98,7 +97,9 @@ export function CuentaPage() {
         {pwMsg && <p className={`alert${pwMsg.ok ? ' alert--ok' : ''}`} role={pwMsg.ok ? 'status' : 'alert'}>{pwMsg.text}</p>}
         <div className="form-actions"><button className="btn" type="submit" disabled={savePw.isPending}>Cambiar contraseña</button></div>
       </form>
+      </Acc>
 
+      <Acc id="apariencia" icon="moon" title="Apariencia" hint="Tema claro u oscuro">
       <section className="card form-section">
         <div className="ajustes__section-head">
           <div>
@@ -108,8 +109,10 @@ export function CuentaPage() {
           <ThemeToggle />
         </div>
       </section>
+      </Acc>
 
       {role !== 'ceo' && role !== 'alumno' && memberships.length > 0 && (
+        <Acc id="mis-escuelas" icon="school" title="Mis escuelas">
         <section className="card form-section">
           <h2>Mis escuelas</h2>
           <ul className="email-log">
@@ -121,7 +124,8 @@ export function CuentaPage() {
             ))}
           </ul>
         </section>
+        </Acc>
       )}
-    </div>
+    </>
   )
 }

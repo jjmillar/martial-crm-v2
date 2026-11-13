@@ -13,4 +13,6 @@ export type ModuleManifest = {
   element: ReactNode
   icon?: IconName
   navGroup?: 'principal' | 'gestion'
+  /** Route only (kept for old links), never shown in the navigation. */
+  hidden?: boolean
 }
