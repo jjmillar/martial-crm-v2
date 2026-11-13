@@ -74,7 +74,7 @@ export function TrialBooking({ s }: { s: Landing }) {
               )
             })}
           </div>
-          <div className="sp-trial__times" role="radiogroup" aria-label="Hora">
+          <div className="sp-trial__times" role="radiogroup" aria-label="Hora" data-motion>
             {times.map((x) => (
               <button key={x.slot_id} type="button" role="radio" aria-checked={isPicked(x)} disabled={x.free <= 0}
                 className={`sp-trial__time${isPicked(x) ? ' is-on' : ''}`} onClick={() => setPick(x)}>

@@ -7,8 +7,12 @@ import { SchoolProvider } from './lib/school'
 import { router } from './app/router'
 import './index.css'
 import './ui/patterns.css'
+import './ui/motion.css'
+import { installMotion } from './ui/motion'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } })
+
+installMotion()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

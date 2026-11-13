@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { hhmm, weekdayShort, weekdays } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 import { classesKey, levelLabel, listClasses, listTags } from './api'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
@@ -64,10 +65,7 @@ export function ClasesList() {
               <input className="input" type="search" placeholder="Buscar por clase, profesor o disciplina" value={q} onChange={(e) => setQ(e.target.value)} />
             </label>
             {inactiveCount > 0 && (
-              <label className="switch switch--inline">
-                <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
-                <span>Mostrar inactivas ({inactiveCount})</span>
-              </label>
+              <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivas (${inactiveCount})`} />
             )}
           </div>
           <div className="segmented segmented--wrap segmented--scroll" role="group" aria-label="Filtrar por día">

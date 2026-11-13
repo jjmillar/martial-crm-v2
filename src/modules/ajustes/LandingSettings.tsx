@@ -5,6 +5,7 @@ import { useSchool } from '../../lib/school'
 import type { School } from '../../lib/database.types'
 import { landingThemes, themeColors, type LandingTheme } from '../../lib/landingThemes'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 
 const MAX_PHOTO = 5 * 1024 * 1024
 const MAX_PHOTOS = 10
@@ -62,10 +63,7 @@ export function LandingSettings({ school }: { school: School }) {
           <h2 id="landing-h">Landing page</h2>
           <p className="hint">Página pública de la escuela. Desde ahí tus alumnos se registran e ingresan, y sus cuentas quedan asignadas a esta escuela.</p>
         </div>
-        <label className="switch switch--inline">
-          <input type="checkbox" checked={f.landing_enabled} onChange={(e) => set('landing_enabled', e.target.checked)} />
-          <span>{f.landing_enabled ? 'Publicada' : 'Oculta'}</span>
-        </label>
+        <Toggle inline checked={f.landing_enabled} onChange={(v) => set('landing_enabled', v)} label={f.landing_enabled ? 'Publicada' : 'Oculta'} />
       </div>
 
       <div className="landing-link">
@@ -124,8 +122,8 @@ export function LandingSettings({ school }: { school: School }) {
       </div>
 
       <div className="landing-toggles">
-        <label className="switch"><input type="checkbox" checked={f.landing_show_schedule} onChange={(e) => set('landing_show_schedule', e.target.checked)} /><span><strong>Mostrar horarios</strong><span className="hint">Clases activas con sus días y horas.</span></span></label>
-        <label className="switch"><input type="checkbox" checked={f.landing_show_plans} onChange={(e) => set('landing_show_plans', e.target.checked)} /><span><strong>Mostrar planes y precios</strong><span className="hint">Planes activos y la matrícula anual.</span></span></label>
+        <Toggle checked={f.landing_show_schedule} onChange={(v) => set('landing_show_schedule', v)} label="Mostrar horarios" hint="Clases activas con sus días y horas." />
+        <Toggle checked={f.landing_show_plans} onChange={(v) => set('landing_show_plans', v)} label="Mostrar planes y precios" hint="Planes activos y la matrícula anual." />
       </div>
       <p className="hint">La dirección, teléfono, correo, ciudad y logo se toman de Datos de la escuela.</p>
 

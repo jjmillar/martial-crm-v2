@@ -17,8 +17,6 @@
   --radius: 5px;
   --radius-card: 12px;
   --gap: 12px;
-  --ease: cubic-bezier(0.45, 0, 0.55, 1);
-  --dur: 300ms;
   --font: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   color-scheme: dark;
@@ -115,7 +113,7 @@ a {
   font: 600 14px/1 var(--font);
   text-decoration: none;
   cursor: pointer;
-  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur) var(--ease);
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
 }
 
 .btn:hover {
@@ -230,17 +228,7 @@ a {
   color: var(--muted);
 }
 
-/* Entrance motion (S8): short, and off for reduced motion */
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-}
-
-.rise {
-  animation: rise 500ms var(--ease) both;
-}
+/* Motion tokens, keyframes and enter/exit rules live in src/ui/motion.css (docs/ui-standards.md) */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -360,27 +348,8 @@ textarea.input {
   backdrop-filter: blur(4px);
 }
 
-.modal[open] {
-  animation: modal-in var(--dur) var(--ease);
-}
-
 .modal__body {
   display: grid;
   gap: 16px;
   padding: 24px;
-}
-
-@keyframes modal-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.97);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fab,
-  .modal[open] {
-    transition: none;
-    animation: none;
-  }
 }

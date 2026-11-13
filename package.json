@@ -13,6 +13,7 @@
     "test:db": "node scripts/db/run.mjs"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.10.2",
     "@supabase/supabase-js": "^2.119.0",
     "@tanstack/react-query": "^5.107.1",
     "react": "^19.1.0",

@@ -63,7 +63,7 @@
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 70%, #f5b041), var(--accent));
-  transition: width 600ms var(--ease);
+  transition: width var(--dur-slow) var(--ease-out);
 }
 
 .skills {

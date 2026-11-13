@@ -6,6 +6,7 @@ import { formatDate, todayIso, yearsSince } from '../../lib/dates'
 import { formatRut } from '../../lib/rut'
 import type { Student } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 import { createStudent, deleteStudent, getStudent, studentsKey, updateStudent } from './api'
 import { beltSuggestions } from '../../lib/belts'
 import { emptyForm, formFromStudent, parseStudent, type StudentForm } from './schema'
@@ -171,13 +172,7 @@ function AlumnoForm({ student }: { student?: Student }) {
       </section>
 
       <section className="card form-section form-section--row">
-        <label className="switch">
-          <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} />
-          <span>
-            <strong>Alumno activo</strong>
-            <span className="hint">Los inactivos se ocultan del listado principal, pero conservan su historial.</span>
-          </span>
-        </label>
+        <Toggle checked={form.active} onChange={(v) => set('active', v)} label="Alumno activo" hint="Los inactivos se ocultan del listado principal, pero conservan su historial." />
       </section>
 
       {student && <StudentEnrollments studentId={student.id} />}

@@ -1,0 +1,146 @@
+/* Motion standard (docs/ui-standards.md). The only durations and easings in the app; src/ui/motion.ts mirrors them.
+   Enter = --dur + --ease-out, exit = --dur-exit + --ease-in, state change / hover = --dur-fast + --ease. */
+:root {
+  --dur-fast: 150ms;
+  --dur: 240ms;
+  --dur-slow: 360ms;
+  --dur-exit: 180ms;
+  --ease: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  interpolate-size: allow-keywords;
+}
+
+/* Keyframes (transform-based so they never stack with the JS list motion) */
+@keyframes m-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes m-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes m-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Utilities: add to anything that should enter on mount */
+.m-in,
+.rise {
+  animation: m-in var(--dur) var(--ease-out) both;
+}
+
+.rise {
+  animation-duration: var(--dur-slow);
+}
+
+.m-pop {
+  animation: m-pop var(--dur) var(--ease-out) both;
+}
+
+.m-fade {
+  animation: m-fade var(--dur) var(--ease-out) both;
+}
+
+/* Feedback messages always enter */
+.alert,
+.field__error {
+  animation: m-in var(--dur) var(--ease-out);
+}
+
+/* Dialogs (modals and the mobile sheet): enter and exit with the dialog itself */
+.modal,
+.sheet {
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+  transition:
+    opacity var(--dur-exit) var(--ease-in),
+    transform var(--dur-exit) var(--ease-in),
+    overlay var(--dur-exit) var(--ease-in) allow-discrete,
+    display var(--dur-exit) var(--ease-in) allow-discrete;
+}
+
+.sheet {
+  transform: translateY(48px);
+}
+
+.modal[open],
+.sheet[open] {
+  opacity: 1;
+  transform: none;
+  transition-duration: var(--dur);
+  transition-timing-function: var(--ease-out);
+}
+
+@starting-style {
+  .modal[open] {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+
+  .sheet[open] {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+}
+
+.modal::backdrop,
+.sheet::backdrop {
+  opacity: 0;
+  transition:
+    opacity var(--dur-exit) var(--ease-in),
+    overlay var(--dur-exit) var(--ease-in) allow-discrete,
+    display var(--dur-exit) var(--ease-in) allow-discrete;
+}
+
+.modal[open]::backdrop,
+.sheet[open]::backdrop {
+  opacity: 1;
+  transition-duration: var(--dur);
+}
+
+@starting-style {
+  .modal[open]::backdrop,
+  .sheet[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* Accordions (<details>): the body opens and closes with its height */
+details::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  transition:
+    block-size var(--dur-exit) var(--ease-in),
+    content-visibility var(--dur-exit) var(--ease-in) allow-discrete;
+}
+
+details[open]::details-content {
+  block-size: auto;
+  transition-duration: var(--dur);
+  transition-timing-function: var(--ease-out);
+}
+
+details[open] > :not(summary) {
+  animation: m-in var(--dur) var(--ease-out);
+}
+
+/* Toast */
+.flash--out {
+  animation: m-flash-out var(--dur-exit) var(--ease-in) forwards;
+}
+
+@keyframes m-flash-out {
+  to {
+    opacity: 0;
+    translate: -50% -12px;
+  }
+}

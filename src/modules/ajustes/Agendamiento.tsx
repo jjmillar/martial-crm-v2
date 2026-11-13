@@ -6,6 +6,7 @@ import { formatDate, todayIso } from '../../lib/dates'
 import { hhmm, weekdayLong, weekdayShort, weekdays } from '../../lib/weekdays'
 import type { School } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 
 type Slot = { id: string; weekday: number; start_time: string; end_time: string; capacity: number; active: boolean }
 type Booking = { id: string; date: string; start_time: string; name: string; phone: string; email: string | null; notes: string | null }
@@ -95,10 +96,12 @@ export function Agendamiento({ school }: { school: School }) {
         {school.landing_enabled && <a className="btn btn--ghost" href={`/e/${school.slug}#prueba`} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={16} /> Ver en la página</a>}
       </div>
 
-      <label className="switch">
-        <input type="checkbox" checked={enabled} onChange={(e) => { setEnabled(e.target.checked); setMsg(null) }} />
-        <span><strong>Recibir clases de prueba gratis</strong><span className="hint">{school.landing_enabled ? 'Muestra el formulario de agendamiento en la landing page.' : 'Tu landing page está oculta: actívala para que se vea el agendamiento.'}</span></span>
-      </label>
+      <Toggle
+        checked={enabled}
+        onChange={(v) => { setEnabled(v); setMsg(null) }}
+        label="Recibir clases de prueba gratis"
+        hint={school.landing_enabled ? 'Muestra el formulario de agendamiento en la landing page.' : 'Tu landing page está oculta: actívala para que se vea el agendamiento.'}
+      />
       <div className="field">
         <label htmlFor="ag-note">Indicaciones para quien agenda (opcional)</label>
         <textarea id="ag-note" className="input" rows={2} maxLength={300} value={note} onChange={(e) => { setNote(e.target.value); setMsg(null) }} placeholder="Ej: Llega 10 minutos antes, con ropa cómoda y agua." />

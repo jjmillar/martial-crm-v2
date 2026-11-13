@@ -5,6 +5,7 @@ import { useSchool } from '../../lib/school'
 import { hhmm, weekdays } from '../../lib/weekdays'
 import type { ClassLevel } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from '../profesores/api'
 import { classColors, classesKey, deleteClass, getClass, levelLabel, listTags, saveClass, type Block, type ClassFull } from './api'
 
@@ -188,10 +189,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
             <label htmlFor="c-notes">Notas</label>
             <textarea id="c-notes" className="input" rows={2} maxLength={400} value={notes} onChange={(e) => { setNotes(e.target.value); touch() }} placeholder="Ej: traer gi, protector bucal" />
           </div>
-          <label className="switch">
-            <input type="checkbox" checked={active} onChange={(e) => { setActive(e.target.checked); touch() }} />
-            <span><strong>Clase activa</strong><span className="hint">Las inactivas no aparecen en el calendario ni en asistencia.</span></span>
-          </label>
+          <Toggle checked={active} onChange={(v) => { setActive(v); touch() }} label="Clase activa" hint="Las inactivas no aparecen en el calendario ni en asistencia." />
         </section>
       </fieldset>
 

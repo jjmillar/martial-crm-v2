@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { beltSwatch } from '../../lib/belts'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from './api'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
@@ -59,10 +60,7 @@ export function ProfesoresList() {
             </select>
           )}
           {inactiveCount > 0 && (
-            <label className="switch switch--inline">
-              <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
-              <span>Mostrar inactivos ({inactiveCount})</span>
-            </label>
+            <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivos (${inactiveCount})`} />
           )}
         </div>
       )}

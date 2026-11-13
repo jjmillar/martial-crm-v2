@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { formatCLP } from '../../lib/money'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, specialtiesKey } from '../profesores/api'
 import { listPlans, plansKey } from './api'
 import { cycleInfo, planFeatures } from './cycles'
@@ -36,10 +37,7 @@ export function PlanesList() {
       </header>
 
       {inactiveCount > 0 && (
-        <label className="switch switch--inline">
-          <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
-          <span>Mostrar inactivos ({inactiveCount})</span>
-        </label>
+        <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivos (${inactiveCount})`} />
       )}
 
       {plans.isLoading && <p className="hint">Cargando…</p>}

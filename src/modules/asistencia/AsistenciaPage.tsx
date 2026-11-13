@@ -7,6 +7,7 @@ import { useAuth } from '../../lib/auth'
 import { addDays, longDate, todayIso } from '../../lib/dates'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { classesKey, listClasses } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
@@ -184,10 +185,7 @@ function StaffAttendance() {
               <span className="sr-only">Buscar alumno</span>
               <input className="input" type="search" placeholder="Buscar alumno" value={search} onChange={(e) => setSearch(e.target.value)} />
             </label>
-            <label className="switch switch--inline">
-              <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
-              <span>Todos los alumnos</span>
-            </label>
+            <Toggle inline checked={showAll} onChange={setShowAll} label="Todos los alumnos" />
           </div>
           {error && <p className="alert" role="alert">{error}</p>}
           {over && <p className="alert">Se superó el cupo de la clase.</p>}

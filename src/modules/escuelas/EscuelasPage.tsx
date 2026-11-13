@@ -87,7 +87,7 @@ export function EscuelasPage() {
 
       {created && <p className="alert alert--ok" role="status">Escuela “{created}” creada. Ábrela e invita a su administrador desde Miembros.</p>}
 
-      <section className="school-grid" aria-label="Escuelas registradas">
+      <section className="school-grid" aria-label="Escuelas registradas" data-motion>
         {schools.map((s) => {
           const st = stats.data?.[s.id]
           const facts: { icon: IconName; value: number | undefined; label: string }[] = [

@@ -330,3 +330,6 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Ajustes → Landing page: publish/hide, link (copy, WhatsApp, open), colors, texts, sections, photos (upload up to 10, captions, reorder, delete).
   - Checks: test:db 15 files / 281 checks; phone + desktop QA end to end (new CEO → school → landing → student sign-up → approval → school login), swept.
 
+- L21 (2026-11-13) — UI standards (docs/ui-standards.md):
+  - Motion: single token set (`ui/motion.css` + `ui/motion.ts`): enter 240 ms ease-out, exit 180 ms ease-in, fast 150 ms, pages 360 ms. Automatic: page transitions (`PageMotion`), list/container enter-exit-move (`installMotion` + auto-animate on ul/ol/form/.modal__body/page root/[data-motion]), dialogs and sheet with exit (`@starting-style`), accordions with height, alerts, toast exit. Hard-coded timings removed.
+  - Toggles: `ui/Toggle` replaces all 14 checkboxes; lint forbids `type="checkbox"` outside it; any checkbox renders as a switch.

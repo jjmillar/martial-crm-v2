@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { PageMotion } from '../ui/PageMotion'
 import { useAuth } from '../lib/auth'
 import { useSchool } from '../lib/school'
 import { roleLabel } from '../lib/roles'
@@ -63,7 +64,7 @@ export function AppLayout() {
         <main className="content">
           <Flash />
           {/* No role anywhere yet (e.g. a self-signup waiting for approval): one screen instead of empty pages. */}
-          {!loading && !role ? <PendingSignup /> : <Outlet />}
+          <PageMotion>{!loading && !role ? <PendingSignup /> : <Outlet />}</PageMotion>
         </main>
         <footer className="app-footer">© {year} Martial CRM</footer>
       </div>

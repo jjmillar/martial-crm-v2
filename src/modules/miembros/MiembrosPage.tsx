@@ -102,7 +102,7 @@ export function MiembrosPage() {
           <p className="hint">La persona recibe un correo para crear su contraseña.</p>
         </form>
 
-        <section className="miembros__list" aria-label="Miembros de la escuela">
+        <section className="miembros__list" aria-label="Miembros de la escuela" data-motion>
           {rowError && <p className="alert" role="alert">{rowError}</p>}
           {members.isLoading && <p className="hint">Cargando…</p>}
           {members.isError && <p className="alert">No se pudieron cargar los miembros.</p>}

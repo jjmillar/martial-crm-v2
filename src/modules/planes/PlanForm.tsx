@@ -5,6 +5,7 @@ import { useSchool } from '../../lib/school'
 import { formatCLP, parseCLP } from '../../lib/money'
 import type { Plan } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, specialtiesKey } from '../profesores/api'
 import { deletePlan, getPlan, plansKey, savePlan } from './api'
 import { cycleInfo, cycles, planFeatures } from './cycles'
@@ -175,27 +176,16 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
           </section>
 
           <section className="card form-section plan-flags">
-            <label className="switch">
-              <input type="checkbox" checked={form.is_default} onChange={(e) => setDefault(e.target.checked)} />
-              <span>
-                <strong>Plan predeterminado</strong>
-                <span className="hint">Se sugiere primero al matricular. Solo puede haber uno: marcar este desmarca el anterior.</span>
-              </span>
-            </label>
-            <label className="switch">
-              <input type="checkbox" checked={form.is_trial} onChange={(e) => set('is_trial', e.target.checked)} />
-              <span>
-                <strong>Plan de prueba</strong>
-                <span className="hint">Para clases de prueba o primeras visitas.</span>
-              </span>
-            </label>
-            <label className="switch">
-              <input id="p-active" type="checkbox" checked={form.active} disabled={form.is_default} onChange={(e) => set('active', e.target.checked)} />
-              <span>
-                <strong>Plan activo</strong>
-                <span className="hint">{form.is_default ? 'El predeterminado siempre está activo.' : 'Los inactivos no se ofrecen en nuevas inscripciones; las existentes siguen igual.'}</span>
-              </span>
-            </label>
+            <Toggle checked={form.is_default} onChange={setDefault} label="Plan predeterminado" hint="Se sugiere primero al matricular. Solo puede haber uno: activar este desactiva el anterior." />
+            <Toggle checked={form.is_trial} onChange={(v) => set('is_trial', v)} label="Plan de prueba" hint="Para clases de prueba o primeras visitas." />
+            <Toggle
+              id="p-active"
+              checked={form.active}
+              disabled={form.is_default}
+              onChange={(v) => set('active', v)}
+              label="Plan activo"
+              hint={form.is_default ? 'El predeterminado siempre está activo.' : 'Los inactivos no se ofrecen en nuevas inscripciones; las existentes siguen igual.'}
+            />
             {errors.active && <span className="field__error">{errors.active}</span>}
           </section>
         </fieldset>

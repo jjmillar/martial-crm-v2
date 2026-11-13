@@ -23,6 +23,18 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // UI standard: every on/off control is a toggle (ui/Toggle), never a checkbox.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXAttribute[name.name='type'][value.value='checkbox']",
+          message: 'Usa <Toggle> de src/ui/Toggle: en la app todos los on/off son toggles, no checkboxes.',
+        },
+      ],
     },
+  },
+  {
+    files: ['src/ui/Toggle.tsx'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
 )

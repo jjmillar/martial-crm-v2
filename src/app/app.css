@@ -220,7 +220,7 @@
   }
 
   .menu-fab.is-ready {
-    transition: transform 260ms var(--ease), scale var(--dur) var(--ease);
+    transition: transform var(--dur) var(--ease-out), scale var(--dur-fast) var(--ease);
   }
 
   .menu-fab.is-ready.is-dragging {
@@ -262,9 +262,6 @@
   backdrop-filter: blur(4px);
 }
 
-.sheet[open] {
-  animation: sheet-in var(--dur) var(--ease);
-}
 
 .sheet__body {
   display: grid;
@@ -321,15 +318,7 @@
   overflow-wrap: anywhere;
 }
 
-@keyframes sheet-in {
-  from {
-    transform: translateY(40px);
-    opacity: 0;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .sheet[open],
   .menu-fab {
     animation: none;
     transition: none;

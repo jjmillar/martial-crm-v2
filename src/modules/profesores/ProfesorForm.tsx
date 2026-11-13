@@ -5,6 +5,7 @@ import { useSchool } from '../../lib/school'
 import { formatRut } from '../../lib/rut'
 import { beltSuggestions } from '../../lib/belts'
 import { Icon } from '../../ui/Icon'
+import { Toggle } from '../../ui/Toggle'
 import { listMembers } from '../miembros/api'
 import { deleteTeacher, getTeacher, listSpecialties, listTeachers, saveTeacher, specialtiesKey, teachersKey, type TeacherWithSpecialties } from './api'
 import { emptyTeacher, formFromTeacher, parseTeacher, type TeacherForm } from './schema'
@@ -179,13 +180,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
         </section>
 
         <section className="card form-section">
-          <label className="switch">
-            <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} />
-            <span>
-              <strong>Profesor activo</strong>
-              <span className="hint">Los inactivos no aparecen al asignar clases, pero conservan su historial.</span>
-            </span>
-          </label>
+          <Toggle checked={form.active} onChange={(v) => set('active', v)} label="Profesor activo" hint="Los inactivos no aparecen al asignar clases, pero conservan su historial." />
         </section>
       </fieldset>
 
