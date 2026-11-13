@@ -9,7 +9,7 @@ import {
   useRouter,
   useSearchParams as useNextSearchParams,
 } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState, type AnchorHTMLAttributes, type MouseEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type AnchorHTMLAttributes, type MouseEvent, type ReactNode } from 'react'
 
 type NavOptions = { replace?: boolean; state?: unknown }
 
@@ -123,9 +123,18 @@ export function NavLink({ to, className, end, ...rest }: NavLinkProps) {
   return <Link to={to} className={cls || undefined} aria-current={isActive ? 'page' : undefined} {...rest} />
 }
 
-/** Redirect on render (client side). */
+/**
+ * Redirect on render (client side), once per target. Re-renders must not navigate again: the guard that
+ * renders this can re-render after the URL already changed, and would overwrite the carried state
+ * (e.g. "come back to /app/pagos after login" would become "come back to /login").
+ */
 export function Navigate({ to, replace, state }: { to: string } & NavOptions) {
   const navigate = useNavigate()
-  useEffect(() => { navigate(to, { replace, state }) }, [navigate, to, replace, state])
+  const done = useRef<string | null>(null)
+  useEffect(() => {
+    if (done.current === to) return
+    done.current = to
+    navigate(to, { replace, state })
+  }, [navigate, to, replace, state])
   return null
 }

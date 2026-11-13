@@ -28,6 +28,12 @@ describe('RequireAuth', () => {
     expect(screen.queryByText('privado')).toBeNull()
     expect(router.replace).toHaveBeenCalledWith('/login')
   })
+  it('redirects only once even if it re-renders (keeps "come back to" intact)', () => {
+    const { rerender } = renderAt(<RequireAuth><p>privado</p></RequireAuth>)
+    rerender(<RequireAuth><p>privado</p></RequireAuth>)
+    rerender(<RequireAuth><p>privado</p></RequireAuth>)
+    expect(router.replace).toHaveBeenCalledTimes(1)
+  })
   it('renders children with a session', () => {
     auth.session = { user: { id: 'u1' } }
     renderAt(<RequireAuth><p>privado</p></RequireAuth>)
