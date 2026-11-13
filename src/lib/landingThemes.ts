@@ -7,7 +7,7 @@ export const landingThemes: { id: Exclude<LandingTheme, 'custom'>; label: string
   { id: 'bosque', label: 'Bosque', primary: '#16a34a', accent: '#a3e635' },
   { id: 'violeta', label: 'Violeta', primary: '#7c3aed', accent: '#f472b6' },
   { id: 'oro', label: 'Oro', primary: '#c8961e', accent: '#f3d27a' },
-  { id: 'grafito', label: 'Grafito', primary: '#94a3b8', accent: '#e2e8f0' },
+  { id: 'grafito', label: 'Grafito', primary: '#3f3f46', accent: '#a1a1aa' }, // monochrome: follows the page's text color
 ]
 
 export function themeColors(theme: string | null | undefined, primary?: string | null, accent?: string | null) {

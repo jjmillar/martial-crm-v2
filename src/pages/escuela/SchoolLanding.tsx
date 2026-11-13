@@ -49,7 +49,7 @@ function Page({ s }: { s: Landing }) {
   }
 
   return (
-    <div className="school-page" style={brandStyle(s)}>
+    <div className={`school-page${s.theme === 'grafito' ? ' school-page--mono' : ''}`} style={brandStyle(s)}>
       <header className="sp-nav">
         <span className="sp-brand">
           {s.logo_url ? <img src={s.logo_url} alt="" /> : <span className="sp-brand__mono" aria-hidden="true">{s.name.slice(0, 2).toUpperCase()}</span>}

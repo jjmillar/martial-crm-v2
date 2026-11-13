@@ -32,6 +32,8 @@ export const igLink = (handle: string) => `https://instagram.com/${handle.replac
 
 // CSS variables for a school's brand colors (landing and its login/sign-up pages).
 export function brandStyle(s: Pick<Landing, 'theme' | 'primary' | 'accent'>): CSSProperties {
+  // Grafito is monochrome: buttons take the page's own text/background colors, so it is crisp in light and dark.
+  if (s.theme === 'grafito') return { ['--brand' as string]: 'var(--text)', ['--brand-2' as string]: 'var(--muted)', ['--on-brand' as string]: 'var(--bg)' }
   const c = themeColors(s.theme, s.primary, s.accent)
   return { ['--brand' as string]: c.primary, ['--brand-2' as string]: c.accent, ['--on-brand' as string]: onColor(c.primary) }
 }

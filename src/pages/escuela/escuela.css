@@ -222,6 +222,12 @@
   border-color: rgb(255 255 255 / 0.55);
 }
 
+/* Monochrome theme over a photo: always a white button, whatever the page's light/dark mode */
+.school-page--mono .sp-hero:not(.sp-hero--plain) {
+  --brand: #fff;
+  --on-brand: #111;
+}
+
 .sp-arrow {
   position: absolute;
   top: 50%;
@@ -581,20 +587,33 @@
 }
 
 .sp-trial__times {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .sp-trial__time {
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-inline: 16px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.sp-trial__time small {
+  font-weight: 400;
 }
 
 .sp-trial__fields {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .sp-trial__fields {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .sp-trial__fields label {
