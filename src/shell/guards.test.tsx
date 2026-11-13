@@ -18,7 +18,12 @@ vi.mock('next/navigation', () => ({
   useParams: () => ({}),
 }))
 
-beforeEach(() => { auth.session = null; auth.loading = false; school.role = null; router.replace.mockClear() })
+beforeEach(() => {
+  auth.session = null; auth.loading = false; school.role = null; router.replace.mockClear()
+  // Each test starts after any earlier navigation has settled (nav.tsx remembers in-flight navigations for 3 s).
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(Date.now() + 60_000))
+})
 
 const renderAt = (el: React.ReactNode) => render(<>{el}</>)
 

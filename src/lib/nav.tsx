@@ -22,6 +22,13 @@ const setCarried = (path: string, state: unknown) => {
 /** Drop the carried state once it has been consumed (e.g. a toast was shown). */
 export const clearNavState = () => { carried = null }
 
+// Next.js navigations are asynchronous: the page that asked to leave keeps rendering for a moment. A
+// render-time redirect (<Navigate>) in that window must not override the navigation already requested
+// (e.g. login → "back to /app/pagos" losing against "signed in → /app").
+const IN_FLIGHT_MS = 3000
+let inFlight: { path: string; at: number } | null = null
+const navInFlight = (pathname: string) => Boolean(inFlight && inFlight.path !== pathname && Date.now() - inFlight.at < IN_FLIGHT_MS)
+
 /** Resolve '..', 'nuevo', '?x=1' or '#id' against the current path, like relative links do. */
 export function resolvePath(to: string, pathname: string, search = ''): string {
   if (/^[a-z][a-z0-9+.-]*:/i.test(to) || to.startsWith('/')) return to
@@ -53,6 +60,7 @@ export function useNavigate() {
       if (typeof to === 'number') { if (to < 0) router.back(); else router.forward(); return }
       const href = resolvePath(to, pathname, search)
       setCarried(href, opts.state)
+      inFlight = { path: href.split(/[?#]/)[0], at: Date.now() }
       if (opts.replace) router.replace(href)
       else router.push(href)
     },
@@ -124,17 +132,23 @@ export function NavLink({ to, className, end, ...rest }: NavLinkProps) {
 }
 
 /**
- * Redirect on render (client side), once per target. Re-renders must not navigate again: the guard that
+ * Redirect on render (client side), once. Re-renders must not navigate again: the guard that
  * renders this can re-render after the URL already changed, and would overwrite the carried state
  * (e.g. "come back to /app/pagos after login" would become "come back to /login").
  */
 export function Navigate({ to, replace, state }: { to: string } & NavOptions) {
   const navigate = useNavigate()
-  const done = useRef<string | null>(null)
+  const { pathname } = useHere()
+  const done = useRef(false)
   useEffect(() => {
-    if (done.current === to) return
-    done.current = to
+    if (done.current) return
+    // Another navigation is on its way: let it land; only step in if it never does.
+    if (navInFlight(pathname)) {
+      const t = setTimeout(() => { if (!done.current) { done.current = true; navigate(to, { replace, state }) } }, IN_FLIGHT_MS)
+      return () => clearTimeout(t)
+    }
+    done.current = true
     navigate(to, { replace, state })
-  }, [navigate, to, replace, state])
+  }, [navigate, pathname, to, replace, state])
   return null
 }
