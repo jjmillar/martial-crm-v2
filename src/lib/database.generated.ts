@@ -982,10 +982,9 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      enrollment_fee_due: { Args: { p_student_id: string }; Returns: string };
       find_user_id_by_email: { Args: { p_email: string }; Returns: string };
       generate_enrollment_fees: {
-        Args: { p_school_id?: string };
+        Args: { p_school_id?: string; p_today?: string };
         Returns: number;
       };
       grant_ceo: { Args: { p_email: string }; Returns: undefined };
@@ -1000,6 +999,14 @@ export type Database = {
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
       is_student_user: { Args: { p_school_id: string }; Returns: boolean };
       my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
+      platform_ceos: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          email: string;
+          full_name: string;
+          user_id: string;
+        }[];
+      };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
       school_stats: {
         Args: Record<PropertyKey, never>;

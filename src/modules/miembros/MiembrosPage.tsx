@@ -5,7 +5,7 @@ import { useSchool } from '../../lib/school'
 import { roleLabel } from '../../lib/roles'
 import type { SchoolRole } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
-import { inviteMember, listMembers, removeMember, updateRole } from './api'
+import { inviteMember, listCeos, listMembers, removeMember, updateRole } from './api'
 import './miembros.css'
 
 export function MiembrosPage() {
@@ -16,6 +16,8 @@ export function MiembrosPage() {
   const key = ['members', schoolId]
 
   const members = useQuery({ queryKey: key, queryFn: () => listMembers(schoolId!), enabled: Boolean(schoolId) })
+  const ceos = useQuery({ queryKey: ['platform-ceos'], queryFn: listCeos, staleTime: 10 * 60_000 })
+  const ceoRows = (ceos.data ?? []).filter((c) => !(members.data ?? []).some((m) => m.user_id === c.user_id))
 
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
@@ -104,6 +106,17 @@ export function MiembrosPage() {
           {rowError && <p className="alert" role="alert">{rowError}</p>}
           {members.isLoading && <p className="hint">Cargando…</p>}
           {members.isError && <p className="alert">No se pudieron cargar los miembros.</p>}
+          {ceoRows.map((c) => (
+            <article key={c.user_id} className="card member-row">
+              <div className="member-row__who">
+                <strong>{c.full_name || c.email}{c.user_id === user?.id ? ' (tú)' : ''}</strong>
+                {c.full_name && <span className="hint">{c.email}</span>}
+              </div>
+              <div className="member-row__actions">
+                <span className="tag tag--accent" title="Acceso a todas las escuelas de la plataforma">{roleLabel.ceo}</span>
+              </div>
+            </article>
+          ))}
           {members.data?.length === 0 && <p className="card hint">Esta escuela aún no tiene miembros. Invita a su administrador.</p>}
           {members.data?.map((m) => {
             const name = m.profile?.full_name || m.profile?.email || 'Invitación pendiente'
