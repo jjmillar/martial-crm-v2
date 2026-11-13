@@ -196,3 +196,147 @@
 .chip-edit .catalog__icon {
   width: 48px;
 }
+
+/* Landing page settings */
+.landing-settings {
+  display: grid;
+  gap: 18px;
+}
+
+.landing-link {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-link .input {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+}
+
+.theme-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.theme-swatch {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  font: 500 13px/1.2 var(--font);
+  cursor: pointer;
+}
+
+.theme-swatch[aria-checked='true'] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--text);
+}
+
+.theme-swatch__colors {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 0.2);
+}
+
+.custom-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.custom-colors label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.custom-colors input[type='color'] {
+  width: 44px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+}
+
+.theme-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.theme-preview span {
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.landing-toggles {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-photos {
+  display: grid;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.photo-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.photo-item {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.photo-item img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.photo-item .input {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.photo-item__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.file-btn.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

@@ -11,8 +11,6 @@ const asService = async (sql, params = []) => { await db.query(`select set_confi
 const reg = (school, user, kind, rut, email, first = 'Ana', last = 'Pérez') =>
   asService(`select public.register_account_request($1,$2,$3,$4,$5,$6,$7,null) id`, [school, user, kind, first, last, rut, email]).then((r) => r.rows[0].id)
 
-check('anyone (not signed in) can list schools for the form', (await as(db, null, `select count(*)::int c from public.public_schools()`)).rows[0].c === 2)
-check('the public list exposes only id, name, city', Object.keys((await as(db, null, `select * from public.public_schools() limit 1`)).rows[0]).join() === 'id,name,city')
 
 const S1 = await newUser(db, 'alumna'), S2 = await newUser(db, 'alumno2'), M1 = await newUser(db, 'profe'), Z = await newUser(db, 'random')
 const existing = (await as(db, A, `insert into public.students (school_id, first_name, first_last_name, rut, email) values ($1,'Sofía','Rojas','11111111-1','sofi@test.cl') returning id`, [s1])).rows[0].id
@@ -26,7 +24,7 @@ check('a student request needs a RUT', noRut === false)
 
 check('pending accounts have no access', (await as(db, S2, `select count(*)::int c from public.classes`)).rows[0].c === 0 && (await as(db, M1, `select count(*)::int c from public.students`)).rows[0].c === 0)
 check('applicant sees only their own request', (await as(db, S2, `select kind from public.account_requests`)).rows.map((r) => r.kind).join() === 'alumno')
-check('CEO sees every pending request', (await as(db, CEO, `select count(*)::int c from public.account_requests where status='pendiente'`)).rows[0].c === 4)
+check('platform CEO sees every pending request', (await as(db, CEO, `select count(*)::int c from public.account_requests where status='pendiente'`)).rows[0].c === 4)
 check('school admins do not see requests (CEO only)', (await as(db, A, `select count(*)::int c from public.account_requests`)).rows[0].c === 0)
 check('user role sees none', (await as(db, U, `select count(*)::int c from public.account_requests`)).rows[0].c === 0)
 

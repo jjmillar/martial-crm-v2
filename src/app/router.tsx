@@ -4,6 +4,8 @@ import { Landing } from '../pages/Landing'
 import { Login } from '../pages/Login'
 import { Bienvenida } from '../pages/Bienvenida'
 import { Registro } from '../pages/Registro'
+import { SchoolLanding } from '../pages/escuela/SchoolLanding'
+import { SchoolLogin, SchoolSignup } from '../pages/escuela/SchoolAuth'
 import { NotFound } from '../pages/NotFound'
 import { AppLayout } from './AppLayout'
 import { RequireAuth } from './RequireAuth'
@@ -15,6 +17,10 @@ export const router = createBrowserRouter([
   { path: '/login', element: <RedirectIfAuthed><Login /></RedirectIfAuthed> },
   { path: '/bienvenida', element: <Bienvenida /> },
   { path: '/registro', element: <RedirectIfAuthed><Registro /></RedirectIfAuthed> },
+  // Public page of each school, with its own student login and sign-up.
+  { path: '/e/:slug', element: <SchoolLanding /> },
+  { path: '/e/:slug/registro', element: <SchoolSignup /> },
+  { path: '/e/:slug/ingresar', element: <SchoolLogin /> },
   {
     path: '/app',
     element: <RequireAuth><AppLayout /></RequireAuth>,

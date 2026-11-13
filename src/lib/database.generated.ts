@@ -420,6 +420,22 @@ export type Database = {
           },
         ];
       };
+      owners: {
+        Row: {
+          created_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       payments: {
         Row: {
           amount: number;
@@ -656,6 +672,42 @@ export type Database = {
           },
         ];
       };
+      school_photos: {
+        Row: {
+          caption: string | null;
+          created_at: string;
+          id: string;
+          path: string;
+          position: number;
+          school_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          caption?: string | null;
+          created_at?: string;
+          id?: string;
+          path: string;
+          position?: number;
+          school_id: string;
+        };
+        Update: {
+          caption?: string | null;
+          created_at?: string;
+          id?: string;
+          path?: string;
+          position?: number;
+          school_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "school_photos_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       schools: {
         Row: {
           address: string | null;
@@ -668,8 +720,19 @@ export type Database = {
           enrollment_fee_months: number;
           enrollment_fee_since: string | null;
           id: string;
+          landing_about: string | null;
+          landing_accent: string | null;
+          landing_enabled: boolean;
+          landing_instagram: string | null;
+          landing_primary: string | null;
+          landing_show_plans: boolean;
+          landing_show_schedule: boolean;
+          landing_tagline: string | null;
+          landing_theme: string;
+          landing_whatsapp: string | null;
           logo_url: string | null;
           name: string;
+          owner_id: string | null;
           phone: string | null;
           slug: string;
           updated_at: string;
@@ -686,8 +749,19 @@ export type Database = {
           enrollment_fee_months?: number;
           enrollment_fee_since?: string | null;
           id?: string;
+          landing_about?: string | null;
+          landing_accent?: string | null;
+          landing_enabled?: boolean;
+          landing_instagram?: string | null;
+          landing_primary?: string | null;
+          landing_show_plans?: boolean;
+          landing_show_schedule?: boolean;
+          landing_tagline?: string | null;
+          landing_theme?: string;
+          landing_whatsapp?: string | null;
           logo_url?: string | null;
           name: string;
+          owner_id?: string | null;
           phone?: string | null;
           slug: string;
           updated_at?: string;
@@ -703,8 +777,19 @@ export type Database = {
           enrollment_fee_months?: number;
           enrollment_fee_since?: string | null;
           id?: string;
+          landing_about?: string | null;
+          landing_accent?: string | null;
+          landing_enabled?: boolean;
+          landing_instagram?: string | null;
+          landing_primary?: string | null;
+          landing_show_plans?: boolean;
+          landing_show_schedule?: boolean;
+          landing_tagline?: string | null;
+          landing_theme?: string;
+          landing_whatsapp?: string | null;
           logo_url?: string | null;
           name?: string;
+          owner_id?: string | null;
           phone?: string | null;
           slug?: string;
           updated_at?: string;
@@ -1036,8 +1121,19 @@ export type Database = {
           enrollment_fee_months: number;
           enrollment_fee_since: string | null;
           id: string;
+          landing_about: string | null;
+          landing_accent: string | null;
+          landing_enabled: boolean;
+          landing_instagram: string | null;
+          landing_primary: string | null;
+          landing_show_plans: boolean;
+          landing_show_schedule: boolean;
+          landing_tagline: string | null;
+          landing_theme: string;
+          landing_whatsapp: string | null;
           logo_url: string | null;
           name: string;
+          owner_id: string | null;
           phone: string | null;
           slug: string;
           updated_at: string;
@@ -1072,25 +1168,11 @@ export type Database = {
         Returns: boolean;
       };
       is_ceo: { Args: Record<PropertyKey, never>; Returns: boolean };
+      is_owner: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
+      is_school_owner: { Args: { p_school_id: string }; Returns: boolean };
       is_student_user: { Args: { p_school_id: string }; Returns: boolean };
       my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
-      platform_ceos: {
-        Args: Record<PropertyKey, never>;
-        Returns: {
-          email: string;
-          full_name: string;
-          user_id: string;
-        }[];
-      };
-      public_schools: {
-        Args: Record<PropertyKey, never>;
-        Returns: {
-          city: string;
-          id: string;
-          name: string;
-        }[];
-      };
       register_account_request: {
         Args: {
           p_email: string;
@@ -1104,8 +1186,18 @@ export type Database = {
         };
         Returns: string;
       };
+      register_owner: { Args: { p_user_id: string }; Returns: undefined };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
       rut_key: { Args: { p_rut: string }; Returns: string };
+      school_landing: { Args: { p_slug: string }; Returns: Json };
+      school_owner: {
+        Args: { p_school_id: string };
+        Returns: {
+          email: string;
+          full_name: string;
+          user_id: string;
+        }[];
+      };
       school_stats: {
         Args: Record<PropertyKey, never>;
         Returns: {

@@ -100,7 +100,7 @@ export function Landing() {
           <ol>
             <li>
               <b>CEO</b>
-              <p>Da de alta cada escuela en la plataforma e invita a su administrador.</p>
+              <p>Crea su cuenta, da de alta sus escuelas, publica su página y aprueba a los alumnos que se registran.</p>
             </li>
             <li>
               <b>Administrador</b>
@@ -114,10 +114,10 @@ export function Landing() {
         </section>
 
         <section className="closing">
-          <h2>¿Entrenas o trabajas en una academia?</h2>
-          <p>Crea tu cuenta como alumno o como parte del equipo; tu academia la aprueba.</p>
+          <h2>¿Tienes una academia?</h2>
+          <p>Crea tu cuenta de CEO y empieza hoy. Tus alumnos se registran desde la página de tu escuela.</p>
           <div className="closing__actions">
-            <Link className="btn" to="/registro">Crear cuenta</Link>
+            <Link className="btn" to="/registro">Crear cuenta de academia</Link>
             <Link className="btn btn--ghost" to="/login">Ingresar</Link>
           </div>
         </section>

@@ -16,7 +16,7 @@ export function MiembrosPage() {
   const key = ['members', schoolId]
 
   const members = useQuery({ queryKey: key, queryFn: () => listMembers(schoolId!), enabled: Boolean(schoolId) })
-  const ceos = useQuery({ queryKey: ['platform-ceos'], queryFn: listCeos, staleTime: 10 * 60_000 })
+  const ceos = useQuery({ queryKey: ['school-owner', schoolId], queryFn: () => listCeos(schoolId!), enabled: Boolean(schoolId), staleTime: 10 * 60_000 })
   const ceoRows = (ceos.data ?? []).filter((c) => !(members.data ?? []).some((m) => m.user_id === c.user_id))
 
   const [email, setEmail] = useState('')
@@ -113,7 +113,7 @@ export function MiembrosPage() {
                 {c.full_name && <span className="hint">{c.email}</span>}
               </div>
               <div className="member-row__actions">
-                <span className="tag tag--accent" title="Acceso a todas las escuelas de la plataforma">{roleLabel.ceo}</span>
+                <span className="tag tag--accent" title="Dueño de la escuela">{roleLabel.ceo}</span>
               </div>
             </article>
           ))}

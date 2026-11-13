@@ -12,11 +12,11 @@ const year = Number(today.slice(0, 4))
 const fees = (sid) => db.query(`select st.first_name, p.amount, p.concept, p.due_date::text due, p.status from public.payments p join public.students st on st.id = p.student_id where p.kind='matricula' and p.school_id=$1 order by 1, 4`, [sid]).then(r => r.rows)
 const asJob = async (sql, params = []) => { await db.query(`select set_config('request.jwt.claims', '{}', false)`); return db.query(sql, params) } // pg_cron: no auth claims
 
-// --- CEO in member lists
-const ceos = (await as(db, A, `select * from public.platform_ceos()`)).rows
-check('staff see the platform CEO for their member list', ceos.length === 1 && ceos[0].user_id === CEO, ceos)
+// --- The school's owner (CEO) in member lists
+const ceos = (await as(db, A, `select * from public.school_owner($1)`, [s1])).rows
+check("staff see their school's owner for the member list", ceos.length === 1 && ceos[0].user_id === CEO, ceos)
 const S = await newUser(db, 'sofi')
-check('a user with no school sees no CEO list', (await as(db, S, `select count(*)::int c from public.platform_ceos()`)).rows[0].c === 0)
+check('a user outside the school sees no owner', (await as(db, S, `select count(*)::int c from public.school_owner($1)`, [s1])).rows[0].c === 0)
 check('CEO is not a membership row (never counts as school admin)', (await db.query(`select count(*)::int c from public.school_members where user_id=$1`, [CEO])).rows[0].c === 0)
 
 // --- Fee

@@ -7,6 +7,7 @@ import { Icon } from '../../ui/Icon'
 import { listEmailLog, sendTemplate } from './api'
 import { Catalogo } from './Catalogo'
 import { EscuelaPerfil } from './EscuelaPerfil'
+import { LandingSettings } from './LandingSettings'
 import { Exportar } from './Exportar'
 import './ajustes.css'
 
@@ -50,6 +51,7 @@ function AjustesBody() {
       </header>
 
       <EscuelaPerfil key={activeSchool.id} school={activeSchool} />
+      <LandingSettings key={`landing-${activeSchool.id}`} school={activeSchool} />
 
       <section id="catalogos" className="card ajustes__section" aria-labelledby="catalogos-h">
         <div className="ajustes__section-head">

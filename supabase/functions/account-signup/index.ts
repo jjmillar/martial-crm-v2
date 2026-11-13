@@ -1,8 +1,9 @@
 /**
  * Supabase Edge Function: account-signup (public, no JWT)
- * Open sign-up on the site: the person says what the account is for (student or staff member) and which
- * school. Auth sign-up stays disabled; this function creates the account and files a request that the CEO
- * (or the school's admins) approve in "Pendientes". Nothing is granted until then.
+ * Two public sign-up flows (Auth sign-up itself stays disabled):
+ *  - kind "ceo"    (main site /registro): a customer creates a CEO account and can then create their schools.
+ *  - kind "alumno" (a school's landing /e/<slug>/registro): a student account tied to THAT school, pending
+ *                  until the school's CEO approves it in "Pendientes".
  */
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
@@ -27,8 +28,8 @@ Deno.serve(async (req: Request) => {
     } catch {
       return json({ error: 'Datos inválidos' }, 400)
     }
-    const kind = body.kind === 'miembro' ? 'miembro' : body.kind === 'alumno' ? 'alumno' : ''
-    const schoolId = str(body.school_id, 40)
+    const kind = body.kind === 'ceo' ? 'ceo' : body.kind === 'alumno' ? 'alumno' : ''
+    const slug = str(body.school_slug, 60)
     const first = str(body.first_name, 60)
     const last = str(body.first_last_name, 60)
     const rut = str(body.rut, 20).replace(/[.\s]/g, '')
@@ -36,8 +37,8 @@ Deno.serve(async (req: Request) => {
     const phone = str(body.phone, 30)
     const password = typeof body.password === 'string' ? body.password : ''
 
-    if (!kind) return json({ error: 'Elige para qué es la cuenta.' }, 400)
-    if (!schoolId) return json({ error: 'Elige tu escuela.' }, 400)
+    if (!kind) return json({ error: 'Tipo de cuenta inválido.' }, 400)
+    if (kind === 'alumno' && !slug) return json({ error: 'Falta la escuela.' }, 400)
     if (!first || !last) return json({ error: 'Completa nombre y apellido.' }, 400)
     if (!/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Correo inválido.' }, 400)
     if (password.length < 8) return json({ error: 'La contraseña debe tener al menos 8 caracteres.' }, 400)
@@ -51,6 +52,12 @@ Deno.serve(async (req: Request) => {
     }
     const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false } })
 
+    let schoolId: string | null = null
+    if (kind === 'alumno') {
+      const { data: landing } = await admin.rpc('school_landing', { p_slug: slug })
+      schoolId = (landing as { id?: string } | null)?.id ?? null
+      if (!schoolId) return json({ error: 'Esta escuela no tiene el registro disponible.' }, 404)
+    }
     if (rut) {
       const { data: rutOk } = await admin.rpc('rut_is_valid', { p_rut: rut })
       if (!rutOk) return json({ error: 'RUT inválido.' }, 400)
@@ -66,18 +73,21 @@ Deno.serve(async (req: Request) => {
       const weak = createError?.message?.toLowerCase().includes('password')
       return json({ error: weak ? 'La contraseña es muy débil: usa más caracteres, letras y números.' : 'No se pudo crear la cuenta.' }, 400)
     }
+    const userId = created.user.id
 
-    const { error: regError } = await admin.rpc('register_account_request', {
-      p_school_id: schoolId, p_user_id: created.user.id, p_kind: kind,
-      p_first_name: first, p_first_last_name: last, p_rut: rut || null, p_email: email, p_phone: phone || null,
-    })
+    const { error: regError } = kind === 'ceo'
+      ? await admin.rpc('register_owner', { p_user_id: userId })
+      : await admin.rpc('register_account_request', {
+        p_school_id: schoolId!, p_user_id: userId, p_kind: 'alumno',
+        p_first_name: first, p_first_last_name: last, p_rut: rut || null, p_email: email, p_phone: phone || null,
+      })
     if (regError) {
       console.error('Register error:', regError)
-      await admin.auth.admin.deleteUser(created.user.id) // don't leave an orphan account
-      return json({ error: regError.message.includes('school not found') ? 'Esa escuela no existe.' : 'No se pudo registrar la solicitud.' }, 400)
+      await admin.auth.admin.deleteUser(userId) // don't leave an orphan account
+      return json({ error: 'No se pudo completar el registro.' }, 500)
     }
-    if (phone) await admin.from('profiles').update({ phone }).eq('id', created.user.id)
-    return json({ ok: true })
+    if (phone) await admin.from('profiles').update({ phone }).eq('id', userId)
+    return json({ ok: true, kind })
   } catch (err) {
     console.error('Unexpected error in account-signup:', err)
     return json({ error: 'Error inesperado' }, 500)

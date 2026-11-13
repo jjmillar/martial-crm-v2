@@ -156,6 +156,7 @@ export function EscuelasPage() {
               <button type="button" className="icon-btn" onClick={() => editRef.current?.close()} aria-label="Cerrar"><Icon name="close" /></button>
             </div>
             <EscuelaPerfil key={editingSchool.id} school={editingSchool} embedded />
+            <a className="btn btn--ghost" href={`/e/${editingSchool.slug}`} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={16} /> Ver página pública</a>
             {activeSchool?.id !== editingSchool.id && (
               <button type="button" className="btn btn--ghost" onClick={() => enter(editingSchool.id)}>
                 Entrar a esta escuela <Icon name="arrow" size={16} />

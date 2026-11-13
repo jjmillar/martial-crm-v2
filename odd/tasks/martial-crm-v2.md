@@ -324,4 +324,9 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   - Matrícula per calendar year: charged on sign-up for new students (that year) and every Jan 1st for active students; separate pending payment; no back-billing when enabled mid-year.
   - Open sign-up at `/registro` (the per-school link was dropped): the person picks "Alumno" or "Equipo de la escuela" and the school; Edge Function `account-signup` creates the account; nothing is linked automatically. Requests land in the new "Pendientes" module (CEO: all schools; admins: theirs) with nav/menu badges and a home tile; approve links/creates the student or adds the member with a role. Approved students complete "Mi ficha" (`update_my_student`).
   - Checks: test:db 14 files / 248 checks; phone QA end to end, swept.
+- L20 (2026-11-14) — SaaS + school landing pages:
+  - Tenancy: `/registro` on the main site creates a customer CEO (`owners`); schools get `owner_id`; `is_school_member`/`has_school_role` also grant the school's owner, so every policy is per tenant. `is_ceo()` stays = platform admin (sees all). An owner never sees another owner's schools (checked).
+  - Landing per school at `/e/<slug>` (`school_landing()`, public fields only): theme presets + custom colors, tagline, about, photo carousel (bucket `landing`, `school_photos`), schedule and plans (toggleable), contact (map, phone, WhatsApp, Instagram, email, share). Student sign-up `/e/<slug>/registro` and login `/e/<slug>/ingresar` are tied to that school; requests go to that school's owner in Pendientes.
+  - Ajustes → Landing page: publish/hide, link (copy, WhatsApp, open), colors, texts, sections, photos (upload up to 10, captions, reorder, delete).
+  - Checks: test:db 15 files / 281 checks; phone + desktop QA end to end (new CEO → school → landing → student sign-up → approval → school login), swept.
 

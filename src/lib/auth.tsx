@@ -40,9 +40,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       if (loadedFor.current !== currentUserId) setLoading(true)
-      const [profileRes, ceoRes] = await Promise.all([
+      // CEO in the app = platform admin or a customer who owns schools (owners).
+      const [profileRes, ceoRes, ownerRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', currentUserId).single(),
-        supabase.rpc('is_ceo')
+        supabase.rpc('is_ceo'),
+        supabase.rpc('is_owner'),
       ])
 
       if (profileRes.data) {
@@ -51,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(null)
       }
 
-      setIsCeo(Boolean(ceoRes.data))
+      setIsCeo(Boolean(ceoRes.data) || Boolean(ownerRes.data))
       loadedFor.current = currentUserId
     } catch {
       setProfile(null)

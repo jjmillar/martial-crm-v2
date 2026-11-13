@@ -18,10 +18,10 @@ export async function listMembers(schoolId: string): Promise<Member[]> {
     .sort((a, b) => (a.profile?.full_name ?? a.profile?.email ?? '').localeCompare(b.profile?.full_name ?? b.profile?.email ?? ''))
 }
 
-// The platform CEO(s): shown in every school's list, display only (they are not membership rows).
+// The school's owner (CEO): shown on top of the list, display only (not a membership row).
 export type Ceo = { user_id: string; full_name: string | null; email: string | null }
-export async function listCeos(): Promise<Ceo[]> {
-  const { data, error } = await supabase.rpc('platform_ceos')
+export async function listCeos(schoolId: string): Promise<Ceo[]> {
+  const { data, error } = await supabase.rpc('school_owner', { p_school_id: schoolId })
   if (error) throw error
   return data ?? []
 }
