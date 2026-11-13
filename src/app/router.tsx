@@ -3,6 +3,7 @@ import { modules } from '../modules/registry'
 import { Landing } from '../pages/Landing'
 import { Login } from '../pages/Login'
 import { Bienvenida } from '../pages/Bienvenida'
+import { Registro } from '../pages/Registro'
 import { NotFound } from '../pages/NotFound'
 import { AppLayout } from './AppLayout'
 import { RequireAuth } from './RequireAuth'
@@ -13,6 +14,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <RedirectIfAuthed><Landing /></RedirectIfAuthed> },
   { path: '/login', element: <RedirectIfAuthed><Login /></RedirectIfAuthed> },
   { path: '/bienvenida', element: <Bienvenida /> },
+  { path: '/registro/:code', element: <RedirectIfAuthed><Registro /></RedirectIfAuthed> },
   {
     path: '/app',
     element: <RequireAuth><AppLayout /></RequireAuth>,

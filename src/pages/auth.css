@@ -75,3 +75,12 @@
 .password__toggle:hover {
   color: var(--text);
 }
+
+.auth__logo {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: #fff;
+}

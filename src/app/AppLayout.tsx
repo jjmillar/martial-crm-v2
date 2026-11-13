@@ -8,11 +8,12 @@ import { ThemeToggle } from '../ui/ThemeToggle'
 import { Wordmark } from '../ui/Wordmark'
 import { Flash } from '../ui/Flash'
 import { MobileMenu } from './MobileMenu'
+import { PendingSignup } from '../modules/portal/PendingSignup'
 import './app.css'
 
 export function AppLayout() {
   const { profile, user, signOut } = useAuth()
-  const { schools, activeSchool, setActiveSchool, role } = useSchool()
+  const { schools, activeSchool, setActiveSchool, role, loading } = useSchool()
   const nav = modulesFor(role)
   const year = new Date().getFullYear()
 
@@ -58,7 +59,8 @@ export function AppLayout() {
       <div className="main">
         <main className="content">
           <Flash />
-          <Outlet />
+          {/* No role anywhere yet (e.g. a self-signup waiting for approval): one screen instead of empty pages. */}
+          {!loading && !role ? <PendingSignup /> : <Outlet />}
         </main>
         <footer className="app-footer">© {year} Martial CRM</footer>
       </div>

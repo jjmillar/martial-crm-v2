@@ -196,3 +196,8 @@
 .chip-edit .catalog__icon {
   width: 48px;
 }
+
+.signup-url {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+}

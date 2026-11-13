@@ -7,6 +7,7 @@ import { yearsSince } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from './api'
 import { beltSwatch } from '../../lib/belts'
+import { SignupRequests } from './SignupRequests'
 
 type Filter = 'activos' | 'inactivos' | 'todos'
 
@@ -54,6 +55,8 @@ export function AlumnosList() {
           <Link className="fab" to="nuevo" aria-label="Nuevo alumno" title="Nuevo alumno"><Icon name="plus" size={22} /></Link>
         )}
       </header>
+
+      <SignupRequests />
 
       <div className="toolbar">
         <label className="search">
