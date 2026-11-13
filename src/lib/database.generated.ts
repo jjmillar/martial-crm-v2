@@ -936,6 +936,17 @@ export type Database = {
       is_ceo: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
+      school_stats: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          attendance_30d: number;
+          classes_active: number;
+          members: number;
+          school_id: string;
+          students_active: number;
+          teachers_active: number;
+        }[];
+      };
       set_class_details: {
         Args: { p_blocks: Json; p_class_id: string; p_tag_ids: string[] };
         Returns: undefined;

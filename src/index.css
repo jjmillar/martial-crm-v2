@@ -344,6 +344,17 @@ textarea.input {
   color: var(--text);
 }
 
+.modal--wide {
+  width: min(720px, calc(100vw - 32px));
+}
+
+.modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .modal::backdrop {
   background: rgb(0 0 0 / 0.55);
   backdrop-filter: blur(4px);

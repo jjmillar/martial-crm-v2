@@ -26,33 +26,92 @@
   gap: 8px;
 }
 
-.escuelas__list {
+/* School cards */
+.school-grid {
   display: grid;
-  gap: 8px;
-}
-
-.school-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
-  padding: 16px 20px;
 }
 
-.school-row h3 {
-  font-size: 17px;
+.school-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 18px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
 
-.school-row > div {
-  min-width: 0;
+.school-card:hover {
+  border-color: color-mix(in srgb, var(--text) 30%, var(--line));
+  transform: translateY(-2px);
 }
 
-.school-row .hint {
+.school-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.school-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.school-card__logo {
+  width: 52px;
+  height: 52px;
+}
+
+.school-card__active {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  color: var(--ok);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.school-card__name {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
   overflow-wrap: anywhere;
 }
 
-.school-row__active {
-  font-size: 13px;
-  color: var(--ok);
-  white-space: nowrap;
+.school-card__place {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.school-card__facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.school-card__fact {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.school-card__fact strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .school-card {
+    transition: none;
+  }
 }

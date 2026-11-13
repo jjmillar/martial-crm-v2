@@ -6,6 +6,7 @@ import { modulesFor } from '../modules/registry'
 import { Icon } from '../ui/Icon'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import { Wordmark } from '../ui/Wordmark'
+import { Flash } from '../ui/Flash'
 import { MobileMenu } from './MobileMenu'
 import './app.css'
 
@@ -56,6 +57,7 @@ export function AppLayout() {
 
       <div className="main">
         <main className="content">
+          <Flash />
           <Outlet />
         </main>
         <footer className="app-footer">© {year} Martial CRM</footer>

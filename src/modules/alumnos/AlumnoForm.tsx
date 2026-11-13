@@ -50,7 +50,7 @@ function AlumnoForm({ student }: { student?: Student }) {
       if (student) {
         setSaved(true)
         setForm(formFromStudent(s))
-      } else navigate(`../${s.id}`, { replace: true })
+      } else navigate('..', { replace: true, state: { flash: `Alumno ${s.full_name ?? ''} creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })

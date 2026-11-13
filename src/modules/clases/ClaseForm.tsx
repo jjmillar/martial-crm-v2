@@ -74,7 +74,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
       await qc.invalidateQueries({ queryKey: classesKey(schoolId) })
       await qc.invalidateQueries({ queryKey: ['class', saved.id] })
       if (c) setSaved(true)
-      else navigate(`../${saved.id}`, { replace: true })
+      else navigate('..', { replace: true, state: { flash: `Clase "${saved.name}" creada.` } })
     },
     onError: (e: Error) => setError(e.message),
   })

@@ -90,7 +90,7 @@ function NuevaMatricula() {
     onSuccess: (e) => {
       qc.invalidateQueries({ queryKey: enrollmentsKey(schoolId) })
       qc.invalidateQueries({ queryKey: ['student-enrollments', e.student_id] })
-      navigate(`../${e.id}`, { replace: true })
+      navigate('..', { replace: true, state: { flash: 'Matrícula creada.' } })
     },
     onError: (e: Error) => setError(e.message),
   })

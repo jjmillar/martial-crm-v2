@@ -67,7 +67,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
       if (plan) {
         setSaved(true)
         setForm(formFromPlan(p))
-      } else navigate(`../${p.id}`, { replace: true })
+      } else navigate('..', { replace: true, state: { flash: `Plan "${p.name}" creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })

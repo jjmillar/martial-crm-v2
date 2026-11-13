@@ -60,7 +60,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
       await qc.invalidateQueries({ queryKey: teachersKey(schoolId) })
       await qc.invalidateQueries({ queryKey: ['teacher', t.id] })
       if (teacher) setSaved(true)
-      else navigate(`../${t.id}`, { replace: true })
+      else navigate('..', { replace: true, state: { flash: `Profesor ${t.full_name} creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })

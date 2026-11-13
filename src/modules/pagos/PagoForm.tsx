@@ -85,7 +85,7 @@ function NuevoPago() {
     onSuccess: (p) => {
       qc.invalidateQueries({ queryKey: paymentsKey(schoolId) })
       qc.invalidateQueries({ queryKey: ['student-payments', p.student_id] })
-      navigate(`../${p.id}`, { replace: true })
+      navigate('..', { replace: true, state: { flash: 'Pago registrado.' } })
     },
     onError: (e: Error) => setError(e.message),
   })

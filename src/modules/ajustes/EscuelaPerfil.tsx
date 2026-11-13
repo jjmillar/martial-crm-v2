@@ -8,7 +8,8 @@ const MAX_LOGO = 2 * 1024 * 1024
 type CalView = 'day' | 'week' | 'month'
 
 // School profile (S6): admins edit name, contact, description, default calendar view and logo.
-export function EscuelaPerfil({ school }: { school: School }) {
+// `embedded`: rendered inside another container (the Escuelas pop-up), so no card frame of its own.
+export function EscuelaPerfil({ school, embedded = false }: { school: School; embedded?: boolean }) {
   const { reload } = useSchool()
   const [f, setF] = useState({
     name: school.name, address: school.address ?? '', city: school.city ?? '', phone: school.phone ?? '',
@@ -54,10 +55,10 @@ export function EscuelaPerfil({ school }: { school: School }) {
   const onSubmit = (e: FormEvent) => { e.preventDefault(); save.mutate() }
 
   return (
-    <form className="card ajustes__section" onSubmit={onSubmit} noValidate aria-labelledby="escuela-h">
+    <form className={`ajustes__section${embedded ? '' : ' card'}`} onSubmit={onSubmit} noValidate aria-labelledby="escuela-h">
       <div className="ajustes__section-head">
         <div>
-          <h2 id="escuela-h">Escuela</h2>
+          <h2 id="escuela-h">{embedded ? school.name : 'Escuela'}</h2>
           <p className="hint">Datos que aparecen en comprobantes y correos.</p>
         </div>
       </div>

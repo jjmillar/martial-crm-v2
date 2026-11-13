@@ -310,3 +310,43 @@
   opacity: 0;
   cursor: pointer;
 }
+
+/* One-shot confirmation toast (ui/Flash) */
+.flash {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  translate: -50% 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
+  animation: flash-in var(--dur) var(--ease);
+}
+
+.flash svg {
+  flex: none;
+  color: var(--ok, #22c55e);
+}
+
+@keyframes flash-in {
+  from {
+    opacity: 0;
+    translate: -50% -12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flash {
+    animation: none;
+  }
+}
