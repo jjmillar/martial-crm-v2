@@ -46,6 +46,10 @@ export function MobileMenu({ nav, who, roleText, onSignOut }: Props) {
   const [, setTick] = useState(0)
   const [ready, setReady] = useState(false)
   const start = useRef<{ px: number; py: number; x: number; y: number; moved: boolean } | null>(null)
+  // Latest drag position in a ref: pointerup can arrive before React re-renders with the drag state.
+  const dragPos = useRef<{ x: number; y: number } | null>(null)
+  // A drag must never end up as a tap: the click that follows the release is swallowed.
+  const swallowClick = useRef(false)
 
   // Close the sheet whenever navigation happens.
   useEffect(() => {
@@ -71,6 +75,8 @@ export function MobileMenu({ nav, who, roleText, onSignOut }: Props) {
     if (e.button !== 0) return
     const { x, y } = spotToXY(spot)
     start.current = { px: e.clientX, py: e.clientY, x, y, moved: false }
+    dragPos.current = null
+    swallowClick.current = false
     e.currentTarget.setPointerCapture(e.pointerId)
   }
 
@@ -83,23 +89,22 @@ export function MobileMenu({ nav, who, roleText, onSignOut }: Props) {
     s.moved = true
     const maxX = window.innerWidth - SIZE - EDGE
     const { top, bottom } = band()
-    setDrag({ x: Math.min(maxX, Math.max(EDGE, s.x + dx)), y: Math.min(bottom, Math.max(top, s.y + dy)) })
+    dragPos.current = { x: Math.min(maxX, Math.max(EDGE, s.x + dx)), y: Math.min(bottom, Math.max(top, s.y + dy)) }
+    setDrag(dragPos.current)
   }
 
   function onPointerUp(e: ReactPointerEvent<HTMLButtonElement>) {
     const s = start.current
     start.current = null
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
-    if (!s) return
-    if (!s.moved || !drag) {
-      setDrag(null)
-      open()
-      return
-    }
+    const p = dragPos.current
+    dragPos.current = null
+    if (!s || !s.moved || !p) { setDrag(null); return } // a tap: the click handler opens the menu
+    swallowClick.current = true
     const { top, bottom } = band()
     const next: Spot = {
-      side: drag.x + SIZE / 2 < window.innerWidth / 2 ? 'left' : 'right',
-      y: bottom > top ? (drag.y - top) / (bottom - top) : 1,
+      side: p.x + SIZE / 2 < window.innerWidth / 2 ? 'left' : 'right',
+      y: bottom > top ? (p.y - top) / (bottom - top) : 1,
     }
     setDrag(null)
     setSpot(next)
@@ -108,6 +113,7 @@ export function MobileMenu({ nav, who, roleText, onSignOut }: Props) {
 
   function onPointerCancel() {
     start.current = null
+    dragPos.current = null
     setDrag(null)
   }
 
@@ -126,7 +132,10 @@ export function MobileMenu({ nav, who, roleText, onSignOut }: Props) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
-        onClick={(e) => { if (e.detail === 0) open() /* keyboard/assistive click */ }}
+        onClick={() => {
+          if (swallowClick.current) { swallowClick.current = false; return }
+          open()
+        }}
       >
         <Icon name="menu" size={24} />
       </button>

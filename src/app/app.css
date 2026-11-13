@@ -234,19 +234,6 @@
     transition: scale var(--dur) var(--ease);
   }
 
-  /* Grip dots: hint that it can be dragged */
-  .menu-fab::after {
-    content: '';
-    position: absolute;
-    bottom: 8px;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: currentColor;
-    box-shadow: -5px 0 currentColor, 5px 0 currentColor;
-    opacity: 0.45;
-  }
-
   .menu-fab:active {
     scale: 0.96;
   }
