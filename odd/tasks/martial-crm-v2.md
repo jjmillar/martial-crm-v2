@@ -319,4 +319,9 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
   6. Links student ↔ teacher ↔ member (`students.user_id`, `teachers.student_id`), suggestions by RUT/email; Edge Function `student-access` creates or links a student login (admin-set password, no email needed).
   7. Student portal (role "alumno", not a school member): home with level/XP/skills, self check-in (`check_in` / `undo_check_in`), staff confirm in Asistencia (teacher's class auto-selected); 10 XP per confirmed attendance, 100 XP per level, skills = XP per class tag; tags can be renamed.
   - Checks: test:db 13 files / 228 checks, 32 unit tests, lint 0 errors, build ok; phone QA end to end with temp qa-* data, swept.
+- L19 (2026-11-13) — follow-ups by chat:
+  - CEO shown on top of every school's Miembros list (`platform_ceos()`, display only).
+  - Matrícula per calendar year: charged on sign-up for new students (that year) and every Jan 1st for active students; separate pending payment; no back-billing when enabled mid-year.
+  - Open sign-up at `/registro` (the per-school link was dropped): the person picks "Alumno" or "Equipo de la escuela" and the school; Edge Function `account-signup` creates the account; nothing is linked automatically. Requests land in the new "Pendientes" module (CEO: all schools; admins: theirs) with nav/menu badges and a home tile; approve links/creates the student or adds the member with a role. Approved students complete "Mi ficha" (`update_my_student`).
+  - Checks: test:db 14 files / 248 checks; phone QA end to end, swept.
 

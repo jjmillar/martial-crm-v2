@@ -114,9 +114,12 @@ export function Landing() {
         </section>
 
         <section className="closing">
-          <h2>¿Ya tienes una cuenta?</h2>
-          <p>El acceso es por invitación de tu academia.</p>
-          <Link className="btn" to="/login">Ingresar</Link>
+          <h2>¿Entrenas o trabajas en una academia?</h2>
+          <p>Crea tu cuenta como alumno o como parte del equipo; tu academia la aprueba.</p>
+          <div className="closing__actions">
+            <Link className="btn" to="/registro">Crear cuenta</Link>
+            <Link className="btn btn--ghost" to="/login">Ingresar</Link>
+          </div>
         </section>
       </main>
 

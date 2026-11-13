@@ -1,10 +1,12 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
 import { roleLabel } from '../../lib/roles'
 import { ThemeToggle } from '../../ui/ThemeToggle'
+import { MiFicha } from './MiFicha'
 
 // Personal settings for every role (S6 "personal profile").
 export function CuentaPage() {
@@ -16,6 +18,12 @@ export function CuentaPage() {
   const [pw2, setPw2] = useState('')
   const [profileMsg, setProfileMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const location = useLocation()
+  useEffect(() => {
+    if (!location.hash) return
+    const t = setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: 'start' }), 300)
+    return () => clearTimeout(t)
+  }, [location.hash])
 
   const saveProfile = useMutation({
     mutationFn: async () => {
@@ -73,6 +81,8 @@ export function CuentaPage() {
         <div className="form-actions"><button className="btn" type="submit" disabled={saveProfile.isPending}>Guardar perfil</button></div>
       </form>
 
+      {role === 'alumno' && <MiFicha />}
+
       <form className="card form-section" onSubmit={onPw} noValidate>
         <h2>Contraseña</h2>
         <div className="form-grid">
@@ -99,7 +109,7 @@ export function CuentaPage() {
         </div>
       </section>
 
-      {role !== 'ceo' && memberships.length > 0 && (
+      {role !== 'ceo' && role !== 'alumno' && memberships.length > 0 && (
         <section className="card form-section">
           <h2>Mis escuelas</h2>
           <ul className="email-log">

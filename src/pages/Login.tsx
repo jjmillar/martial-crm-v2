@@ -98,6 +98,7 @@ export function Login() {
           {mode === 'login'
             ? <button type="button" className="link-btn" onClick={() => switchMode('reset')}>¿Olvidaste tu contraseña?</button>
             : <button type="button" className="link-btn" onClick={() => switchMode('login')}>Volver a ingresar</button>}
+          <p className="hint">¿No tienes cuenta? <Link to="/registro">Crear cuenta</Link></p>
         </form>
         <p className="auth__foot hint">El acceso es por invitación. Si no tienes cuenta, pídela al administrador de tu academia.</p>
       </main>

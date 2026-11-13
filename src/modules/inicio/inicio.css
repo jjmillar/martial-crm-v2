@@ -139,3 +139,12 @@
     margin-left: auto;
   }
 }
+
+.tile--alert {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+.tile__big--sm {
+  font-size: 22px;
+}

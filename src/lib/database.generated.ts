@@ -14,6 +14,73 @@ export type Database = {
   };
   public: {
     Tables: {
+      account_requests: {
+        Row: {
+          created_at: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          email: string;
+          first_last_name: string;
+          first_name: string;
+          id: string;
+          kind: Database["public"]["Enums"]["request_kind"];
+          phone: string | null;
+          rut: string | null;
+          school_id: string;
+          status: Database["public"]["Enums"]["request_status"];
+          student_id: string | null;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          email: string;
+          first_last_name: string;
+          first_name: string;
+          id?: string;
+          kind: Database["public"]["Enums"]["request_kind"];
+          phone?: string | null;
+          rut?: string | null;
+          school_id: string;
+          status?: Database["public"]["Enums"]["request_status"];
+          student_id?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          email?: string;
+          first_last_name?: string;
+          first_name?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["request_kind"];
+          phone?: string | null;
+          rut?: string | null;
+          school_id?: string;
+          status?: Database["public"]["Enums"]["request_status"];
+          student_id?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "account_requests_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "account_requests_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       attendance: {
         Row: {
           class_id: string;
@@ -604,8 +671,6 @@ export type Database = {
           logo_url: string | null;
           name: string;
           phone: string | null;
-          signup_code: string;
-          signup_enabled: boolean;
           slug: string;
           updated_at: string;
         };
@@ -624,8 +689,6 @@ export type Database = {
           logo_url?: string | null;
           name: string;
           phone?: string | null;
-          signup_code?: string;
-          signup_enabled?: boolean;
           slug: string;
           updated_at?: string;
         };
@@ -643,8 +706,6 @@ export type Database = {
           logo_url?: string | null;
           name?: string;
           phone?: string | null;
-          signup_code?: string;
-          signup_enabled?: boolean;
           slug?: string;
           updated_at?: string;
         };
@@ -679,70 +740,6 @@ export type Database = {
             columns: ["school_id"];
             isOneToOne: false;
             referencedRelation: "schools";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      student_signups: {
-        Row: {
-          created_at: string;
-          decided_at: string | null;
-          decided_by: string | null;
-          email: string;
-          first_last_name: string;
-          first_name: string;
-          id: string;
-          phone: string | null;
-          rut: string;
-          school_id: string;
-          status: Database["public"]["Enums"]["signup_status"];
-          student_id: string | null;
-          user_id: string;
-        };
-        ComputedFields: never;
-        Insert: {
-          created_at?: string;
-          decided_at?: string | null;
-          decided_by?: string | null;
-          email: string;
-          first_last_name: string;
-          first_name: string;
-          id?: string;
-          phone?: string | null;
-          rut: string;
-          school_id: string;
-          status?: Database["public"]["Enums"]["signup_status"];
-          student_id?: string | null;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          decided_at?: string | null;
-          decided_by?: string | null;
-          email?: string;
-          first_last_name?: string;
-          first_name?: string;
-          id?: string;
-          phone?: string | null;
-          rut?: string;
-          school_id?: string;
-          status?: Database["public"]["Enums"]["signup_status"];
-          student_id?: string | null;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "student_signups_school_id_fkey";
-            columns: ["school_id"];
-            isOneToOne: false;
-            referencedRelation: "schools";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "student_signups_student_id_fkey";
-            columns: ["student_id"];
-            isOneToOne: false;
-            referencedRelation: "students";
             referencedColumns: ["id"];
           },
         ];
@@ -1042,8 +1039,6 @@ export type Database = {
           logo_url: string | null;
           name: string;
           phone: string | null;
-          signup_code: string;
-          signup_enabled: boolean;
           slug: string;
           updated_at: string;
         };
@@ -1054,8 +1049,13 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      decide_student_signup: {
-        Args: { p_action: string; p_id: string; p_student_id?: string };
+      decide_account_request: {
+        Args: {
+          p_approve: boolean;
+          p_id: string;
+          p_role?: Database["public"]["Enums"]["school_role"];
+          p_student_id?: string;
+        };
         Returns: string;
       };
       find_user_id_by_email: { Args: { p_email: string }; Returns: string };
@@ -1075,7 +1075,6 @@ export type Database = {
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
       is_student_user: { Args: { p_school_id: string }; Returns: boolean };
       my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
-      new_signup_code: { Args: Record<PropertyKey, never>; Returns: string };
       platform_ceos: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -1084,21 +1083,26 @@ export type Database = {
           user_id: string;
         }[];
       };
-      regenerate_signup_code: {
-        Args: { p_school_id: string };
-        Returns: string;
+      public_schools: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          city: string;
+          id: string;
+          name: string;
+        }[];
       };
-      register_student_signup: {
+      register_account_request: {
         Args: {
-          p_code: string;
           p_email: string;
           p_first_last_name: string;
           p_first_name: string;
+          p_kind: Database["public"]["Enums"]["request_kind"];
           p_phone: string;
           p_rut: string;
+          p_school_id: string;
           p_user_id: string;
         };
-        Returns: Json;
+        Returns: string;
       };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
       rut_key: { Args: { p_rut: string }; Returns: string };
@@ -1121,17 +1125,21 @@ export type Database = {
         Args: { p_specialty_ids: string[]; p_teacher_id: string };
         Returns: undefined;
       };
-      signup_school: {
-        Args: { p_code: string };
-        Returns: {
-          id: string;
-          logo_url: string;
-          name: string;
-        }[];
-      };
       storage_school_id: { Args: { p_name: string }; Returns: string };
       student_progress: { Args: { p_student_id: string }; Returns: Json };
       undo_check_in: { Args: { p_class_id: string }; Returns: undefined };
+      update_my_student: {
+        Args: {
+          p_address: string;
+          p_birth_date: string;
+          p_emergency_contact: string;
+          p_emergency_phone: string;
+          p_medical_notes: string;
+          p_phone: string;
+          p_student_id: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";
@@ -1147,8 +1155,9 @@ export type Database = {
       payment_kind: "plan" | "matricula" | "otro";
       payment_method: "transferencia" | "efectivo" | "tarjeta" | "otro";
       payment_status: "pendiente" | "pagado" | "fallido" | "reembolsado";
+      request_kind: "alumno" | "miembro";
+      request_status: "pendiente" | "aprobada" | "rechazada";
       school_role: "admin" | "user";
-      signup_status: "pendiente" | "aprobada" | "rechazada";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1293,8 +1302,9 @@ export const Constants = {
       payment_kind: ["plan", "matricula", "otro"],
       payment_method: ["transferencia", "efectivo", "tarjeta", "otro"],
       payment_status: ["pendiente", "pagado", "fallido", "reembolsado"],
+      request_kind: ["alumno", "miembro"],
+      request_status: ["pendiente", "aprobada", "rechazada"],
       school_role: ["admin", "user"],
-      signup_status: ["pendiente", "aprobada", "rechazada"],
     },
   },
 } as const;

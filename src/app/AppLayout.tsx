@@ -9,12 +9,14 @@ import { Wordmark } from '../ui/Wordmark'
 import { Flash } from '../ui/Flash'
 import { MobileMenu } from './MobileMenu'
 import { PendingSignup } from '../modules/portal/PendingSignup'
+import { usePendingCount } from '../modules/pendientes/api'
 import './app.css'
 
 export function AppLayout() {
   const { profile, user, signOut } = useAuth()
   const { schools, activeSchool, setActiveSchool, role, loading } = useSchool()
   const nav = modulesFor(role)
+  const pending = usePendingCount()
   const year = new Date().getFullYear()
 
   return (
@@ -41,6 +43,7 @@ export function AppLayout() {
             <NavLink key={m.id} to={m.path} className="nav__link">
               {m.icon && <Icon name={m.icon} />}
               <span>{m.label}</span>
+              {m.id === 'pendientes' && pending > 0 && <span className="nav-badge" aria-label={`${pending} pendientes`}>{pending}</span>}
             </NavLink>
           ))}
         </nav>
@@ -66,7 +69,7 @@ export function AppLayout() {
       </div>
 
       {/* Mobile: draggable floating menu button + sheet with every module, account and logout */}
-      <MobileMenu nav={nav} who={profile?.full_name || user?.email || ''} roleText={role ? roleLabel[role] : 'Sin rol asignado'} onSignOut={signOut} />
+      <MobileMenu nav={nav} pending={pending} who={profile?.full_name || user?.email || ''} roleText={role ? roleLabel[role] : 'Sin rol asignado'} onSignOut={signOut} />
     </div>
   )
 }

@@ -335,3 +335,32 @@
     transition: none;
   }
 }
+
+/* Pending-requests badge on the floating menu button */
+.menu-fab__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+.sheet__link {
+  position: relative;
+}
+
+.sheet__badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  margin: 0;
+}

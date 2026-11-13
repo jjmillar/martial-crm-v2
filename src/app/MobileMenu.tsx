@@ -6,7 +6,7 @@ import { Icon } from '../ui/Icon'
 // Mobile navigation (S4): a draggable floating hamburger button that opens a sheet with every module,
 // plus account and logout. Released, it snaps to the nearest side edge; the position is remembered per device.
 
-type Props = { nav: ModuleManifest[]; who: string; roleText: string; onSignOut: () => void }
+type Props = { nav: ModuleManifest[]; who: string; roleText: string; onSignOut: () => void; pending?: number }
 type Spot = { side: 'left' | 'right'; y: number } // y = fraction of the usable height (0 top … 1 bottom)
 
 const SIZE = 56
@@ -38,7 +38,7 @@ function spotToXY(s: Spot) {
   return { x: s.side === 'left' ? EDGE : window.innerWidth - SIZE - EDGE, y: top + s.y * (bottom - top) }
 }
 
-export function MobileMenu({ nav, who, roleText, onSignOut }: Props) {
+export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props) {
   const sheet = useRef<HTMLDialogElement>(null)
   const { pathname } = useLocation()
   const [spot, setSpot] = useState<Spot>(loadSpot)
@@ -138,6 +138,7 @@ export function MobileMenu({ nav, who, roleText, onSignOut }: Props) {
         }}
       >
         <Icon name="menu" size={24} />
+        {pending > 0 && <span className="menu-fab__badge" aria-label={`${pending} pendientes`}>{pending}</span>}
       </button>
 
       <dialog
@@ -159,6 +160,7 @@ export function MobileMenu({ nav, who, roleText, onSignOut }: Props) {
               <NavLink key={m.id} to={m.path} className="sheet__link">
                 {m.icon && <Icon name={m.icon} size={22} />}
                 <span>{m.label}</span>
+                {m.id === 'pendientes' && pending > 0 && <span className="nav-badge sheet__badge">{pending}</span>}
               </NavLink>
             ))}
           </nav>

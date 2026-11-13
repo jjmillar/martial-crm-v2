@@ -329,3 +329,10 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.closing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}

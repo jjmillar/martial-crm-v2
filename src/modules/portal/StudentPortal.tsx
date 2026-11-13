@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
+import { supabase } from '../../lib/supabase'
 import { formatDate, longDate, todayIso } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
@@ -101,6 +102,15 @@ export function StudentHome() {
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
   const enr = useQuery({ queryKey: ['my-enrollments', studentId], queryFn: () => myEnrollments(studentId!), enabled: Boolean(studentId) })
   const pay = useQuery({ queryKey: ['my-payments', studentId], queryFn: () => myPendingPayments(studentId!), enabled: Boolean(studentId) })
+  // Freshly approved accounts: nudge to complete contact and emergency data.
+  const incomplete = useQuery({
+    queryKey: ['my-student-incomplete', studentId],
+    queryFn: async () => {
+      const { data } = await supabase.from('students').select('phone, birth_date, emergency_contact, emergency_phone').eq('id', studentId!).single()
+      return !data?.phone || !data?.birth_date || !data?.emergency_contact || !data?.emergency_phone
+    },
+    enabled: Boolean(studentId),
+  })
 
   const p = progress.data
   const firstName = (profile?.full_name || name).split(' ')[0]
@@ -115,6 +125,14 @@ export function StudentHome() {
         <h1>Hola{firstName ? `, ${firstName}` : ''}.</h1>
         <p className="tile__lead">{longDate(today)}</p>
       </section>
+
+      {incomplete.data && (
+        <Link className="tile tile--wide tile--link tile--alert rise" to="/app/cuenta#ficha">
+          <span className="eyebrow">Tu ficha</span>
+          <p className="tile__big tile__big--sm">Completa tus datos</p>
+          <p className="hint">Teléfono, fecha de nacimiento y contacto de emergencia para tu escuela.</p>
+        </Link>
+      )}
 
       <section className="tile level-card rise" style={{ animationDelay: '40ms' }} aria-label="Tu nivel">
         <div className="level-badge" style={{ ['--pct' as string]: `${pct}%` }}>

@@ -14,7 +14,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <RedirectIfAuthed><Landing /></RedirectIfAuthed> },
   { path: '/login', element: <RedirectIfAuthed><Login /></RedirectIfAuthed> },
   { path: '/bienvenida', element: <Bienvenida /> },
-  { path: '/registro/:code', element: <RedirectIfAuthed><Registro /></RedirectIfAuthed> },
+  { path: '/registro', element: <RedirectIfAuthed><Registro /></RedirectIfAuthed> },
   {
     path: '/app',
     element: <RequireAuth><AppLayout /></RequireAuth>,
