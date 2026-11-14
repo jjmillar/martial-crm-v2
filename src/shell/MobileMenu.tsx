@@ -26,10 +26,23 @@ function saveSpot(s: Spot) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(s)) } catch { /* storage unavailable */ }
 }
 
+// Stable viewport height (100svh): on phones window.innerHeight grows and shrinks while scrolling, as the
+// address bar hides and shows; measuring that would make the button slide around on every scroll.
+let probe: HTMLDivElement | null = null
+function viewHeight() {
+  if (!probe) {
+    probe = document.createElement('div')
+    probe.setAttribute('aria-hidden', 'true')
+    probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none'
+    document.body.appendChild(probe)
+  }
+  return probe.offsetHeight || window.innerHeight
+}
+
 // Usable vertical band: below the top bar area, above the bottom safe area.
 function band() {
   const top = 72
-  const bottom = window.innerHeight - SIZE - EDGE - 8
+  const bottom = viewHeight() - SIZE - EDGE - 8
   return { top, bottom: Math.max(top, bottom) }
 }
 
@@ -62,9 +75,14 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
     return () => cancelAnimationFrame(id)
   }, [])
 
-  // Re-place the button when the viewport changes (rotation, keyboard).
+  // Re-place the button when the viewport really changes (rotation, window size), not when the
+  // address bar hides or shows while scrolling.
   useEffect(() => {
-    const onResize = () => setTick((t) => t + 1)
+    let last = `${window.innerWidth}x${viewHeight()}`
+    const onResize = () => {
+      const now = `${window.innerWidth}x${viewHeight()}`
+      if (now !== last) { last = now; setTick((t) => t + 1) }
+    }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
   }, [])
