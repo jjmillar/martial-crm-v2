@@ -1,10 +1,9 @@
-import { Link } from 'react-router-dom'
+import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { formatDate, santiagoDate } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
 import { Icon } from '../../ui/Icon'
 import { listStudentPayments, statusLabel } from '../pagos/api'
-import '../pagos/pagos.css'
 
 /** Payments of one student, shown inside the student form. */
 export function StudentPayments({ studentId }: { studentId: string }) {

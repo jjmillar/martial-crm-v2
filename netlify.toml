@@ -1,9 +1,12 @@
 [build]
   command = "npm run build"
-  publish = "dist"
+  publish = ".next"
 
-# SPA: todas las rutas sirven index.html (React Router)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[build.environment]
+  NODE_VERSION = "22"
+
+# Next.js on Netlify: the official adapter turns the build into server functions (public pages rendered on
+# the server) plus static assets. Declared explicitly because this site was created for a Vite build.
+# Data and auth stay in Supabase.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

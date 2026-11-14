@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { formatDate } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'

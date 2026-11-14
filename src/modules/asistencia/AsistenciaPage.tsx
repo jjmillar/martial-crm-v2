@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from '../../lib/nav'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
@@ -12,7 +12,6 @@ import { listStudents, studentsKey } from '../alumnos/api'
 import { classesKey, listClasses } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { StudentAttendance } from '../portal/StudentPortal'
-import './asistencia.css'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
@@ -14,7 +14,6 @@ import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { listPayments, paymentsKey } from '../pagos/api'
 import { StudentHome } from '../portal/StudentPortal'
 import { useApprovalsCount } from '../tareas/api'
-import './inicio.css'
 
 async function weekAttendance(schoolId: string, from: string): Promise<number> {
   const { count, error } = await supabase.from('attendance').select('id', { count: 'exact', head: true }).eq('school_id', schoolId).gte('date', from)

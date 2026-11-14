@@ -333,3 +333,8 @@ Branch: `main` (one work-unit commit per task) · Delivery: phased, one module p
 - L21 (2026-11-13) — UI standards (docs/ui-standards.md):
   - Motion: single token set (`ui/motion.css` + `ui/motion.ts`): enter 240 ms ease-out, exit 180 ms ease-in, fast 150 ms, pages 360 ms. Automatic: page transitions (`PageMotion`), list/container enter-exit-move (`installMotion` + auto-animate on ul/ol/form/.modal__body/page root/[data-motion]), dialogs and sheet with exit (`@starting-style`), accordions with height, alerts, toast exit. Hard-coded timings removed.
   - Toggles: `ui/Toggle` replaces all 14 checkboxes; lint forbids `type="checkbox"` outside it; any checkbox renders as a switch.
+- L22 (2026-11-13) — Migration to Next.js 16 (branch `next`):
+  - App Router: `app/(public)` server-rendered (school page fetches `school_landing` on the server + metadata/Open Graph), `app/app` signed-in app client-only behind RequireAuth/ModulePage. Netlify with the official Next adapter; Supabase unchanged.
+  - `src/lib/nav.tsx` keeps the navigation API the screens use (relative paths, navigation state for toasts and "Duplicar"); `src/app`→`src/shell`, `src/pages`→`src/screens`; all CSS imported once in `app/layout.tsx` in the original cascade order.
+  - Verified: pixel comparison against the live Vite build, 30 screens × phone/desktop + student portal = 0.00% difference; 29 interaction checks (login redirect, menus, create/edit/back, toast, duplicate, URL filters, deep links, theme, logout, school pages); motion QA; lint/tests/build green.
+  - Fixed on the way: toast stuck on screen if you navigated away within 3.5 s (timer now independent of navigation).

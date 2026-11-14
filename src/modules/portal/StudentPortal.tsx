@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '../../lib/nav'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
@@ -13,8 +13,6 @@ import {
   checkIn, levelOf, myAttendance, myAttendanceKey, myEnrollments, myPendingPayments, progressKey, studentProgress, undoCheckIn,
   XP_PER_CLASS, XP_PER_LEVEL, type MyAttendance,
 } from './api'
-import '../inicio/inicio.css'
-import './portal.css'
 
 function useMe() {
   const { activeSchool, myStudent } = useSchool()

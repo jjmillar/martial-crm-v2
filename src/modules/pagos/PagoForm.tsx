@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from '../../lib/nav'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { formatDate, monthTitle, santiagoDate, todayIso } from '../../lib/dates'
