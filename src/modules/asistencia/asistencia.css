@@ -264,3 +264,12 @@
   border-radius: 10px;
   background: color-mix(in srgb, #e8c547 8%, transparent);
 }
+
+.att-card__no {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}

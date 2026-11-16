@@ -189,6 +189,96 @@ export type Database = {
           },
         ];
       };
+      class_sessions: {
+        Row: {
+          class_id: string;
+          color: string;
+          created_at: string;
+          customized: boolean;
+          date: string;
+          description: string | null;
+          end_time: string;
+          id: string;
+          name: string;
+          number: number | null;
+          room: string | null;
+          schedule_id: string | null;
+          school_id: string;
+          skill_ids: string[];
+          start_time: string;
+          teacher_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          color?: string;
+          created_at?: string;
+          customized?: boolean;
+          date: string;
+          description?: string | null;
+          end_time: string;
+          id?: string;
+          name: string;
+          number?: number | null;
+          room?: string | null;
+          schedule_id?: string | null;
+          school_id: string;
+          skill_ids?: string[];
+          start_time: string;
+          teacher_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          class_id?: string;
+          color?: string;
+          created_at?: string;
+          customized?: boolean;
+          date?: string;
+          description?: string | null;
+          end_time?: string;
+          id?: string;
+          name?: string;
+          number?: number | null;
+          room?: string | null;
+          schedule_id?: string | null;
+          school_id?: string;
+          skill_ids?: string[];
+          start_time?: string;
+          teacher_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_class_id_school_id_fkey";
+            columns: ["class_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "class_sessions_schedule_id_fkey";
+            columns: ["schedule_id"];
+            isOneToOne: false;
+            referencedRelation: "class_schedules";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "class_sessions_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "class_sessions_teacher_id_fkey";
+            columns: ["teacher_id"];
+            isOneToOne: false;
+            referencedRelation: "teachers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       class_tags: {
         Row: {
           class_id: string;
@@ -1264,6 +1354,10 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      class_snapshot_skills: {
+        Args: { p_class_id: string };
+        Returns: string[];
+      };
       create_school: {
         Args: { p_name: string; p_slug: string };
         Returns: {
@@ -1348,6 +1442,16 @@ export type Database = {
       register_owner: { Args: { p_user_id: string }; Returns: undefined };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
       rut_key: { Args: { p_rut: string }; Returns: string };
+      save_class_session: {
+        Args: {
+          p_class_id: string;
+          p_date: string;
+          p_description: string;
+          p_skill_ids: string[];
+          p_start_time: string;
+        };
+        Returns: string;
+      };
       school_landing: { Args: { p_slug: string }; Returns: Json };
       school_owner: {
         Args: { p_school_id: string };
@@ -1378,6 +1482,11 @@ export type Database = {
       };
       storage_school_id: { Args: { p_name: string }; Returns: string };
       student_progress: { Args: { p_student_id: string }; Returns: Json };
+      sync_all_class_sessions: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      sync_class_sessions: { Args: { p_school_id: string }; Returns: number };
       trial_availability: { Args: { p_school_id: string }; Returns: Json };
       undo_check_in: { Args: { p_class_id: string }; Returns: undefined };
       update_my_student: {

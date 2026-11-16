@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
@@ -8,10 +8,10 @@ import { Icon } from '../../ui/Icon'
 import { Modal } from '../../ui/Modal'
 import { Toggle } from '../../ui/Toggle'
 import { listStudents, studentsKey } from '../alumnos/api'
-import { classesKey, listTags, type ClassFull } from '../clases/api'
+import { listTags, type ClassFull } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { CatalogoDialog } from '../ajustes/CatalogoDialog'
-import { attendanceKey, listAttendance, type Mark, type Session, type TrialBooking } from './api'
+import { attendanceKey, listAttendance, saveSession, view, type Mark, type Session, type TrialBooking } from './api'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
@@ -23,25 +23,26 @@ type Props = { session: Session | null; open: boolean; onClose: () => void; tria
  */
 export function SessionDialog({ session, open, onClose, trials }: Props) {
   return (
-    <Modal open={open} onClose={onClose} wide label={session ? `${session.cls.name}, ${longDate(session.date)}` : 'Clase'}>
-      {session && <SessionBody key={`${session.block.id}|${session.date}`} session={session} trials={trials} onClose={onClose} />}
+    <Modal open={open} onClose={onClose} wide label={session ? `${view(session).name}, ${longDate(session.date)}` : 'Clase'}>
+      {session && <SessionBody key={session.key} session={session} trials={trials} onClose={onClose} />}
     </Modal>
   )
 }
 
 function SessionBody({ session, trials, onClose }: { session: Session; trials: TrialBooking[]; onClose: () => void }) {
-  const { cls, block, date } = session
+  const { cls, date } = session
+  const v = view(session)
   const today = todayIso()
   const canMark = date <= today
   return (
     <>
       <div className="modal__head">
-        <span className="eyebrow">{longDate(date)} · {hhmm(block.start_time)}–{hhmm(block.end_time)}</span>
+        <span className="eyebrow">{v.number ? `Clase N° ${v.number} · ` : ''}{longDate(date)} · {hhmm(session.start_time)}–{hhmm(session.end_time)}</span>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
       </div>
-      <div className="sess-title" style={{ ['--class-color' as string]: cls.color }}>
-        <h2>{cls.name}</h2>
-        <p className="hint">{[cls.teacher?.full_name ?? 'Sin profesor', cls.room].filter(Boolean).join(' · ')}</p>
+      <div className="sess-title" style={{ ['--class-color' as string]: v.color }}>
+        <h2>{v.name}</h2>
+        <p className="hint">{[v.teacher ?? 'Sin profesor', v.room].filter(Boolean).join(' · ')}</p>
       </div>
 
       {trials.length > 0 && (
@@ -68,7 +69,7 @@ function SessionBody({ session, trials, onClose }: { session: Session; trials: T
         {canMark ? <Roster cls={cls} date={date} /> : <p className="hint">La asistencia se toma desde el día de la clase.</p>}
       </section>
 
-      <ClassInfo cls={cls} />
+      <SessionInfo session={session} />
     </>
   )
 }
@@ -180,37 +181,31 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
   )
 }
 
-// The class's skills and description (shared by every date of the class). Admins edit them here.
-function ClassInfo({ cls }: { cls: ClassFull }) {
+// Skills and description of this session (this class on this date). Saved to its record only: other dates and the
+// class itself don't change (edit the class in Clases for that). Admins edit; the rest of the team reads.
+function SessionInfo({ session }: { session: Session }) {
   const { activeSchool, role } = useSchool()
   const schoolId = activeSchool!.id
   const canEdit = role === 'admin' || role === 'ceo'
   const qc = useQueryClient()
+  const v = view(session)
   const tags = useQuery({ queryKey: ['tags', schoolId], queryFn: () => listTags(schoolId) })
-  const [picked, setPicked] = useState<string[]>(cls.tag_ids)
-  const [desc, setDesc] = useState(cls.description ?? '')
+  const [picked, setPicked] = useState<string[]>(v.skillIds)
+  const [desc, setDesc] = useState(v.description ?? '')
+  const [savedDesc, setSavedDesc] = useState(v.description ?? '')
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
-  useEffect(() => { setPicked(cls.tag_ids) }, [cls.tag_ids])
-  const refresh = () => qc.invalidateQueries({ queryKey: classesKey(schoolId) })
+  const refresh = () => qc.invalidateQueries({ queryKey: ['class-sessions', schoolId] })
 
   const setSkill = useMutation({
-    mutationFn: async ({ id, on }: { id: string; on: boolean }) => {
-      const { error } = on
-        ? await supabase.from('class_tags').insert({ class_id: cls.id, tag_id: id, school_id: schoolId })
-        : await supabase.from('class_tags').delete().eq('class_id', cls.id).eq('tag_id', id)
-      if (error && !error.message.includes('duplicate key')) throw error
-    },
-    onMutate: ({ id, on }) => { setMsg(null); setPicked((x) => (on ? [...x, id] : x.filter((y) => y !== id))) },
-    onError: (_e, { id, on }) => { setPicked((x) => (on ? x.filter((y) => y !== id) : [...x, id])); setMsg({ ok: false, text: 'No se pudo guardar la skill.' }) },
+    mutationFn: (next: string[]) => saveSession(session, savedDesc.trim() || null, next),
+    onMutate: (next) => { setMsg(null); const prev = picked; setPicked(next); return { prev } },
+    onError: (_e, _n, ctx) => { if (ctx) setPicked(ctx.prev); setMsg({ ok: false, text: 'No se pudo guardar la skill.' }) },
     onSettled: refresh,
   })
   const saveDesc = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('classes').update({ description: desc.trim() || null }).eq('id', cls.id)
-      if (error) throw error
-    },
+    mutationFn: () => saveSession(session, desc.trim() || null, picked),
     onMutate: () => setMsg(null),
-    onSuccess: async () => { await refresh(); setMsg({ ok: true, text: 'Descripción guardada.' }) },
+    onSuccess: async () => { setSavedDesc(desc); await refresh(); setMsg({ ok: true, text: 'Descripción guardada para esta clase.' }) },
     onError: () => setMsg({ ok: false, text: 'No se pudo guardar la descripción.' }),
   })
 
@@ -231,13 +226,13 @@ function ClassInfo({ cls }: { cls: ClassFull }) {
             />
           )}
         </div>
-        <p className="hint">Las skills que suben los alumnos al asistir a esta clase.</p>
+        <p className="hint">Las skills que suben los alumnos que asistieron a esta clase. Se guardan solo para esta fecha.</p>
         {canEdit ? (
           shown.length ? (
             <div className="pick-chips" role="group" aria-label="Skills de la clase">
               {shown.map((t) => (
                 <button key={t.id} type="button" className="pick-chip" aria-pressed={picked.includes(t.id)} disabled={setSkill.isPending}
-                  onClick={() => setSkill.mutate({ id: t.id, on: !picked.includes(t.id) })}>
+                  onClick={() => setSkill.mutate(picked.includes(t.id) ? picked.filter((y) => y !== t.id) : [...picked, t.id])}>
                   {t.icon} {t.label}
                 </button>
               ))}
@@ -253,12 +248,12 @@ function ClassInfo({ cls }: { cls: ClassFull }) {
         {canEdit ? (
           <>
             <textarea className="input" rows={3} maxLength={300} value={desc} onChange={(e) => { setDesc(e.target.value); setMsg(null) }} aria-labelledby="sess-desc-h" placeholder="Ej: Técnica base de jiu-jitsu para quienes recién empiezan." />
-            <p className="hint">Se muestra en tu landing page, donde eligen la clase de prueba.</p>
+            <p className="hint">Solo para esta clase del {longDate(session.date).toLowerCase()}. La descripción general (la de la landing) se edita en Clases.</p>
             <div className="form-actions">
-              <button type="button" className="btn" disabled={saveDesc.isPending || desc.trim() === (cls.description ?? '')} onClick={() => saveDesc.mutate()}>{saveDesc.isPending ? 'Guardando…' : 'Guardar descripción'}</button>
+              <button type="button" className="btn" disabled={saveDesc.isPending || desc.trim() === savedDesc.trim()} onClick={() => saveDesc.mutate()}>{saveDesc.isPending ? 'Guardando…' : 'Guardar descripción'}</button>
             </div>
           </>
-        ) : <p>{cls.description || 'Sin descripción.'}</p>}
+        ) : <p>{v.description || 'Sin descripción.'}</p>}
         {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}
       </section>
     </>

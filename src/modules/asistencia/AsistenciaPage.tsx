@@ -8,7 +8,7 @@ import { Icon } from '../../ui/Icon'
 import { classesKey, listClasses } from '../clases/api'
 import { StudentAttendance } from '../portal/StudentPortal'
 import { SchoolFilter } from '../../ui/SchoolFilter'
-import { attendanceCounts, trialBookings, type Session, type TrialBooking } from './api'
+import { attendanceCounts, listSessions, sessionKey, syncSessions, trialBookings, view as cardView, type Session, type TrialBooking } from './api'
 import { SessionDialog } from './SessionDialog'
 
 type View = 'day' | 'week' | 'month'
@@ -41,8 +41,9 @@ export function AsistenciaPage() {
   return role === 'alumno' ? <StudentAttendance /> : <StaffAttendance />
 }
 
-// Asistencia (staff): a stack of class cards for a day, week or month. Each card opens the class on that date:
-// trial classes booked from the landing page, the attendance list, and the class's skills and description.
+// Asistencia (staff): a stack of class cards for a day, week or month. Each card is one class on one date, stored as
+// a numbered record (class_sessions) and opens it: trial bookings, the attendance list, and that session's skills and
+// description.
 function StaffAttendance() {
   const { activeSchool } = useSchool()
   const schoolId = activeSchool?.id
@@ -61,17 +62,32 @@ function StaffAttendance() {
   const classes = useQuery({ queryKey: classesKey(schoolId), queryFn: () => listClasses(schoolId!), enabled: Boolean(schoolId) })
   const counts = useQuery({ queryKey: ['attendance-range', schoolId, from, to], queryFn: () => attendanceCounts(schoolId!, from, to), enabled: Boolean(schoolId) })
   const trials = useQuery({ queryKey: ['trial-range', schoolId, from, to], queryFn: () => trialBookings(schoolId!, from, to), enabled: Boolean(schoolId) })
+  // Make sure every class up to today is stored and numbered, then read the records of the range.
+  const synced = useQuery({ queryKey: ['sessions-sync', schoolId], queryFn: () => syncSessions(schoolId!), enabled: Boolean(schoolId), staleTime: 5 * 60_000 })
+  const rows = useQuery({ queryKey: ['class-sessions', schoolId, from, to], queryFn: () => listSessions(schoolId!, from, to), enabled: Boolean(schoolId) && synced.isFetched })
 
-  // Every block of every active class on each date of the range, by date then time.
+  // Each date of the range: its stored sessions plus the blocks of active classes not stored yet (future), by time.
   const days = useMemo(() => {
+    const all = new Map((classes.data ?? []).map((c) => [c.id, c]))
     const active = (classes.data ?? []).filter((c) => c.active)
-    return datesBetween(from, to).map((d) => ({
-      date: d,
-      sessions: active
-        .flatMap((cls) => cls.schedules.filter((b) => b.weekday === isoWeekday(d)).map((block): Session => ({ cls, block, date: d })))
-        .sort((a, b) => a.block.start_time.localeCompare(b.block.start_time) || a.cls.name.localeCompare(b.cls.name)),
-    }))
-  }, [classes.data, from, to])
+    const stored = new Map((rows.data ?? []).map((r) => [sessionKey(r.class_id, r.date, r.start_time), r]))
+    return datesBetween(from, to).map((d) => {
+      const list = new Map<string, Session>()
+      for (const cls of active) {
+        for (const b of cls.schedules.filter((x) => x.weekday === isoWeekday(d))) {
+          const key = sessionKey(cls.id, d, b.start_time)
+          list.set(key, { key, cls, date: d, start_time: b.start_time, end_time: b.end_time, scheduleId: b.id, row: stored.get(key) ?? null })
+        }
+      }
+      for (const r of rows.data ?? []) {
+        const key = sessionKey(r.class_id, r.date, r.start_time)
+        const cls = all.get(r.class_id)
+        if (r.date !== d || list.has(key) || !cls) continue
+        list.set(key, { key, cls, date: d, start_time: r.start_time, end_time: r.end_time, scheduleId: r.schedule_id, row: r })
+      }
+      return { date: d, sessions: [...list.values()].sort((a, b) => a.start_time.localeCompare(b.start_time) || a.cls.name.localeCompare(b.cls.name)) }
+    })
+  }, [classes.data, rows.data, from, to])
 
   const trialsBy = useMemo(() => {
     const m = new Map<string, TrialBooking[]>()
@@ -81,11 +97,11 @@ function StaffAttendance() {
     }
     return m
   }, [trials.data])
-  const trialsOf = (s: Session) => [...(trialsBy.get(`s:${s.block.id}|${s.date}`) ?? []), ...(trialsBy.get(`c:${s.cls.id}|${s.date}|${s.block.start_time}`) ?? [])]
+  const trialsOf = (s: Session) => [...(s.scheduleId ? trialsBy.get(`s:${s.scheduleId}|${s.date}`) ?? [] : []), ...(trialsBy.get(`c:${s.cls.id}|${s.date}|${s.start_time}`) ?? [])]
 
   const [openKey, setOpenKey] = useState<string | null>(null)
   const [last, setLast] = useState<Session | null>(null) // stays while the pop-up closes
-  const keyOf = (s: Session) => `${s.block.id}|${s.date}`
+  const keyOf = (s: Session) => s.key
   const current = days.flatMap((d) => d.sessions).find((s) => keyOf(s) === openKey) ?? last
 
   const step = view === 'day' ? 1 : view === 'week' ? 7 : 0
@@ -93,7 +109,7 @@ function StaffAttendance() {
   const next = () => go({ fecha: step ? addDays(date, step) : shiftMonth(date, 1) })
   const title = view === 'day' ? longDate(date) : view === 'week' ? `${dayMonth(from)} – ${dayMonth(to)}` : monthTitle(date)
   const shownDays = view === 'day' ? days : days.filter((d) => d.sessions.length > 0)
-  const noClasses = classes.isSuccess && !(classes.data ?? []).some((c) => c.active && c.schedules.length)
+  const noClasses = classes.isSuccess && !(classes.data ?? []).some((c) => c.active && c.schedules.length) && !(rows.data ?? []).length
 
   if (!activeSchool) return <p className="page-note">Selecciona una escuela.</p>
 
@@ -135,16 +151,18 @@ function StaffAttendance() {
                 {d.sessions.map((s) => {
                   const n = counts.data?.get(`${s.cls.id}|${s.date}`) ?? 0
                   const t = trialsOf(s).length
-                  const live = s.date === today && hhmm(s.block.start_time) <= nowHHMM() && nowHHMM() < hhmm(s.block.end_time)
+                  const v = cardView(s)
+                  const live = s.date === today && hhmm(s.start_time) <= nowHHMM() && nowHHMM() < hhmm(s.end_time)
                   return (
                     <li key={keyOf(s)}>
-                      <button type="button" className={`att-card${live ? ' is-live' : ''}`} style={{ ['--class-color' as string]: s.cls.color }}
+                      <button type="button" className={`att-card${live ? ' is-live' : ''}`} style={{ ['--class-color' as string]: v.color }}
                         onClick={() => { setLast(s); setOpenKey(keyOf(s)) }}
-                        aria-label={`${s.cls.name}, ${hhmm(s.block.start_time)}. ${n} presentes${t ? `, ${t} ${t === 1 ? 'clase de prueba' : 'clases de prueba'}` : ''}. Abrir`}>
-                        <span className="att-card__time">{hhmm(s.block.start_time)}<small>{hhmm(s.block.end_time)}</small></span>
+                        aria-label={`${v.number ? `Clase N° ${v.number}, ` : ''}${v.name}, ${hhmm(s.start_time)}. ${n} presentes${t ? `, ${t} ${t === 1 ? 'clase de prueba' : 'clases de prueba'}` : ''}. Abrir`}>
+                        <span className="att-card__time">{hhmm(s.start_time)}<small>{hhmm(s.end_time)}</small></span>
                         <span className="att-card__main">
-                          <strong>{s.cls.name}</strong>
-                          <span className="hint">{[s.cls.teacher?.full_name, s.cls.room].filter(Boolean).join(' · ') || 'Sin profesor'}</span>
+                          <span className="att-card__no">{v.number ? `N° ${v.number}` : 'Programada'}</span>
+                          <strong>{v.name}</strong>
+                          <span className="hint">{[v.teacher, v.room].filter(Boolean).join(' · ') || 'Sin profesor'}</span>
                           <span className="att-card__tags">
                             {live && <span className="tag tag--ok">En curso</span>}
                             {s.date <= today && <span className="tag">{n} {n === 1 ? 'presente' : 'presentes'}</span>}
