@@ -104,6 +104,7 @@ function AlumnoForm({ student }: { student?: Student }) {
         <div>
           <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Alumnos</Link>
           <h1>{student ? student.full_name : 'Nuevo alumno'}</h1>
+          <p className="hint">Los campos con * son obligatorios.</p>
           {student && (
             <p className="hint">
               {[student.rut && formatRut(student.rut), age !== null && `${age} años`, `Inscrito el ${formatDate(student.enrollment_date)}`, tenure ? `${tenure} ${tenure === 1 ? 'año' : 'años'} en la escuela` : null].filter(Boolean).join(' · ')}
@@ -118,8 +119,8 @@ function AlumnoForm({ student }: { student?: Student }) {
           {field('first_name', 'Primer nombre *', <input {...inputProps('first_name')} autoComplete="off" />)}
           {field('middle_name', 'Segundo nombre', <input {...inputProps('middle_name')} autoComplete="off" />)}
           {field('first_last_name', 'Primer apellido *', <input {...inputProps('first_last_name')} autoComplete="off" />)}
-          {field('second_last_name', 'Segundo apellido', <input {...inputProps('second_last_name')} autoComplete="off" />)}
-          {field('rut', 'RUT', <input {...inputProps('rut')} inputMode="text" placeholder="12.345.678-5" onBlur={() => form.rut && set('rut', formatRut(form.rut))} />)}
+          {field('second_last_name', 'Segundo apellido *', <input {...inputProps('second_last_name')} autoComplete="off" />)}
+          {field('rut', 'RUT *', <input {...inputProps('rut')} inputMode="text" placeholder="12.345.678-5" onBlur={() => form.rut && set('rut', formatRut(form.rut))} />)}
           {field('gender', 'Género', (
             <select id="f-gender" className="input" value={form.gender} onChange={(e) => set('gender', e.target.value as StudentForm['gender'])}>
               <option value="">Sin especificar</option>
@@ -128,7 +129,7 @@ function AlumnoForm({ student }: { student?: Student }) {
               <option value="otro">Otro</option>
             </select>
           ))}
-          {field('birth_date', 'Fecha de nacimiento', <input {...inputProps('birth_date')} type="date" max={todayIso()} />)}
+          {field('birth_date', age !== null ? `Fecha de nacimiento * · ${age} ${age === 1 ? 'año' : 'años'}` : 'Fecha de nacimiento (edad) *', <input {...inputProps('birth_date')} type="date" max={todayIso()} />)}
           {field('enrollment_date', 'Fecha de inscripción *', <input {...inputProps('enrollment_date')} type="date" />)}
         </div>
       </section>
@@ -150,9 +151,9 @@ function AlumnoForm({ student }: { student?: Student }) {
       <section className="card form-section">
         <h2>Contacto</h2>
         <div className="form-grid">
-          {field('email', 'Correo', <input {...inputProps('email')} type="email" autoComplete="off" />)}
+          {field('email', 'Correo *', <input {...inputProps('email')} type="email" autoComplete="off" />)}
           {field('phone', 'Teléfono', <input {...inputProps('phone')} type="tel" placeholder="+56 9 1234 5678" />)}
-          {field('address', 'Dirección', <input {...inputProps('address')} />, true)}
+          {field('address', 'Dirección *', <input {...inputProps('address')} />, true)}
         </div>
       </section>
 

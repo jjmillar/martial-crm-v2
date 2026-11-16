@@ -58,9 +58,8 @@ export const studentSchema = z
     first_name: text.min(1, 'Escribe el primer nombre.'),
     middle_name: optional,
     first_last_name: text.min(1, 'Escribe el primer apellido.'),
-    second_last_name: optional,
-    rut: text.transform((v, ctx) => {
-      if (v === '') return null
+    second_last_name: text.min(1, 'Escribe el segundo apellido.'),
+    rut: text.min(1, 'Escribe el RUT.').transform((v, ctx) => {
       const r = normalizeRut(v)
       if (!r) {
         ctx.addIssue({ code: 'custom', message: 'RUT inválido: revisa el dígito verificador.' })
@@ -69,11 +68,11 @@ export const studentSchema = z
       return r
     }),
     gender: z.enum(['', 'masculino', 'femenino', 'otro']).transform((v) => (v === '' ? null : v)),
-    birth_date: optional,
+    birth_date: text.min(1, 'Indica la fecha de nacimiento (para la edad).'),
     enrollment_date: text.min(1, 'Indica la fecha de inscripción.'),
-    email: text.refine((v) => v === '' || /^\S+@\S+\.\S+$/.test(v), 'Correo inválido.').transform((v) => (v === '' ? null : v.toLowerCase())),
+    email: text.min(1, 'Escribe el correo.').refine((v) => /^\S+@\S+\.\S+$/.test(v), 'Correo inválido.').transform((v) => v.toLowerCase()),
     phone: optional,
-    address: optional,
+    address: text.min(1, 'Escribe la dirección.'),
     belt: optional,
     belt_degree: optionalNumber(0, 12, 'El grado va de 0 a 12.').refine((v) => v === null || Number.isInteger(v), 'El grado debe ser un número entero.'),
     weight_kg: optionalNumber(1, 399, 'Peso inválido.'),
@@ -83,7 +82,7 @@ export const studentSchema = z
     notes: optional,
     active: z.boolean(),
   })
-  .refine((v) => !v.birth_date || v.birth_date <= v.enrollment_date, { message: 'La fecha de nacimiento no puede ser posterior a la inscripción.', path: ['birth_date'] })
+  .refine((v) => v.birth_date <= v.enrollment_date, { message: 'La fecha de nacimiento no puede ser posterior a la inscripción.', path: ['birth_date'] })
 
 export type StudentPayload = Omit<StudentInsert, 'school_id'>
 

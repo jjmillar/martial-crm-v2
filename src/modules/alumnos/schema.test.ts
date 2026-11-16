@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { emptyForm, parseStudent } from './schema'
 
-const base = { ...emptyForm('2026-11-11'), first_name: ' Juan ', first_last_name: 'Pérez' }
+const base = {
+  ...emptyForm('2026-11-11'), first_name: ' Juan ', first_last_name: 'Pérez', second_last_name: 'Soto', rut: '12.345.678-5',
+  email: 'jp@mail.cl', birth_date: '2000-05-01', address: 'Av. Siempre Viva 123',
+}
 
 describe('student schema', () => {
   it('trims, nulls empty optionals and normalizes RUT', () => {
@@ -25,6 +28,18 @@ describe('student schema', () => {
       expect(r.errors.rut).toMatch(/RUT inválido/)
       expect(r.errors.belt_degree).toMatch(/0 a 12/)
       expect(r.errors.email).toMatch(/Correo/)
+    }
+  })
+  it('requires names, RUT, email, birth date and address', () => {
+    const r = parseStudent({ ...emptyForm('2026-11-11'), first_name: 'Ana', first_last_name: 'Rojas' })
+    expect(r.ok).toBe(false)
+    if (!r.ok) {
+      expect(r.errors.second_last_name).toMatch(/segundo apellido/)
+      expect(r.errors.rut).toMatch(/Escribe el RUT/)
+      expect(r.errors.email).toMatch(/Escribe el correo/)
+      expect(r.errors.birth_date).toMatch(/nacimiento/)
+      expect(r.errors.address).toMatch(/dirección/)
+      expect(r.errors.middle_name).toBeUndefined()
     }
   })
   it('rejects a birth date after enrollment', () => {
