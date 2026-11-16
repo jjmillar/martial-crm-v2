@@ -1162,7 +1162,6 @@ export type Database = {
           phone: string;
           schedule_id: string | null;
           school_id: string;
-          slot_id: string | null;
           start_time: string;
           status: string;
         };
@@ -1180,7 +1179,6 @@ export type Database = {
           phone: string;
           schedule_id?: string | null;
           school_id: string;
-          slot_id?: string | null;
           start_time: string;
           status?: string;
         };
@@ -1197,7 +1195,6 @@ export type Database = {
           phone?: string;
           schedule_id?: string | null;
           school_id?: string;
-          slot_id?: string | null;
           start_time?: string;
           status?: string;
         };
@@ -1218,55 +1215,6 @@ export type Database = {
           },
           {
             foreignKeyName: "trial_bookings_school_id_fkey";
-            columns: ["school_id"];
-            isOneToOne: false;
-            referencedRelation: "schools";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "trial_bookings_slot_id_fkey";
-            columns: ["slot_id"];
-            isOneToOne: false;
-            referencedRelation: "trial_slots";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      trial_slots: {
-        Row: {
-          active: boolean;
-          capacity: number;
-          created_at: string;
-          end_time: string;
-          id: string;
-          school_id: string;
-          start_time: string;
-          weekday: number;
-        };
-        ComputedFields: never;
-        Insert: {
-          active?: boolean;
-          capacity?: number;
-          created_at?: string;
-          end_time: string;
-          id?: string;
-          school_id: string;
-          start_time: string;
-          weekday: number;
-        };
-        Update: {
-          active?: boolean;
-          capacity?: number;
-          created_at?: string;
-          end_time?: string;
-          id?: string;
-          school_id?: string;
-          start_time?: string;
-          weekday?: number;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "trial_slots_school_id_fkey";
             columns: ["school_id"];
             isOneToOne: false;
             referencedRelation: "schools";
