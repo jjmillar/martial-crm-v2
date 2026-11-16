@@ -21,3 +21,28 @@ export async function fetchLanding(slug: string): Promise<Landing | null> {
 }
 
 export const landingPhotoUrl = (path: string) => `${url}/storage/v1/object/public/landing/${path}`
+
+export type StudentProfile = {
+  handle: string; name: string; initials: string; headline: string | null; bio: string | null; since: string
+  belt: string | null; belt_degree: number | null
+  stats: { xp: number; level: number; level_xp: number; attended: number } | null
+  skills: { label: string; icon: string | null; xp: number }[] | null
+  school: { slug: string; name: string; logo_url: string | null; city: string | null; theme: string; primary: string | null; accent: string | null; landing: boolean }
+}
+
+// Server-side read of a student's public profile (only what the student chose to publish).
+export async function fetchStudentProfile(slug: string, handle: string): Promise<StudentProfile | null> {
+  if (!url || !key) return null
+  try {
+    const r = await fetch(`${url}/rest/v1/rpc/student_public_profile`, {
+      method: 'POST',
+      headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_slug: slug, p_handle: handle }),
+      cache: 'no-store', // the student's changes show at once
+    })
+    if (!r.ok) return null
+    return ((await r.json()) as StudentProfile | null) ?? null
+  } catch {
+    return null
+  }
+}

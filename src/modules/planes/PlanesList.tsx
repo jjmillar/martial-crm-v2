@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
@@ -9,10 +9,15 @@ import { listSpecialties, specialtiesKey } from '../profesores/api'
 import { listPlans, plansKey } from './api'
 import { cycleInfo, planFeatures } from './cycles'
 import { SchoolFilter } from '../../ui/SchoolFilter'
+import { myEnrollments } from '../portal/api'
+import { todayIso } from '../../lib/dates'
 
 export function PlanesList() {
-  const { activeSchool, role } = useSchool()
+  const { activeSchool, role, myStudent } = useSchool()
   const schoolId = activeSchool?.id
+  const student = role === 'alumno'
+  const mine = useQuery({ queryKey: ['my-enrollments', myStudent?.id], queryFn: () => myEnrollments(myStudent!.id), enabled: student && Boolean(myStudent) })
+  const myPlans = useMemo(() => new Set((mine.data ?? []).filter((e) => e.status === 'activa' && (!e.ends_at || e.ends_at >= todayIso())).map((e) => e.plan_id)), [mine.data])
   const canEdit = role === 'admin' || role === 'ceo'
   const plans = useQuery({ queryKey: plansKey(schoolId), queryFn: () => listPlans(schoolId!), enabled: Boolean(schoolId) })
   const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
@@ -20,7 +25,7 @@ export function PlanesList() {
 
   const spName = useMemo(() => new Map((specialties.data ?? []).map((s) => [s.id, s.name])), [specialties.data])
   const inactiveCount = (plans.data ?? []).filter((p) => !p.active).length
-  const rows = (plans.data ?? []).filter((p) => showInactive || p.active)
+  const rows = (plans.data ?? []).filter((p) => (showInactive && !student) || p.active)
 
   if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus planes.</p>
 
@@ -28,16 +33,16 @@ export function PlanesList() {
     <div className="planes">
       <header className="page-head page-head--row">
         <div>
-          <SchoolFilter />
+          {student ? <span className="eyebrow">{activeSchool.name}</span> : <SchoolFilter />}
           <h1>Planes</h1>
-          {Boolean(plans.data?.length) && <p className="hint">Lo que ofrece tu escuela. El plan predeterminado se sugiere primero al matricular.</p>}
+          {Boolean(plans.data?.length) && <p className="hint">{student ? 'Los planes de tu escuela. Para cambiarte de plan, habla con tu escuela.' : 'Lo que ofrece tu escuela. El plan predeterminado se sugiere primero al matricular.'}</p>}
         </div>
         {canEdit && Boolean(plans.data?.length) && (
           <Link className="fab" to="nuevo" aria-label="Nuevo plan" title="Nuevo plan"><Icon name="plus" size={22} /></Link>
         )}
       </header>
 
-      {inactiveCount > 0 && (
+      {inactiveCount > 0 && !student && (
         <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivos (${inactiveCount})`} />
       )}
 
@@ -62,10 +67,11 @@ export function PlanesList() {
           const cycle = cycleInfo(p.billing_cycle)
           return (
             <li key={p.id}>
-              <Link className={`card plan-card${p.is_default ? ' is-default' : ''}${p.active ? '' : ' is-off'}`} to={p.id}>
+              <PlanCard student={student} className={`card plan-card${p.is_default && !student ? ' is-default' : ''}${myPlans.has(p.id) ? ' is-mine' : ''}${p.active ? '' : ' is-off'}`} to={p.id}>
                 <div className="plan-card__tags">
                   <span className="eyebrow">{p.specialty_id ? spName.get(p.specialty_id) ?? 'Disciplina' : 'Todas las disciplinas'}</span>
-                  {p.is_default && <span className="tag tag--accent">Predeterminado</span>}
+                  {myPlans.has(p.id) && <span className="tag tag--ok">Tu plan</span>}
+                  {p.is_default && !student && <span className="tag tag--accent">Predeterminado</span>}
                   {p.is_trial && <span className="tag">Prueba</span>}
                   {!p.active && <span className="tag">Inactivo</span>}
                 </div>
@@ -78,11 +84,16 @@ export function PlanesList() {
                   {planFeatures(p).map((f) => <li key={f}>{f}</li>)}
                 </ul>
                 {p.description && <p className="hint plan-card__desc">{p.description}</p>}
-              </Link>
+              </PlanCard>
             </li>
           )
         })}
       </ul>
     </div>
   )
+}
+
+// Staff open a plan to edit it; students only read it.
+function PlanCard({ student, className, to, children }: { student: boolean; className: string; to: string; children: ReactNode }) {
+  return student ? <div className={className}>{children}</div> : <Link className={className} to={to}>{children}</Link>
 }

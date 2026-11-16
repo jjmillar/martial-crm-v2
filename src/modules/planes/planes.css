@@ -32,6 +32,10 @@ a.plan-card:focus-visible {
   border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
 }
 
+.plan-card.is-mine {
+  border-color: color-mix(in srgb, var(--ok) 60%, var(--line));
+}
+
 .plan-card.is-off {
   opacity: 0.6;
 }

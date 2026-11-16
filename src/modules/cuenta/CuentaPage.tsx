@@ -8,6 +8,7 @@ import { roleLabel } from '../../lib/roles'
 import { ThemeToggle } from '../../ui/ThemeToggle'
 import { Acc } from '../../ui/Accordion'
 import { MiFicha } from './MiFicha'
+import { PerfilPublico } from './PerfilPublico'
 
 // "Mi cuenta" now lives inside Ajustes; old links (/app/cuenta#ficha) keep working.
 export function CuentaPage() {
@@ -80,6 +81,7 @@ export function CuentaSections() {
       </Acc>
 
       {role === 'alumno' && <Acc id="mi-ficha" icon="enroll" title="Mi ficha de alumno" hint="Contacto, emergencia y salud"><MiFicha /></Acc>}
+      {role === 'alumno' && <Acc id="perfil-publico" icon="globe" title="Mi perfil público" hint="Tu página personal: cinturón, nivel y skills"><PerfilPublico /></Acc>}
 
       <Acc id="contrasena" icon="eye" title="Contraseña">
       <form className="card form-section" onSubmit={onPw} noValidate>

@@ -943,6 +943,64 @@ export type Database = {
           },
         ];
       };
+      student_profiles: {
+        Row: {
+          bio: string | null;
+          created_at: string;
+          handle: string;
+          headline: string | null;
+          published: boolean;
+          school_id: string;
+          show_belt: boolean;
+          show_skills: boolean;
+          show_stats: boolean;
+          student_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          bio?: string | null;
+          created_at?: string;
+          handle: string;
+          headline?: string | null;
+          published?: boolean;
+          school_id: string;
+          show_belt?: boolean;
+          show_skills?: boolean;
+          show_stats?: boolean;
+          student_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          bio?: string | null;
+          created_at?: string;
+          handle?: string;
+          headline?: string | null;
+          published?: boolean;
+          school_id?: string;
+          show_belt?: boolean;
+          show_skills?: boolean;
+          show_stats?: boolean;
+          student_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_profiles_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "student_profiles_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: true;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       students: {
         Row: {
           active: boolean;
@@ -1468,6 +1526,37 @@ export type Database = {
         };
         Returns: string;
       };
+      save_my_public_profile: {
+        Args: {
+          p_bio: string;
+          p_handle: string;
+          p_headline: string;
+          p_published: boolean;
+          p_show_belt: boolean;
+          p_show_skills: boolean;
+          p_show_stats: boolean;
+          p_student_id: string;
+        };
+        Returns: {
+          bio: string | null;
+          created_at: string;
+          handle: string;
+          headline: string | null;
+          published: boolean;
+          school_id: string;
+          show_belt: boolean;
+          show_skills: boolean;
+          show_stats: boolean;
+          student_id: string;
+          updated_at: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "student_profiles";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       school_landing: { Args: { p_slug: string }; Returns: Json };
       school_owner: {
         Args: { p_school_id: string };
@@ -1498,6 +1587,10 @@ export type Database = {
       };
       storage_school_id: { Args: { p_name: string }; Returns: string };
       student_progress: { Args: { p_student_id: string }; Returns: Json };
+      student_public_profile: {
+        Args: { p_handle: string; p_slug: string };
+        Returns: Json;
+      };
       sync_all_class_sessions: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;

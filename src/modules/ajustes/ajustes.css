@@ -512,3 +512,35 @@
   justify-content: space-between;
   gap: 12px;
 }
+
+/* Student public profile settings */
+.pp-handle {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+.pp-handle__prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-right: 0;
+  border-radius: var(--radius) 0 0 var(--radius);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pp-handle .input {
+  flex: 1;
+  min-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.pp-toggles {
+  display: grid;
+  gap: 12px;
+}

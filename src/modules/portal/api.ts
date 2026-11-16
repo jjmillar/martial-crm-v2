@@ -51,11 +51,11 @@ export async function undoCheckIn(classId: string) {
   if (error) throw new Error('No se pudo deshacer.')
 }
 
-export type MyEnrollment = { id: string; status: string; ends_at: string | null; start_date: string; plan: { name: string } | null }
+export type MyEnrollment = { id: string; plan_id: string; status: string; ends_at: string | null; start_date: string; plan: { name: string } | null }
 export async function myEnrollments(studentId: string): Promise<MyEnrollment[]> {
   const { data, error } = await supabase
     .from('enrollments')
-    .select('id, status, ends_at, start_date, plan:plans(name)')
+    .select('id, plan_id, status, ends_at, start_date, plan:plans(name)')
     .eq('student_id', studentId)
     .neq('status', 'cancelada')
     .order('start_date', { ascending: false })
