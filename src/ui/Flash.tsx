@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { clearNavState, useLocation } from '../lib/nav'
 import { Icon } from './Icon'
+import { FLASH_EVENT } from './flashEvent'
 import { motion } from './motion'
+
+let flashSeq = 0
 
 // One-shot confirmation after a navigation, e.g. navigate('..', { state: { flash: 'Plan creado.' } }).
 // The message is dropped from history right away so a reload doesn't show it again.
@@ -16,6 +19,12 @@ export function Flash() {
     setMsg({ text, key: location.key })
     clearNavState()
   }, [text, location.key])
+
+  useEffect(() => {
+    const on = (e: Event) => setMsg({ text: (e as CustomEvent<string>).detail, key: `flash:${++flashSeq}` })
+    window.addEventListener(FLASH_EVENT, on)
+    return () => window.removeEventListener(FLASH_EVENT, on)
+  }, [])
 
   // Its own clock: it leaves after 3.5 s with the standard exit even if the user has already moved on.
   const msgKey = msg?.key

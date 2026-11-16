@@ -6,6 +6,7 @@ import { longDate, todayIso } from '../../lib/dates'
 import { hhmm } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
 import { Modal } from '../../ui/Modal'
+import { flash } from '../../ui/flashEvent'
 import { Toggle } from '../../ui/Toggle'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { listTags, type ClassFull } from '../clases/api'
@@ -69,7 +70,7 @@ function SessionBody({ session, trials, onClose }: { session: Session; trials: T
         {canMark ? <Roster cls={cls} date={date} /> : <p className="hint">La asistencia se toma desde el día de la clase.</p>}
       </section>
 
-      <SessionInfo session={session} />
+      <SessionInfo session={session} onSaved={onClose} />
     </>
   )
 }
@@ -183,7 +184,7 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
 
 // Skills and description of this session (this class on this date). Saved to its record only: other dates and the
 // class itself don't change (edit the class in Clases for that). Admins edit; the rest of the team reads.
-function SessionInfo({ session }: { session: Session }) {
+function SessionInfo({ session, onSaved }: { session: Session; onSaved: () => void }) {
   const { activeSchool, role } = useSchool()
   const schoolId = activeSchool!.id
   const canEdit = role === 'admin' || role === 'ceo'
@@ -205,7 +206,8 @@ function SessionInfo({ session }: { session: Session }) {
   const saveDesc = useMutation({
     mutationFn: () => saveSession(session, desc.trim() || null, picked),
     onMutate: () => setMsg(null),
-    onSuccess: async () => { setSavedDesc(desc); await refresh(); setMsg({ ok: true, text: 'Descripción guardada para esta clase.' }) },
+    // Like saving any form: back to the list of classes with a confirmation.
+    onSuccess: async () => { setSavedDesc(desc); await refresh(); onSaved(); flash(`Descripción de "${v.name}" guardada.`) },
     onError: () => setMsg({ ok: false, text: 'No se pudo guardar la descripción.' }),
   })
 
