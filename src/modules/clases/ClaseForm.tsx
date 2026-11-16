@@ -42,6 +42,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
   const [room, setRoom] = useState(c?.room ?? '')
   const [capacity, setCapacity] = useState(c?.capacity?.toString() ?? '')
   const [color, setColor] = useState(c?.color ?? classColors[0])
+  const [description, setDescription] = useState(c?.description ?? '')
   const [notes, setNotes] = useState(c?.notes ?? '')
   const [active, setActive] = useState(c?.active ?? true)
   const [tagIds, setTagIds] = useState<string[]>(c?.tag_ids ?? [])
@@ -68,7 +69,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
       for (const r of rows) if (!r.start_time || !r.end_time || r.end_time <= r.start_time) throw new Error('Cada horario debe terminar después de empezar.')
       return saveClass(
         schoolId!, c?.id ?? null,
-        { name: name.trim(), specialty_id: specialtyId || null, teacher_id: teacherId || null, room: room.trim() || null, capacity: cap, level, color, notes: notes.trim() || null, active },
+        { name: name.trim(), specialty_id: specialtyId || null, teacher_id: teacherId || null, room: room.trim() || null, capacity: cap, level, color, description: description.trim() || null, notes: notes.trim() || null, active },
         tagIds, rows.map(({ weekday, start_time, end_time }) => ({ weekday, start_time, end_time })),
       )
     },
@@ -147,6 +148,11 @@ function ClaseForm({ c }: { c?: ClassFull }) {
                 <button key={col} type="button" role="radio" aria-checked={color === col} aria-label={col} className="swatch" style={{ background: col }} onClick={() => { setColor(col); touch() }} />
               ))}
             </div>
+          </div>
+          <div className="field">
+            <label htmlFor="c-desc">Descripción</label>
+            <textarea id="c-desc" className="input" rows={2} maxLength={300} value={description} onChange={(e) => { setDescription(e.target.value); touch() }} placeholder="Ej: Técnica base de jiu-jitsu para quienes recién empiezan." aria-describedby="c-desc-hint" />
+            <p className="hint" id="c-desc-hint">Se muestra en tu landing page, donde los visitantes eligen su clase de prueba gratis.</p>
           </div>
         </section>
 

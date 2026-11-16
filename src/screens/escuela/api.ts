@@ -11,7 +11,11 @@ export type Landing = {
   photos: { path: string; caption: string | null }[]
   schedule: { weekday: number; start: string; end: string; name: string; color: string; level: string; discipline: string | null }[] | null
   plans: { name: string; price: number; cycle: string; description: string | null; trial: boolean }[] | null
-  trial: { note: string | null; slots: { slot_id: string; date: string; start: string; end: string; free: number }[] } | null
+  // Bookable trial classes: every weekly block of the school's active classes, next 21 days (unlimited places).
+  trial: {
+    note: string | null
+    slots: { schedule_id: string; class_id: string; date: string; start: string; end: string; name: string; description: string | null; discipline: string | null; level: string; color: string }[]
+  } | null
 }
 
 export function useLanding(slug: string | undefined, initial?: Landing | null) {

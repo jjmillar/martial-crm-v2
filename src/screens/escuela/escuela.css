@@ -542,8 +542,7 @@
   scroll-snap-type: x proximity;
 }
 
-.sp-trial__day,
-.sp-trial__time {
+.sp-trial__day {
   display: grid;
   flex: none;
   place-items: center;
@@ -560,48 +559,87 @@
 }
 
 .sp-trial__day span,
-.sp-trial__day small,
-.sp-trial__time small {
+.sp-trial__day small {
   color: var(--muted);
   font-size: 12px;
 }
 
-.sp-trial__day.is-on,
-.sp-trial__time.is-on {
+.sp-trial__day.is-on {
   border-color: var(--brand);
   background: var(--brand);
   color: var(--on-brand);
 }
 
-.sp-trial__day.is-on span,
-.sp-trial__time.is-on small {
+.sp-trial__day.is-on span {
   color: inherit;
   opacity: 0.85;
 }
 
-.sp-trial__day:disabled,
-.sp-trial__time:disabled {
+.sp-trial__day:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.sp-trial__times {
-  display: flex;
-  flex-wrap: wrap;
+/* The day's classes, as option cards (time, name, discipline · level, description) */
+.sp-trial__classes {
+  display: grid;
   gap: 8px;
 }
 
-.sp-trial__time {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 10px;
-  padding-inline: 16px;
-  white-space: nowrap;
-  font-weight: 600;
+@media (min-width: 640px) {
+  .sp-trial__classes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.sp-trial__time small {
-  font-weight: 400;
+.sp-trial__class {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--class-color, var(--brand));
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+
+.sp-trial__class:hover {
+  background: color-mix(in srgb, var(--brand) 5%, var(--surface));
+}
+
+.sp-trial__class.is-on {
+  border-color: var(--brand);
+  border-left-color: var(--class-color, var(--brand));
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+  box-shadow: 0 0 0 1px var(--brand);
+}
+
+.sp-trial__class-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.sp-trial__class-name {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.sp-trial__class-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sp-trial__class-desc {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 .sp-trial__fields {

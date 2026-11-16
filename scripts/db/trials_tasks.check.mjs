@@ -9,61 +9,69 @@ const a = (await as(db, O1, `select (public.create_school('Dojo A','dojo-a')).id
 const b = (await as(db, O2, `select (public.create_school('Dojo B','dojo-b')).id`)).rows[0].id
 await as(db, O1, `insert into public.school_members (school_id, user_id, role) values ($1,$2,'user')`, [a, M])
 
-// Slots: admin only
+// Trial slots come from the school's classes (every weekly block of an active class), unlimited places.
 const tomorrow = (await db.query(`select ((now() at time zone 'America/Santiago')::date + 1) d, extract(isodow from (now() at time zone 'America/Santiago')::date + 1)::int w`)).rows[0]
 const day = tomorrow.d.toISOString().slice(0, 10), wd = tomorrow.w
-const slot = (await as(db, O1, `insert into public.trial_slots (school_id, weekday, start_time, end_time, capacity) values ($1,$2,'19:00','20:00',1) returning id`, [a, wd])).rows[0].id
-const staffSlot = await tryAs(db, M, `insert into public.trial_slots (school_id, weekday, start_time, end_time) values ($1,1,'10:00','11:00')`, [a])
-check('staff (user role) cannot create slots', !staffSlot.ok, staffSlot.err)
-const xSlot = await tryAs(db, O2, `insert into public.trial_slots (school_id, weekday, start_time, end_time) values ($1,1,'10:00','11:00')`, [a])
-check("another owner cannot create slots in my school", !xSlot.ok, xSlot.err)
-const badTime = await tryAs(db, O1, `insert into public.trial_slots (school_id, weekday, start_time, end_time) values ($1,1,'11:00','10:00')`, [a])
-check('slot must end after it starts', !badTime.ok, badTime.err)
+const q = (sql) => sql
+const cls = (await as(db, O1, q("insert into public.classes (school_id, name, description) values ($1,'BJJ Fundamentos','Técnica base para empezar desde cero') returning id"), [a])).rows[0].id
+const blk = (await as(db, O1, q("insert into public.class_schedules (school_id, class_id, weekday, start_time, end_time) values ($1,$2,$3,'19:00','20:00') returning id"), [a, cls, wd])).rows[0].id
+const off = (await as(db, O1, q("insert into public.classes (school_id, name, active) values ($1,'Clase pausada',false) returning id"), [a])).rows[0].id
+const offBlk = (await as(db, O1, q("insert into public.class_schedules (school_id, class_id, weekday, start_time, end_time) values ($1,$2,$3,'07:00','08:00') returning id"), [a, off, wd])).rows[0].id
+const longDesc = await tryAs(db, O1, q("update public.classes set description=repeat('x',301) where id=$1"), [cls])
+check('class description is capped at 300 characters', !longDesc.ok, longDesc.err)
+const landing = async () => (await as(db, null, q("select public.school_landing('dojo-a') l"))).rows[0].l
+const book = (slug, blockId, date, name, phone, extra = '') => tryAs(db, null, q("select public.book_trial('" + slug + "',$1," + date + ",'" + name + "','" + phone + "'" + extra + ") id"), [blockId, day])
 
 // Landing: hidden until enabled
-let L = (await as(db, null, `select public.school_landing('dojo-a') l`)).rows[0].l
+let L = await landing()
 check('trial block is hidden while disabled', L.trial === null, L.trial)
-const off = await tryAs(db, null, `select public.book_trial('dojo-a',$1,$2,'Pedro','+56 9 1111 1111')`, [slot, day])
-check('cannot book while disabled', !off.ok, off.err)
-check('minimum notice defaults to 24 hours', (await as(db, O1, `select trial_min_hours h from public.schools where id=$1`, [a])).rows[0].h === 24)
-// 48 h of notice: tomorrow's slot (at most ~43 h away) is neither offered nor bookable.
-await as(db, O1, `update public.schools set trial_enabled=true, trial_min_hours=48 where id=$1`, [a])
-L = (await as(db, null, `select public.school_landing('dojo-a') l`)).rows[0].l
+const offB = await book('dojo-a', blk, '$2', 'Pedro', '+56 9 1111 1111')
+check('cannot book while disabled', !offB.ok, offB.err)
+check('minimum notice defaults to 24 hours', (await as(db, O1, q('select trial_min_hours h from public.schools where id=$1'), [a])).rows[0].h === 24)
+// 48 h of notice: tomorrow's block (at most ~43 h away) is neither offered nor bookable.
+await as(db, O1, q('update public.schools set trial_enabled=true, trial_min_hours=48 where id=$1'), [a])
+L = await landing()
 check('slots inside the notice window are not offered', L.trial.slots.length === 2 && L.trial.slots[0].date !== day, L.trial.slots)
-const tooLate = await tryAs(db, null, `select public.book_trial('dojo-a',$1,$2,'Pedro','+56 9 1111 1111')`, [slot, day])
+const tooLate = await book('dojo-a', blk, '$2', 'Pedro', '+56 9 1111 1111')
 check('booking inside the notice window is rejected', !tooLate.ok && tooLate.err.includes('too late'), tooLate.err)
-const badHours = await tryAs(db, O1, `update public.schools set trial_min_hours=500 where id=$1`, [a])
+const badHours = await tryAs(db, O1, q('update public.schools set trial_min_hours=500 where id=$1'), [a])
 check('notice is capped at 168 hours', !badHours.ok, badHours.err)
-const staffHours = await tryAs(db, M, `update public.schools set trial_min_hours=0 where id=$1`, [a])
+const staffHours = await tryAs(db, M, q('update public.schools set trial_min_hours=0 where id=$1'), [a])
 check('staff (user role) cannot change the notice', !staffHours.ok || staffHours.affected === 0, staffHours.err)
-await as(db, O1, `update public.schools set trial_enabled=true, trial_min_hours=0, trial_note='Trae ropa cómoda' where id=$1`, [a])
-L = (await as(db, null, `select public.school_landing('dojo-a') l`)).rows[0].l
-check('landing lists upcoming slot dates', L.trial.note === 'Trae ropa cómoda' && L.trial.slots.length === 3 && L.trial.slots[0].date === day && L.trial.slots[0].free === 1, L.trial)
-check('trial_availability is not directly callable', !(await tryAs(db, null, `select public.trial_availability($1)`, [a])).ok)
+await as(db, O1, q("update public.schools set trial_enabled=true, trial_min_hours=0, trial_note='Trae ropa cómoda' where id=$1"), [a])
+L = await landing()
+const first = L.trial.slots[0]
+check('landing lists the class blocks with name and description', L.trial.note === 'Trae ropa cómoda' && L.trial.slots.length === 3 && first.date === day && first.schedule_id === blk && first.name === 'BJJ Fundamentos' && first.description.startsWith('Técnica') && !('free' in first), L.trial)
+check('inactive classes are not offered', !L.trial.slots.some((x) => x.schedule_id === offBlk))
+check('trial_availability is not directly callable', !(await tryAs(db, null, q('select public.trial_availability($1)'), [a])).ok)
 
-// Booking
-const bk = await tryAs(db, null, `select public.book_trial('dojo-a',$1,$2,'Pedro Pérez','+56 9 1111 1111','pedro@test.cl','Nunca he entrenado') id`, [slot, day])
+// Booking (unlimited places)
+const bk = await book('dojo-a', blk, '$2', 'Pedro Pérez', '+56 9 1111 1111', ",'pedro@test.cl','Nunca he entrenado'")
 check('a visitor books a trial class', bk.ok, bk.err)
-const full = await tryAs(db, null, `select public.book_trial('dojo-a',$1,$2,'Otra','+56 9 2222 2222')`, [slot, day])
-check('a full slot rejects more bookings', !full.ok && full.err.includes('slot full'), full.err)
-const wrongDay = await tryAs(db, null, `select public.book_trial('dojo-a',$1,($2::date + 1),'Otra','+56 9 2222 2222')`, [slot, day])
-check('date must match the slot weekday', !wrongDay.ok, wrongDay.err)
-const past = await tryAs(db, null, `select public.book_trial('dojo-a',$1,($2::date - 7),'Otra','+56 9 2222 2222')`, [slot, day])
-check('cannot book in the past or today', !past.ok, past.err)
-const otherSchool = await tryAs(db, null, `select public.book_trial('dojo-b',$1,$2,'Otra','+56 9 2222 2222')`, [slot, day])
-check("cannot book a slot of another school", !otherSchool.ok, otherSchool.err)
-await tryAs(db, null, `select public.book_trial('dojo-a',$1,($2::date + 7),'Pedro','+56911111111')`, [slot, day])
-const spam = await tryAs(db, null, `select public.book_trial('dojo-a',$1,($2::date + 14),'Pedro','+56 9 1111-1111')`, [slot, day])
+const many = []
+for (let i = 0; i < 4; i++) many.push(await book('dojo-a', blk, '$2', 'Persona ' + i, '+56 9 3333 000' + i))
+check('places are unlimited', many.every((r) => r.ok), many.map((r) => r.err))
+const row = (await as(db, O1, q("select class_id, schedule_id, class_name from public.trial_bookings where name='Pedro Pérez'"))).rows[0]
+check('booking records the class', row.class_id === cls && row.schedule_id === blk && row.class_name === 'BJJ Fundamentos', row)
+const inactive = await book('dojo-a', offBlk, '$2', 'Otra', '+56 9 2222 2222')
+check('an inactive class cannot be booked', !inactive.ok, inactive.err)
+const wrongDay = await book('dojo-a', blk, '($2::date + 1)', 'Otra', '+56 9 2222 2222')
+check('date must match the class weekday', !wrongDay.ok, wrongDay.err)
+const past = await book('dojo-a', blk, '($2::date - 7)', 'Otra', '+56 9 2222 2222')
+check('cannot book in the past', !past.ok, past.err)
+const otherSchool = await book('dojo-b', blk, '$2', 'Otra', '+56 9 2222 2222')
+check('cannot book a class of another school', !otherSchool.ok, otherSchool.err)
+await book('dojo-a', blk, '($2::date + 7)', 'Pedro', '+56911111111')
+const spam = await book('dojo-a', blk, '($2::date + 14)', 'Pedro', '+56 9 1111-1111')
 check('same phone limited to 2 upcoming bookings', !spam.ok && spam.err.includes('too many'), spam.err)
-L = (await as(db, null, `select public.school_landing('dojo-a') l`)).rows[0].l
-check('landing shows the slot as full', L.trial.slots[0].free === 0)
+L = await landing()
 check('landing exposes no booking data', !JSON.stringify(L).includes('Pedro'))
-{ const r = await tryAs(db, null, `select * from public.trial_bookings`); check('visitors cannot read bookings', !r.ok || r.rows.length === 0, r.err) }
+{ const r = await tryAs(db, null, q('select * from public.trial_bookings')); check('visitors cannot read bookings', !r.ok || r.rows.length === 0, r.err) }
 
 // Booking became a task for the school
 const t = (await as(db, M, `select * from public.tasks`)).rows
-check('booking creates a task visible to staff', t.length === 2 && t.every((x) => x.kind === 'clase_prueba' && x.status === 'por_hacer') && t.some((x) => x.title.startsWith('Clase de prueba: Pedro Pérez') && x.notes.includes('+56 9 1111 1111')), t)
-check('staff see the bookings', (await as(db, M, `select count(*)::int c from public.trial_bookings`)).rows[0].c === 2)
+check('booking creates a task visible to staff (with the class)', t.length === 6 && t.every((x) => x.kind === 'clase_prueba' && x.status === 'por_hacer') && t.some((x) => x.title.startsWith('Clase de prueba: Pedro Pérez · BJJ Fundamentos') && x.notes.includes('+56 9 1111 1111')), t.map((x) => x.title))
+check('staff see the bookings', (await as(db, M, `select count(*)::int c from public.trial_bookings`)).rows[0].c === 6)
 check("another owner sees none of it", (await as(db, O2, `select count(*)::int c from public.tasks`)).rows[0].c === 0 && (await as(db, O2, `select count(*)::int c from public.trial_bookings`)).rows[0].c === 0)
 check('accounts outside the school see nothing', (await as(db, Z, `select count(*)::int c from public.tasks`)).rows[0].c === 0)
 

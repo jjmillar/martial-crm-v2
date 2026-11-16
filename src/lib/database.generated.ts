@@ -236,6 +236,7 @@ export type Database = {
           capacity: number | null;
           color: string;
           created_at: string;
+          description: string | null;
           id: string;
           level: Database["public"]["Enums"]["class_level"];
           name: string;
@@ -252,6 +253,7 @@ export type Database = {
           capacity?: number | null;
           color?: string;
           created_at?: string;
+          description?: string | null;
           id?: string;
           level?: Database["public"]["Enums"]["class_level"];
           name: string;
@@ -267,6 +269,7 @@ export type Database = {
           capacity?: number | null;
           color?: string;
           created_at?: string;
+          description?: string | null;
           id?: string;
           level?: Database["public"]["Enums"]["class_level"];
           name?: string;
@@ -1147,6 +1150,8 @@ export type Database = {
       };
       trial_bookings: {
         Row: {
+          class_id: string | null;
+          class_name: string | null;
           created_at: string;
           date: string;
           email: string | null;
@@ -1155,6 +1160,7 @@ export type Database = {
           name: string;
           notes: string | null;
           phone: string;
+          schedule_id: string | null;
           school_id: string;
           slot_id: string | null;
           start_time: string;
@@ -1162,6 +1168,8 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          class_id?: string | null;
+          class_name?: string | null;
           created_at?: string;
           date: string;
           email?: string | null;
@@ -1170,12 +1178,15 @@ export type Database = {
           name: string;
           notes?: string | null;
           phone: string;
+          schedule_id?: string | null;
           school_id: string;
           slot_id?: string | null;
           start_time: string;
           status?: string;
         };
         Update: {
+          class_id?: string | null;
+          class_name?: string | null;
           created_at?: string;
           date?: string;
           email?: string | null;
@@ -1184,12 +1195,27 @@ export type Database = {
           name?: string;
           notes?: string | null;
           phone?: string;
+          schedule_id?: string | null;
           school_id?: string;
           slot_id?: string | null;
           start_time?: string;
           status?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "trial_bookings_class_id_fkey";
+            columns: ["class_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trial_bookings_schedule_id_fkey";
+            columns: ["schedule_id"];
+            isOneToOne: false;
+            referencedRelation: "class_schedules";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "trial_bookings_school_id_fkey";
             columns: ["school_id"];
@@ -1264,7 +1290,7 @@ export type Database = {
           p_name: string;
           p_notes?: string;
           p_phone: string;
-          p_slot_id: string;
+          p_schedule_id: string;
           p_slug: string;
         };
         Returns: string;

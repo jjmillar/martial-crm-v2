@@ -53,6 +53,7 @@ export type ClassInput = {
   capacity: number | null
   level: ClassLevel
   color: string
+  description: string | null
   notes: string | null
   active: boolean
 }

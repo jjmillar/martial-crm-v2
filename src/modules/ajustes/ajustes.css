@@ -385,3 +385,10 @@
 .agenda__hours {
   max-width: 140px;
 }
+
+.ajustes__sub-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
