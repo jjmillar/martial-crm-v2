@@ -161,7 +161,7 @@ export function StudentHome() {
 
       <section className="tile tile--wide rise" style={{ animationDelay: '120ms' }} aria-label="Skills">
         <div className="tile__head"><span className="eyebrow">Skills</span></div>
-        {p && p.skills.length === 0 && <p className="hint">Tus skills aparecen cuando asistas a clases con etiquetas (por ejemplo Guardia o Derribos).</p>}
+        {p && p.skills.length === 0 && <p className="hint">Tus skills aparecen cuando asistas a clases con skills (por ejemplo Guardia o Derribos).</p>}
         <ul className="skills">
           {p?.skills.map((s) => (
             <li key={s.tag_id}>

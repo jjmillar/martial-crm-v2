@@ -11,7 +11,7 @@ import { SchoolFilter } from '../../ui/SchoolFilter'
 const DONE_SHOWN = 20
 const nowPos = () => Date.now() / 1000
 
-// Tareas: one place for approvals (CEO), automatic notices (trial class bookings) and the team's own tasks.
+// Tareas: approvals (CEO) and the team's own tasks. Trial class bookings live in Asistencia, on their class card.
 // Simple fixed board: move tasks between columns and edit them; the columns themselves are not editable.
 export function TareasPage() {
   const { activeSchool, role } = useSchool()
@@ -20,7 +20,7 @@ export function TareasPage() {
       <header className="page-head">
         <SchoolFilter fallback="Tareas" />
         <h1>Tareas</h1>
-        <p className="hint">Aprobaciones, clases de prueba agendadas y las tareas del equipo, en un solo lugar.</p>
+        <p className="hint">Aprobaciones y las tareas del equipo, en un solo lugar.</p>
       </header>
       {role === 'ceo' && <Aprobaciones />}
       {activeSchool ? <Board schoolId={activeSchool.id} /> : <p className="hint">Selecciona una escuela para ver sus tareas.</p>}

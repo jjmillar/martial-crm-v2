@@ -3,21 +3,46 @@
   gap: 16px;
 }
 
-.att-date.input {
-  width: auto;
-  min-height: 36px;
+/* Stack of class cards, grouped by day (week / month views) */
+.att-days {
+  display: grid;
+  gap: 20px;
 }
 
-.att-classes {
-  display: flex;
-  flex-wrap: wrap;
+.att-day {
+  display: grid;
   gap: 8px;
 }
 
-.att-class {
+.att-day__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.att-day__title.is-today {
+  color: var(--text);
+}
+
+.att-stack {
   display: grid;
-  gap: 2px;
-  padding: 10px 14px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.att-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 14px 12px 16px;
   border: 1px solid var(--line);
   border-left: 4px solid var(--class-color, var(--accent));
   border-radius: var(--radius-card);
@@ -26,40 +51,119 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), translate var(--dur-fast) var(--ease);
 }
 
-.att-class span {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.att-class[aria-pressed='true'] {
-  border-color: var(--text);
-  border-left-color: var(--class-color, var(--accent));
+.att-card:hover {
   background: var(--surface-2);
 }
 
-.att-other.input {
-  width: auto;
-  min-width: 180px;
-  align-self: stretch;
+.att-card:active {
+  translate: 0 1px;
+}
+
+.att-card.is-live {
+  border-color: color-mix(in srgb, var(--ok) 55%, var(--line));
+  border-left-color: var(--class-color, var(--accent));
+}
+
+.att-card > svg {
+  flex: none;
+  color: var(--faint);
+}
+
+.att-card__time {
+  display: grid;
+  flex: none;
+  min-width: 48px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.att-card__time small {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.att-card__main {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.att-card__main strong {
+  overflow-wrap: anywhere;
+}
+
+.att-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.att-card__tags:empty {
+  display: none;
+}
+
+/* Class pop-up (one class on one date) */
+.sess-title {
+  padding-left: 12px;
+  border-left: 4px solid var(--class-color, var(--accent));
+}
+
+.sess-title h2 {
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+
+.sess-section {
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.sess-section h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.sess-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sess-trials {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sess-trial {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
 }
 
 .att-roster {
   display: grid;
   gap: 14px;
-}
-
-.att-roster__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.att-roster__head h2 {
-  font-size: 20px;
 }
 
 .att-count {

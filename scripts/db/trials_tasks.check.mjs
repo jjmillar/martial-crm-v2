@@ -68,9 +68,11 @@ L = await landing()
 check('landing exposes no booking data', !JSON.stringify(L).includes('Pedro'))
 { const r = await tryAs(db, null, q('select * from public.trial_bookings')); check('visitors cannot read bookings', !r.ok || r.rows.length === 0, r.err) }
 
-// Booking became a task for the school
-const t = (await as(db, M, `select * from public.tasks`)).rows
-check('booking creates a task visible to staff (with the class)', t.length === 6 && t.every((x) => x.kind === 'clase_prueba' && x.status === 'por_hacer') && t.some((x) => x.title.startsWith('Clase de prueba: Pedro Pérez · BJJ Fundamentos') && x.notes.includes('+56 9 1111 1111')), t.map((x) => x.title))
+// Bookings are listed in Asistencia (by class and date), not as tasks
+const t = (await as(db, M, q('select * from public.tasks'))).rows
+check('a booking does not create a task', t.length === 0, t.map((x) => x.title))
+const forCard = (await as(db, M, q("select name, phone, notes from public.trial_bookings where class_id=$1 and date=$2 and status='agendada' order by created_at"), [cls, day])).rows
+check('staff read the bookings of a class and date (for its attendance card)', forCard.length === 5 && forCard[0].name === 'Pedro Pérez' && forCard[0].phone === '+56 9 1111 1111' && forCard[0].notes === 'Nunca he entrenado', forCard)
 check('staff see the bookings', (await as(db, M, `select count(*)::int c from public.trial_bookings`)).rows[0].c === 6)
 check("another owner sees none of it", (await as(db, O2, `select count(*)::int c from public.tasks`)).rows[0].c === 0 && (await as(db, O2, `select count(*)::int c from public.trial_bookings`)).rows[0].c === 0)
 check('accounts outside the school see nothing', (await as(db, Z, `select count(*)::int c from public.tasks`)).rows[0].c === 0)

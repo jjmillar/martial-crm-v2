@@ -55,11 +55,11 @@ function SchoolSections() {
       <Acc id="agendamiento" icon="calendar" title="Agendamiento" hint="Clases de prueba gratis desde la landing">
         <Agendamiento key={`agenda-${school.id}`} school={school} />
       </Acc>
-      <Acc id="catalogos" icon="plan" title="Catálogos" hint="Especialidades y etiquetas de clase">
+      <Acc id="catalogos" icon="plan" title="Catálogos" hint="Especialidades y skills">
         <p className="hint">Listas que usa toda la escuela. Desactivar oculta un elemento de las opciones sin borrar su historial.</p>
         <div className="catalog-grid">
           <Catalogo table="specialties" schoolId={school.id} canEdit title="Especialidades" description="Disciplinas que enseñan los profesores." placeholder="Ej: Jiu-jitsu brasileño" />
-          <Catalogo table="tags" schoolId={school.id} canEdit withIcon title="Etiquetas de clase (skills)" description="Clasifican las clases y son las skills de los alumnos: cada asistencia confirmada suma XP a las etiquetas de esa clase." placeholder="Ej: Guardia, Derribos" />
+          <Catalogo table="tags" schoolId={school.id} canEdit withIcon title="Skills" description="Clasifican las clases y son lo que entrenan los alumnos: cada asistencia confirmada suma XP a las skills de esa clase." placeholder="Ej: Guardia, Derribos" />
         </div>
       </Acc>
       <Acc id="exportar" icon="share" title="Exportar datos" hint="Archivos CSV para Excel o Sheets">

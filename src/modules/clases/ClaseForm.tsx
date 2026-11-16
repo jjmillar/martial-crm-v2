@@ -181,26 +181,26 @@ function ClaseForm({ c }: { c?: ClassFull }) {
         </section>
 
         <section className="card form-section">
-          <h2>Etiquetas y notas</h2>
-          <p className="hint">Las etiquetas son las <b>skills</b> que suben los alumnos al asistir a esta clase. {canEdit && schoolId && (
+          <h2>Skills y notas</h2>
+          <p className="hint">Las <b>skills</b> que suben los alumnos al asistir a esta clase. {canEdit && schoolId && (
             <CatalogoDialog
-              label="Crear o editar etiquetas"
+              label="Crear o editar skills"
               table="tags" schoolId={schoolId} withIcon
-              title="Etiquetas de clase (skills)"
-              description="Cada asistencia confirmada suma XP a las etiquetas de esa clase."
+              title="Skills"
+              description="Cada asistencia confirmada a una clase suma XP a sus skills."
               placeholder="Ej: Guardia, Derribos"
               onChange={() => qc.invalidateQueries({ queryKey: ['tags', schoolId] })}
             />
           )}</p>
           {tags.data?.length ? (
-            <div className="pick-chips" role="group" aria-label="Etiquetas">
+            <div className="pick-chips" role="group" aria-label="Skills">
               {tags.data.filter((t) => t.active || tagIds.includes(t.id)).map((t) => (
                 <button key={t.id} type="button" className="pick-chip" aria-pressed={tagIds.includes(t.id)} onClick={() => { setTagIds((x) => (x.includes(t.id) ? x.filter((y) => y !== t.id) : [...x, t.id])); touch() }}>
                   {t.icon} {t.label}
                 </button>
               ))}
             </div>
-          ) : <p className="hint">Sin etiquetas todavía.</p>}
+          ) : <p className="hint">Sin skills todavía.</p>}
           <div className="field">
             <label htmlFor="c-notes">Notas</label>
             <textarea id="c-notes" className="input" rows={2} maxLength={400} value={notes} onChange={(e) => { setNotes(e.target.value); touch() }} placeholder="Ej: traer gi, protector bucal" />

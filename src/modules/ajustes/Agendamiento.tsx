@@ -77,7 +77,7 @@ export function Agendamiento({ school }: { school: School }) {
       <div className="ajustes__section-head">
         <div>
           <h2 id="agenda-h">Agendamiento</h2>
-          <p className="hint">Las personas agendan una clase de prueba gratis desde tu landing page, eligiendo entre tus clases y sus horarios, sin límite de cupos. Cada reserva llega a Tareas.</p>
+          <p className="hint">Las personas agendan una clase de prueba gratis desde tu landing page, eligiendo entre tus clases y sus horarios, sin límite de cupos. Cada reserva aparece en Asistencia, en la tarjeta de esa clase y día.</p>
         </div>
         {school.landing_enabled && <a className="btn btn--ghost" href={`/e/${school.slug}#prueba`} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={16} /> Ver en la página</a>}
       </div>

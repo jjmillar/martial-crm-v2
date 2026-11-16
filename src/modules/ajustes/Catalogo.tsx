@@ -123,7 +123,7 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
             )}
             {canEdit && editing?.id !== it.id && (confirmId === it.id ? (
               <span className="chip-confirm" role="group" aria-label={`Eliminar ${it.text}`}>
-                <span>{table === 'tags' ? '¿Eliminar? Sale de las clases y de las skills de los alumnos.' : '¿Eliminar? Sale de profesores, clases y planes.'}</span>
+                <span>{table === 'tags' ? '¿Eliminar? Sale de las clases y del progreso de los alumnos.' : '¿Eliminar? Sale de profesores, clases y planes.'}</span>
                 <button type="button" className="chip-action chip-action--danger" disabled={remove.isPending} onClick={() => remove.mutate(it.id)}>Sí, eliminar</button>
                 <button type="button" className="chip-action" onClick={() => setConfirmId(null)}>Cancelar</button>
               </span>
