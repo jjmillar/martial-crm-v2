@@ -15,7 +15,7 @@ import { usePendingCount } from '../modules/tareas/api'
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile, user, signOut } = useAuth()
-  const { schools, activeSchool, setActiveSchool, role, loading } = useSchool()
+  const { role, loading } = useSchool()
   const nav = modulesFor(role)
   const pending = usePendingCount()
   const year = new Date().getFullYear()
@@ -27,17 +27,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <Wordmark to="/app" />
           <ThemeToggle />
         </div>
-
-        {schools.length > 1 ? (
-          <div className="field">
-            <label htmlFor="school-switch">Escuela</label>
-            <select id="school-switch" className="input" value={activeSchool?.id ?? ''} onChange={(e) => setActiveSchool(e.target.value)}>
-              {schools.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </div>
-        ) : (
-          <p className="sidebar__school">{activeSchool?.name ?? 'Sin escuela'}</p>
-        )}
 
         <nav className="nav" aria-label="Secciones">
           {nav.map((m) => (

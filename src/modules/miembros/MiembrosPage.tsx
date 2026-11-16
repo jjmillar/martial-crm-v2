@@ -6,6 +6,7 @@ import { roleLabel } from '../../lib/roles'
 import type { SchoolRole } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { inviteMember, listCeos, listMembers, removeMember, updateRole } from './api'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 export function MiembrosPage() {
   const { activeSchool } = useSchool()
@@ -70,7 +71,7 @@ export function MiembrosPage() {
   return (
     <div className="miembros">
       <header className="page-head">
-        <span className="eyebrow">{activeSchool.name}</span>
+        <SchoolFilter />
         <h1>Miembros</h1>
         <p className="hint">Los administradores gestionan toda la escuela. Los usuarios trabajan el día a día.</p>
       </header>

@@ -6,6 +6,7 @@ import { formatDate, santiagoDate } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { Aprobaciones } from './Aprobaciones'
 import { columns, listTasks, tasksKey, type Task, type TaskStatus } from './api'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const DONE_SHOWN = 20
 const nowPos = () => Date.now() / 1000
@@ -17,7 +18,7 @@ export function TareasPage() {
   return (
     <div className="tareas">
       <header className="page-head">
-        <span className="eyebrow">{activeSchool?.name ?? 'Tareas'}</span>
+        <SchoolFilter fallback="Tareas" />
         <h1>Tareas</h1>
         <p className="hint">Aprobaciones, clases de prueba agendadas y las tareas del equipo, en un solo lugar.</p>
       </header>

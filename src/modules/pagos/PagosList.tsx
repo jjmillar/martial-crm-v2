@@ -8,6 +8,7 @@ import { formatCLP } from '../../lib/money'
 import type { PaymentStatus } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { listPayments, methodLabel, paymentsKey, statusLabel } from './api'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 type Filter = PaymentStatus | 'todos'
 const filters: { id: Filter; label: string }[] = [
@@ -59,7 +60,7 @@ export function PagosList() {
     <div className="matriculas">
       <header className="page-head page-head--row">
         <div>
-          <span className="eyebrow">{activeSchool.name}</span>
+          <SchoolFilter />
           <h1>Pagos</h1>
         </div>
         {Boolean(q.data?.length) && <Link className="fab" to="nuevo" aria-label="Registrar pago" title="Registrar pago"><Icon name="plus" size={22} /></Link>}

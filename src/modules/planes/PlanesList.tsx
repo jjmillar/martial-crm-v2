@@ -8,6 +8,7 @@ import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, specialtiesKey } from '../profesores/api'
 import { listPlans, plansKey } from './api'
 import { cycleInfo, planFeatures } from './cycles'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 export function PlanesList() {
   const { activeSchool, role } = useSchool()
@@ -27,7 +28,7 @@ export function PlanesList() {
     <div className="planes">
       <header className="page-head page-head--row">
         <div>
-          <span className="eyebrow">{activeSchool.name}</span>
+          <SchoolFilter />
           <h1>Planes</h1>
           {Boolean(plans.data?.length) && <p className="hint">Lo que ofrece tu escuela. El plan predeterminado se sugiere primero al matricular.</p>}
         </div>

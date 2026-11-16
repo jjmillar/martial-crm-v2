@@ -6,6 +6,7 @@ import { hhmm, weekdayShort, weekdays } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { classesKey, levelLabel, listClasses, listTags } from './api'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
@@ -36,7 +37,7 @@ export function ClasesList() {
     <div className="matriculas">
       <header className="page-head page-head--row">
         <div>
-          <span className="eyebrow">{activeSchool.name}</span>
+          <SchoolFilter />
           <h1>Clases</h1>
         </div>
         {canEdit && Boolean(classes.data?.length) && <Link className="fab" to="nueva" aria-label="Nueva clase" title="Nueva clase"><Icon name="plus" size={22} /></Link>}

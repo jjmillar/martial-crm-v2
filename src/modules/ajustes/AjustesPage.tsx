@@ -13,6 +13,7 @@ import { Catalogo } from './Catalogo'
 import { EscuelaPerfil } from './EscuelaPerfil'
 import { LandingSettings } from './LandingSettings'
 import { Exportar } from './Exportar'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
 
@@ -29,7 +30,7 @@ export function AjustesPage() {
   return (
     <div className="ajustes">
       <header className="page-head">
-        <span className="eyebrow">{manages ? activeSchool!.name : 'Configuración'}</span>
+        {manages ? <SchoolFilter /> : <span className="eyebrow">Configuración</span>}
         <h1>Ajustes</h1>
         <p className="hint">{manages ? 'Toca una sección para abrirla.' : 'Tu perfil, contraseña y apariencia.'}</p>
       </header>

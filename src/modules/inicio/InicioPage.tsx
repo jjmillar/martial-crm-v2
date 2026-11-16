@@ -14,6 +14,7 @@ import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { listPayments, paymentsKey } from '../pagos/api'
 import { StudentHome } from '../portal/StudentPortal'
 import { useApprovalsCount } from '../tareas/api'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 async function weekAttendance(schoolId: string, from: string): Promise<number> {
   const { count, error } = await supabase.from('attendance').select('id', { count: 'exact', head: true }).eq('school_id', schoolId).gte('date', from)
@@ -75,8 +76,9 @@ function StaffHome() {
         <span className="eyebrow">{role ? roleLabel[role] : 'Sin rol'}</span>
         <h1>Hola{firstName ? `, ${firstName}` : ''}.</h1>
         <p className="tile__lead">
-          {activeSchool ? <>{longDate(today)} · {activeSchool.name}</> : 'Todavía no tienes una escuela seleccionada.'}
+          {activeSchool ? <>{longDate(today)}{schools.length < 2 && <> · {activeSchool.name}</>}</> : 'Todavía no tienes una escuela seleccionada.'}
         </p>
+        {schools.length > 1 && <SchoolFilter />}
         {role === 'ceo' && <Link className="btn btn--ghost tile__cta" to="/app/escuelas">{schools.length} {schools.length === 1 ? 'escuela' : 'escuelas'} · Gestionar</Link>}
       </section>
 

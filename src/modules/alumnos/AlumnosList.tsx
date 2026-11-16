@@ -7,6 +7,7 @@ import { yearsSince } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from './api'
 import { beltSwatch } from '../../lib/belts'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 type Filter = 'activos' | 'inactivos' | 'todos'
 
@@ -47,7 +48,7 @@ export function AlumnosList() {
     <div className="alumnos">
       <header className="page-head page-head--row">
         <div>
-          <span className="eyebrow">{activeSchool.name}</span>
+          <SchoolFilter />
           <h1>Alumnos</h1>
         </div>
         {Boolean(students.data?.length) && (

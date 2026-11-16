@@ -12,6 +12,7 @@ import { listStudents, studentsKey } from '../alumnos/api'
 import { classesKey, listClasses } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { StudentAttendance } from '../portal/StudentPortal'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
@@ -136,7 +137,7 @@ function StaffAttendance() {
   return (
     <div className="asistencia">
       <header className="page-head">
-        <span className="eyebrow">{activeSchool.name}</span>
+        <SchoolFilter />
         <h1>Asistencia</h1>
       </header>
 

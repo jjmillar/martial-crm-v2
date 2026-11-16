@@ -504,3 +504,58 @@ input[type='checkbox']:disabled {
   padding: 6px 12px;
   font-size: 13px;
 }
+
+/* School filter (top of each section, only with more than one school) */
+.school-filter {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  color: var(--muted);
+}
+
+.school-filter::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.school-filter__select {
+  max-width: 100%;
+  min-height: 32px;
+  padding: 4px 32px 4px 26px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+.school-filter__select:hover {
+  border-color: color-mix(in srgb, var(--text) 30%, var(--line));
+  background: var(--surface-2);
+}
+
+.school-filter__select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.school-filter svg {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+}

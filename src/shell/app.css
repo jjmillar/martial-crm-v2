@@ -55,11 +55,6 @@
   justify-content: space-between;
 }
 
-.sidebar__school {
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
 .nav {
   display: grid;
   gap: 2px;

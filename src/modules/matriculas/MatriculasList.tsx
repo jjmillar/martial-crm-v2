@@ -6,6 +6,7 @@ import { formatDate, daysUntil } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
 import { Icon } from '../../ui/Icon'
 import { enrollmentsKey, listEnrollments, phaseLabel, phaseOf, type Phase } from './api'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 type Filter = 'vigentes' | 'por_vencer' | 'vencida' | 'pausada' | 'cancelada' | 'todas'
 const filters: { id: Filter; label: string }[] = [
@@ -41,7 +42,7 @@ export function MatriculasList() {
     <div className="matriculas">
       <header className="page-head page-head--row">
         <div>
-          <span className="eyebrow">{activeSchool.name}</span>
+          <SchoolFilter />
           <h1>Inscripciones</h1>
         </div>
         {Boolean(q.data?.length) && <Link className="fab" to="nueva" aria-label="Nueva inscripción" title="Nueva inscripción"><Icon name="plus" size={22} /></Link>}

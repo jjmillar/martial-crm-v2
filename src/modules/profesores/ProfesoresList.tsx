@@ -6,6 +6,7 @@ import { beltSwatch } from '../../lib/belts'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from './api'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
@@ -38,7 +39,7 @@ export function ProfesoresList() {
     <div className="profesores">
       <header className="page-head page-head--row">
         <div>
-          <span className="eyebrow">{activeSchool.name}</span>
+          <SchoolFilter />
           <h1>Profesores</h1>
         </div>
         {canEdit && (

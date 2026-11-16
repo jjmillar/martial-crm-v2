@@ -6,6 +6,7 @@ import { addDays, dayMonth, longDate, monthGrid, monthTitle, startOfWeek, todayI
 import { hhmm, isoWeekday, weekdayShort } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
+import { SchoolFilter } from '../../ui/SchoolFilter'
 
 type View = 'day' | 'week' | 'month'
 type Slot = { id: string; cls: ClassFull; start: string; end: string; weekday: number }
@@ -60,7 +61,7 @@ export function CalendarioPage() {
   return (
     <div className="calendario">
       <header className="page-head">
-        <span className="eyebrow">{activeSchool.name}</span>
+        <SchoolFilter />
         <h1>Calendario</h1>
       </header>
 
