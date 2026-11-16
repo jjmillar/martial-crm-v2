@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPoi
 import { NavLink, useLocation } from '../lib/nav'
 import type { ModuleManifest } from '../modules/types'
 import { Icon } from '../ui/Icon'
+import { closeDialog } from '../ui/motion'
 
 // Mobile navigation (S4): a draggable floating hamburger button that opens a sheet with every module,
 // plus account and logout. Released, it snaps to the nearest side edge; the position is remembered per device.
@@ -66,7 +67,7 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
 
   // Close the sheet whenever navigation happens.
   useEffect(() => {
-    sheet.current?.close()
+    closeDialog(sheet.current)
   }, [pathname])
 
   // Enable the snap animation only after the first paint, so it doesn't fly in from the corner.
@@ -163,12 +164,13 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
         ref={sheet}
         className="sheet"
         aria-label="Menú"
-        onClick={(e) => { if (e.target === e.currentTarget) sheet.current?.close() }}
+        onCancel={(e) => { e.preventDefault(); closeDialog(sheet.current) }}
+        onClick={(e) => { if (e.target === e.currentTarget) closeDialog(sheet.current) }}
       >
         <div className="sheet__body">
           <div className="sheet__head">
             <span className="eyebrow">Menú</span>
-            <button type="button" className="icon-btn" onClick={() => sheet.current?.close()} aria-label="Cerrar">
+            <button type="button" className="icon-btn" onClick={() => closeDialog(sheet.current)} aria-label="Cerrar">
               <Icon name="close" />
             </button>
           </div>

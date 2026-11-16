@@ -56,16 +56,13 @@
   animation: m-in var(--dur) var(--ease-out);
 }
 
-/* Dialogs (modals and the mobile sheet): enter and exit with the dialog itself */
+/* Dialogs (every pop-up = <Modal>, plus the mobile menu sheet). One movement for all: fade + a short rise,
+   no scaling (scaled text looks blurry while it moves). Enter: @starting-style when [open] appears. Exit: closeDialog()
+   sets [data-closing], the dialog fades out, then it really closes (works in every browser, Safari included). */
 .modal,
 .sheet {
   opacity: 0;
-  transform: translateY(12px) scale(0.97);
-  transition:
-    opacity var(--dur-exit) var(--ease-in),
-    transform var(--dur-exit) var(--ease-in),
-    overlay var(--dur-exit) var(--ease-in) allow-discrete,
-    display var(--dur-exit) var(--ease-in) allow-discrete;
+  transform: translateY(8px);
 }
 
 .sheet {
@@ -76,14 +73,15 @@
 .sheet[open] {
   opacity: 1;
   transform: none;
-  transition-duration: var(--dur);
-  transition-timing-function: var(--ease-out);
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
 }
 
 @starting-style {
   .modal[open] {
     opacity: 0;
-    transform: translateY(12px) scale(0.97);
+    transform: translateY(8px);
   }
 
   .sheet[open] {
@@ -92,19 +90,25 @@
   }
 }
 
-.modal::backdrop,
-.sheet::backdrop {
+.modal[open][data-closing],
+.sheet[open][data-closing] {
   opacity: 0;
+  transform: translateY(8px);
+  /* the fade eases in and out (an ease-in fade drops the last 40% in one frame and looks cut); the movement eases in */
   transition:
-    opacity var(--dur-exit) var(--ease-in),
-    overlay var(--dur-exit) var(--ease-in) allow-discrete,
-    display var(--dur-exit) var(--ease-in) allow-discrete;
+    opacity var(--dur-exit) var(--ease),
+    transform var(--dur-exit) var(--ease-in);
+  pointer-events: none;
+}
+
+.sheet[open][data-closing] {
+  transform: translateY(48px);
 }
 
 .modal[open]::backdrop,
 .sheet[open]::backdrop {
   opacity: 1;
-  transition-duration: var(--dur);
+  transition: opacity var(--dur) var(--ease-out);
 }
 
 @starting-style {
@@ -112,6 +116,12 @@
   .sheet[open]::backdrop {
     opacity: 0;
   }
+}
+
+.modal[open][data-closing]::backdrop,
+.sheet[open][data-closing]::backdrop {
+  opacity: 0;
+  transition: opacity var(--dur-exit) var(--ease);
 }
 
 /* Accordions (<details>): the body opens and closes with its height */

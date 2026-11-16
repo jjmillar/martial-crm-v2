@@ -2,23 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { Icon } from '../../ui/Icon'
+import { catalogQuery, type CatalogTable, type Item } from './catalogApi'
 
 // One component for every simple per-school catalog (S6): specialties, tags, and later belts, rooms, disciplines...
-type CatalogTable = 'specialties' | 'tags'
-type Item = { id: string; text: string; icon: string | null; active: boolean }
-
-const textCol = { specialties: 'name', tags: 'label' } as const
-
-async function listItems(table: CatalogTable, schoolId: string): Promise<Item[]> {
-  const { data, error } = await supabase.from(table).select('*').eq('school_id', schoolId).order(textCol[table])
-  if (error) throw error
-  return data.map((r) => ({
-    id: r.id,
-    text: 'label' in r ? r.label : r.name,
-    icon: 'icon' in r ? r.icon : null,
-    active: r.active,
-  }))
-}
 
 function friendly(message: string): string {
   if (message.includes('duplicate key')) return 'Ya existe con ese nombre.'
@@ -34,8 +20,8 @@ export type CatalogProps = {
 
 export function Catalogo({ table, schoolId, title, description, placeholder, withIcon = false, canEdit, onChange }: CatalogProps) {
   const qc = useQueryClient()
-  const key = ['catalog', table, schoolId]
-  const items = useQuery({ queryKey: key, queryFn: () => listItems(table, schoolId) })
+  const { queryKey: key, queryFn } = catalogQuery(table, schoolId)
+  const items = useQuery({ queryKey: key, queryFn })
   const [text, setText] = useState('')
   const [icon, setIcon] = useState('')
   const [error, setError] = useState<string | null>(null)

@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import { Icon, type IconName } from '../../ui/Icon'
+import { Modal } from '../../ui/Modal'
 import { EscuelaPerfil } from '../ajustes/EscuelaPerfil'
 import { SchoolForm } from './SchoolForm'
 
@@ -20,33 +21,32 @@ async function schoolStats(): Promise<Record<string, Stats>> {
 export function EscuelasPage() {
   const { schools, reload, setActiveSchool, activeSchool, loading } = useSchool()
   const navigate = useNavigate()
-  const createRef = useRef<HTMLDialogElement>(null)
-  const editRef = useRef<HTMLDialogElement>(null)
   const [createOpen, setCreateOpen] = useState(false)
+  // The school stays selected while its pop-up closes, so the content doesn't vanish mid-animation.
   const [editing, setEditing] = useState<string | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
   const [created, setCreated] = useState<string | null>(null)
   const stats = useQuery({ queryKey: ['school-stats', schools.length], queryFn: schoolStats, enabled: schools.length > 0 })
 
   async function onCreated(name: string) {
     await reload()
     setCreated(name)
-    createRef.current?.close()
+    setCreateOpen(false)
   }
 
   function openCreate() {
     setCreated(null)
     setCreateOpen(true)
-    createRef.current?.showModal()
   }
 
   function openEdit(id: string) {
     setEditing(id)
-    editRef.current?.showModal()
+    setEditOpen(true)
   }
 
   function enter(id: string) {
     setActiveSchool(id)
-    editRef.current?.close()
+    setEditOpen(false)
     navigate('/app/inicio')
   }
 
@@ -120,38 +120,22 @@ export function EscuelasPage() {
         })}
       </section>
 
-      <dialog
-        ref={createRef}
-        className="modal"
-        aria-labelledby="new-school-h"
-        onClose={() => setCreateOpen(false)}
-        onClick={(e) => { if (e.target === e.currentTarget) createRef.current?.close() }}
-      >
-        <div className="modal__body">
-          <h2 id="new-school-h">Nueva escuela</h2>
-          {/* Remount on every open so the form starts empty */}
-          {createOpen && (
-            <SchoolForm
-              onCreated={onCreated}
-              autoFocus
-              actions={<button type="button" className="btn btn--ghost" onClick={() => createRef.current?.close()}>Cancelar</button>}
-            />
-          )}
-        </div>
-      </dialog>
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} labelledBy="new-school-h">
+        <h2 id="new-school-h">Nueva escuela</h2>
+        {/* Mounted on every open (and kept while closing), so the form starts empty */}
+        <SchoolForm
+          onCreated={onCreated}
+          autoFocus
+          actions={<button type="button" className="btn btn--ghost" onClick={() => setCreateOpen(false)}>Cancelar</button>}
+        />
+      </Modal>
 
-      <dialog
-        ref={editRef}
-        className="modal modal--wide"
-        aria-label={editingSchool ? `Ajustes de ${editingSchool.name}` : 'Ajustes de la escuela'}
-        onClose={() => setEditing(null)}
-        onClick={(e) => { if (e.target === e.currentTarget) editRef.current?.close() }}
-      >
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} wide label={editingSchool ? `Ajustes de ${editingSchool.name}` : 'Ajustes de la escuela'}>
         {editingSchool && (
-          <div className="modal__body">
+          <>
             <div className="modal__head">
               <span className="eyebrow">Ajustes de la escuela</span>
-              <button type="button" className="icon-btn" onClick={() => editRef.current?.close()} aria-label="Cerrar"><Icon name="close" /></button>
+              <button type="button" className="icon-btn" onClick={() => setEditOpen(false)} aria-label="Cerrar"><Icon name="close" /></button>
             </div>
             <EscuelaPerfil key={editingSchool.id} school={editingSchool} embedded />
             <a className="btn btn--ghost" href={`/e/${editingSchool.slug}`} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={16} /> Ver página pública</a>
@@ -160,9 +144,9 @@ export function EscuelasPage() {
                 Entrar a esta escuela <Icon name="arrow" size={16} />
               </button>
             )}
-          </div>
+          </>
         )}
-      </dialog>
+      </Modal>
     </div>
   )
 }

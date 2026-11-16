@@ -40,10 +40,10 @@ const plugin: AutoAnimationPlugin = (el, action, oldCoords, newCoords) => {
 }
 
 /**
- * Containers whose children animate in/out automatically: every list, form and dialog body, the root of
+ * Containers whose children animate in/out automatically: every list and form, the root of
  * each page, and anything marked data-motion. Opt a subtree out with data-motion="off".
  */
-export const MOTION_CONTAINERS = '[data-motion]:not([data-motion="off"]), form, ul, ol, .modal__body, .m-page > *'
+export const MOTION_CONTAINERS = '[data-motion]:not([data-motion="off"]), form, ul, ol, .m-page > *'
 
 const registered = new WeakSet<Element>()
 function register(el: Element) {
@@ -63,4 +63,26 @@ export function installMotion() {
   new MutationObserver((records) => {
     for (const r of records) r.addedNodes.forEach((n) => { if (n instanceof Element) scan(n) })
   }).observe(document.body, { childList: true, subtree: true })
+}
+
+/**
+ * Close a <dialog> with the standard exit: it fades out first (data-closing), then really closes.
+ * Done in JS so the exit plays in every browser (Safari can't animate a dialog leaving the top layer).
+ */
+export function closeDialog(d: HTMLDialogElement | null) {
+  if (!d?.open || d.dataset.closing !== undefined) return
+  if (reducedMotion()) return d.close()
+  d.dataset.closing = ''
+  // Close once the fade has really ended (a fixed timer can fire a frame early and cut it at ~40% opacity).
+  let done = false
+  const finish = () => {
+    if (done) return
+    done = true
+    d.removeEventListener('transitionend', onEnd)
+    delete d.dataset.closing
+    d.close()
+  }
+  const onEnd = (e: TransitionEvent) => { if (e.target === d && e.propertyName === 'opacity') finish() }
+  d.addEventListener('transitionend', onEnd)
+  window.setTimeout(finish, motion.exit + 120) // safety net if the event never comes
 }

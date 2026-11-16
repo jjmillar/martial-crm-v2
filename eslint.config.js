@@ -36,11 +36,16 @@ export default tseslint.config(
           selector: "JSXAttribute[name.name='type'][value.value='checkbox']",
           message: 'Usa <Toggle> de src/ui/Toggle: en la app todos los on/off son toggles, no checkboxes.',
         },
+        {
+          // UI standard: every pop-up is <Modal>, so they all enter and leave the same way.
+          selector: "JSXOpeningElement[name.name='dialog']",
+          message: 'Usa <Modal> de src/ui/Modal: todos los pop-ups comparten la misma transición de entrada y salida.',
+        },
       ],
     },
   },
   {
-    files: ['src/ui/Toggle.tsx'],
+    files: ['src/ui/Toggle.tsx', 'src/ui/Modal.tsx', 'src/shell/MobileMenu.tsx'],
     rules: { 'no-restricted-syntax': 'off' },
   },
   {

@@ -21,8 +21,8 @@ Standard movements: **enter** = fade in while rising 8 px (pages: 12 px); **exit
 What is already automatic (no code needed):
 
 - **Pages**: `PageMotion` animates every route change, in the app shell (`AppLayout`) and on public pages (`router.tsx`). Query-string changes such as filters don't count.
-- **Lists and containers**: `installMotion()` (called in `main.tsx`) animates children added, removed or moved inside every `ul`, `ol`, `form`, `.modal__body`, the root of each page, and any element with `data-motion`. To exclude a subtree, use `data-motion="off"`. That is the only way out.
-- **Dialogs** (`.modal`, `.sheet`): enter and exit with the dialog, backdrop included (`@starting-style` + `allow-discrete`).
+- **Lists and containers**: `installMotion()` (called in `app/providers.tsx`) animates children added, removed or moved inside every `ul`, `ol`, `form`, the root of each page, and any element with `data-motion`. To exclude a subtree, use `data-motion="off"`. That is the only way out.
+- **Pop-ups**: always `<Modal open onClose>` from `src/ui/Modal.tsx` (lint blocks a raw `<dialog>` elsewhere; the mobile menu sheet is the one exception and uses the same motion). One movement for every pop-up: it fades in rising 8 px and leaves fading out and sinking 8 px, backdrop included, with **no scaling** (scaled text looks blurry while it moves). The content moves as one piece with the pop-up: it is mounted before the pop-up appears, stays in place until the exit has finished, and nothing inside animates on its own while it opens or closes. The exit is driven by `closeDialog()` (`ui/motion.ts`), so it also plays on Safari/iPhone. Inside another form, pass `isolate` (rendered outside that form; typing or Enter in the pop-up never touches it). Data the pop-up shows should be loaded before it opens, so nothing pops in while it animates.
 - **Accordions** (`<details>`): open and close with a height transition.
 - **Alerts and field errors**: always enter.
 - **Toast** (`Flash`): enters and leaves.
