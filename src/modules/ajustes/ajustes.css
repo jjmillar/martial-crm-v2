@@ -160,7 +160,12 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #fff;
+}
+
+/* A real logo shows as uploaded: transparent areas let the page show through (no white or tinted box). */
+.logo-box:has(img) {
+  border-color: transparent;
+  background: transparent;
 }
 
 /* Enrollment fee settings inside the school profile */
