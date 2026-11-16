@@ -50,10 +50,9 @@ function ClaseForm({ c }: { c?: ClassFull }) {
     c ? c.schedules.map((s) => toRow({ weekday: s.weekday, start_time: hhmm(s.start_time), end_time: hhmm(s.end_time) })) : [toRow({ weekday: 1, start_time: '19:00', end_time: '20:30' })],
   )
   const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const touch = () => { setSaved(false); setError(null) }
+  const touch = () => setError(null)
   const setRow = (key: number, patch: Partial<Block>) => { setRows((r) => r.map((x) => (x.key === key ? { ...x, ...patch } : x))); touch() }
   const addRow = () => {
     const last = rows[rows.length - 1]
@@ -76,8 +75,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
     onSuccess: async (saved) => {
       await qc.invalidateQueries({ queryKey: classesKey(schoolId) })
       await qc.invalidateQueries({ queryKey: ['class', saved.id] })
-      if (c) setSaved(true)
-      else navigate('..', { replace: true, state: { flash: `Clase "${saved.name}" creada.` } })
+      navigate('..', { replace: true, state: { flash: c ? `Cambios en "${saved.name}" guardados.` : `Clase "${saved.name}" creada.` } })
     },
     onError: (e: Error) => setError(e.message),
   })
@@ -210,7 +208,6 @@ function ClaseForm({ c }: { c?: ClassFull }) {
       </fieldset>
 
       {error && <p className="alert" role="alert">{error}</p>}
-      {saved && <p className="alert alert--ok" role="status">Cambios guardados.</p>}
 
       {canEdit && (
         <div className="form-actions">

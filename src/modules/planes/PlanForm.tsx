@@ -41,17 +41,14 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
   const [durationTouched, setDurationTouched] = useState(Boolean(plan))
   const [errors, setErrors] = useState<Errors>({})
   const [serverError, setServerError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => {
     setForm((f) => ({ ...f, [k]: v }))
-    setSaved(false)
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }))
   }
   const setCycle = (c: Form['billing_cycle']) => {
     setForm((f) => ({ ...f, billing_cycle: c, duration_days: durationTouched ? f.duration_days : cycleInfo(c).days?.toString() ?? '' }))
-    setSaved(false)
   }
   const setDefault = (v: boolean) => setForm((f) => ({ ...f, is_default: v, active: v ? true : f.active }))
   const moneyBlur = (k: 'price' | 'enrollment_fee') => () => {
@@ -65,10 +62,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
       // Saving a default unmarks another plan, so refresh the whole list.
       await qc.invalidateQueries({ queryKey: plansKey(schoolId) })
       qc.setQueryData(['plan', p.id], p)
-      if (plan) {
-        setSaved(true)
-        setForm(formFromPlan(p))
-      } else navigate('..', { replace: true, state: { flash: `Plan "${p.name}" creado.` } })
+      navigate('..', { replace: true, state: { flash: plan ? `Cambios en "${p.name}" guardados.` : `Plan "${p.name}" creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })
@@ -213,7 +207,6 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
       </div>
 
       {serverError && <p className="alert" role="alert">{serverError}</p>}
-      {saved && <p className="alert alert--ok" role="status">Cambios guardados.</p>}
 
       {canEdit && (
         <div className="form-actions">

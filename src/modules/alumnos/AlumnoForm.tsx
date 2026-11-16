@@ -34,12 +34,10 @@ function AlumnoForm({ student }: { student?: Student }) {
   const [form, setForm] = useState<StudentForm>(() => (student ? formFromStudent(student) : emptyForm(todayIso())))
   const [errors, setErrors] = useState<Errors>({})
   const [serverError, setServerError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const set = <K extends keyof StudentForm>(k: K, v: StudentForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }))
-    setSaved(false)
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }))
   }
 
@@ -49,10 +47,7 @@ function AlumnoForm({ student }: { student?: Student }) {
     onSuccess: (s) => {
       qc.invalidateQueries({ queryKey: studentsKey(activeSchool?.id) })
       qc.setQueryData(['student', s.id], s)
-      if (student) {
-        setSaved(true)
-        setForm(formFromStudent(s))
-      } else navigate('..', { replace: true, state: { flash: `Alumno ${s.full_name ?? ''} creado.` } })
+      navigate('..', { replace: true, state: { flash: student ? `Cambios de ${s.full_name ?? 'alumno'} guardados.` : `Alumno ${s.full_name ?? ''} creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })
@@ -180,7 +175,6 @@ function AlumnoForm({ student }: { student?: Student }) {
       {student && <StudentLinks student={student} />}
 
       {serverError && <p className="alert" role="alert">{serverError}</p>}
-      {saved && <p className="alert alert--ok" role="status">Cambios guardados.</p>}
 
       <div className="form-actions">
         <button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : student ? 'Guardar cambios' : 'Crear alumno'}</button>

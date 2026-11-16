@@ -40,7 +40,6 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
   const [picked, setPicked] = useState<string[]>(() => teacher?.specialty_ids ?? [])
   const [errors, setErrors] = useState<Errors>({})
   const [serverError, setServerError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   // Accounts already linked to another teacher are not offered again.
@@ -51,12 +50,10 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
 
   const set = <K extends keyof TeacherForm>(k: K, v: TeacherForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }))
-    setSaved(false)
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }))
   }
   const toggleSpecialty = (id: string) => {
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
-    setSaved(false)
   }
 
   const save = useMutation({
@@ -64,8 +61,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
     onSuccess: async (t) => {
       await qc.invalidateQueries({ queryKey: teachersKey(schoolId) })
       await qc.invalidateQueries({ queryKey: ['teacher', t.id] })
-      if (teacher) setSaved(true)
-      else navigate('..', { replace: true, state: { flash: `Profesor ${t.full_name} creado.` } })
+      navigate('..', { replace: true, state: { flash: teacher ? `Cambios de ${t.full_name} guardados.` : `Profesor ${t.full_name} creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })
@@ -196,7 +192,6 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
       {teacher && <TeacherLinks teacher={teacher} />}
 
       {serverError && <p className="alert" role="alert">{serverError}</p>}
-      {saved && <p className="alert alert--ok" role="status">Cambios guardados.</p>}
 
       {canEdit && (
         <div className="form-actions">
