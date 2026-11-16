@@ -6,6 +6,7 @@ import { formatRut } from '../../lib/rut'
 import { beltSuggestions } from '../../lib/belts'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
+import { CatalogoDialog } from '../ajustes/CatalogoDialog'
 import { listMembers } from '../miembros/api'
 import { deleteTeacher, getTeacher, listSpecialties, listTeachers, saveTeacher, specialtiesKey, teachersKey, type TeacherWithSpecialties } from './api'
 import { emptyTeacher, formFromTeacher, parseTeacher, type TeacherForm } from './schema'
@@ -154,9 +155,17 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
                 ))}
               </div>
             ) : (
-              <p className="hint">
-                Aún no hay especialidades. {canEdit && <>Créalas en <Link to="/app/ajustes">Ajustes → Catálogos</Link>.</>}
-              </p>
+              <p className="hint">Aún no hay especialidades.</p>
+            )}
+            {canEdit && schoolId && (
+              <CatalogoDialog
+                label="Crear o editar especialidades"
+                table="specialties" schoolId={schoolId}
+                title="Especialidades"
+                description="Disciplinas que enseñan los profesores."
+                placeholder="Ej: Jiu-jitsu brasileño"
+                onChange={() => qc.invalidateQueries({ queryKey: specialtiesKey(schoolId) })}
+              />
             )}
           </div>
           {field('bio', 'Bio corta', <textarea {...inputProps('bio')} rows={3} maxLength={600} placeholder="Trayectoria, logros, estilo de enseñanza…" />, true)}

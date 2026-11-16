@@ -26,9 +26,13 @@ function friendly(message: string): string {
   return 'No se pudo guardar.'
 }
 
-type Props = { table: CatalogTable; schoolId: string; title: string; description: string; placeholder: string; withIcon?: boolean; canEdit: boolean }
+export type CatalogProps = {
+  table: CatalogTable; schoolId: string; title: string; description: string; placeholder: string; withIcon?: boolean; canEdit: boolean
+  /** Called after any change, so other screens that list these items can refresh. */
+  onChange?: () => void
+}
 
-export function Catalogo({ table, schoolId, title, description, placeholder, withIcon = false, canEdit }: Props) {
+export function Catalogo({ table, schoolId, title, description, placeholder, withIcon = false, canEdit, onChange }: CatalogProps) {
   const qc = useQueryClient()
   const key = ['catalog', table, schoolId]
   const items = useQuery({ queryKey: key, queryFn: () => listItems(table, schoolId) })
@@ -36,7 +40,8 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
   const [icon, setIcon] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<{ id: string; text: string; icon: string } | null>(null)
-  const done = () => qc.invalidateQueries({ queryKey: key })
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const done = () => { onChange?.(); return qc.invalidateQueries({ queryKey: key }) }
   const fail = (e: Error) => setError(e.message)
 
   const add = useMutation({
@@ -58,6 +63,16 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
       if (error) throw new Error(friendly(error.message))
     },
     onSuccess: done,
+    onError: fail,
+  })
+
+  // Delete for good (asked first): it also leaves the classes/teachers that used it.
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from(table).delete().eq('id', id)
+      if (error) throw new Error(friendly(error.message))
+    },
+    onSuccess: () => { setConfirmId(null); done() },
     onError: fail,
   })
 
@@ -112,14 +127,23 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
                 {it.text}
               </>
             )}
-            {canEdit && editing?.id !== it.id && (
+            {canEdit && editing?.id !== it.id && confirmId !== it.id && (
               <button type="button" className="chip-action" onClick={() => { setError(null); setEditing({ id: it.id, text: it.text, icon: it.icon ?? '' }) }} aria-label={`Editar ${it.text}`}>Editar</button>
             )}
-            {canEdit && editing?.id !== it.id && (
+            {canEdit && editing?.id !== it.id && confirmId !== it.id && (
               <button type="button" className="chip-action" onClick={() => toggle.mutate(it)} aria-label={`${it.active ? 'Desactivar' : 'Activar'} ${it.text}`}>
                 {it.active ? 'Desactivar' : 'Activar'}
               </button>
             )}
+            {canEdit && editing?.id !== it.id && (confirmId === it.id ? (
+              <span className="chip-confirm" role="group" aria-label={`Eliminar ${it.text}`}>
+                <span>{table === 'tags' ? '¿Eliminar? Sale de las clases y de las skills de los alumnos.' : '¿Eliminar? Sale de profesores, clases y planes.'}</span>
+                <button type="button" className="chip-action chip-action--danger" disabled={remove.isPending} onClick={() => remove.mutate(it.id)}>Sí, eliminar</button>
+                <button type="button" className="chip-action" onClick={() => setConfirmId(null)}>Cancelar</button>
+              </span>
+            ) : (
+              <button type="button" className="chip-action" onClick={() => { setError(null); setConfirmId(it.id) }} aria-label={`Eliminar ${it.text}`}>Eliminar</button>
+            ))}
           </li>
         ))}
       </ul>

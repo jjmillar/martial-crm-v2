@@ -6,6 +6,7 @@ import { hhmm, weekdays } from '../../lib/weekdays'
 import type { ClassLevel } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
+import { CatalogoDialog } from '../ajustes/CatalogoDialog'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from '../profesores/api'
 import { classColors, classesKey, deleteClass, getClass, levelLabel, listTags, saveClass, type Block, type ClassFull } from './api'
 
@@ -175,7 +176,16 @@ function ClaseForm({ c }: { c?: ClassFull }) {
 
         <section className="card form-section">
           <h2>Etiquetas y notas</h2>
-          <p className="hint">Las etiquetas son las <b>skills</b> que suben los alumnos al asistir a esta clase. {canEdit && <Link to="/app/ajustes#catalogos">Crear o editar etiquetas</Link>}</p>
+          <p className="hint">Las etiquetas son las <b>skills</b> que suben los alumnos al asistir a esta clase. {canEdit && schoolId && (
+            <CatalogoDialog
+              label="Crear o editar etiquetas"
+              table="tags" schoolId={schoolId} withIcon
+              title="Etiquetas de clase (skills)"
+              description="Cada asistencia confirmada suma XP a las etiquetas de esa clase."
+              placeholder="Ej: Guardia, Derribos"
+              onChange={() => qc.invalidateQueries({ queryKey: ['tags', schoolId] })}
+            />
+          )}</p>
           {tags.data?.length ? (
             <div className="pick-chips" role="group" aria-label="Etiquetas">
               {tags.data.filter((t) => t.active || tagIds.includes(t.id)).map((t) => (
