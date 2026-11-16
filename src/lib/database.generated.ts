@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       account_requests: {
         Row: {
+          address: string | null;
+          birth_date: string | null;
           created_at: string;
           decided_at: string | null;
           decided_by: string | null;
@@ -24,15 +26,19 @@ export type Database = {
           first_name: string;
           id: string;
           kind: Database["public"]["Enums"]["request_kind"];
+          middle_name: string | null;
           phone: string | null;
           rut: string | null;
           school_id: string;
+          second_last_name: string | null;
           status: Database["public"]["Enums"]["request_status"];
           student_id: string | null;
           user_id: string;
         };
         ComputedFields: never;
         Insert: {
+          address?: string | null;
+          birth_date?: string | null;
           created_at?: string;
           decided_at?: string | null;
           decided_by?: string | null;
@@ -41,14 +47,18 @@ export type Database = {
           first_name: string;
           id?: string;
           kind: Database["public"]["Enums"]["request_kind"];
+          middle_name?: string | null;
           phone?: string | null;
           rut?: string | null;
           school_id: string;
+          second_last_name?: string | null;
           status?: Database["public"]["Enums"]["request_status"];
           student_id?: string | null;
           user_id: string;
         };
         Update: {
+          address?: string | null;
+          birth_date?: string | null;
           created_at?: string;
           decided_at?: string | null;
           decided_by?: string | null;
@@ -57,9 +67,11 @@ export type Database = {
           first_name?: string;
           id?: string;
           kind?: Database["public"]["Enums"]["request_kind"];
+          middle_name?: string | null;
           phone?: string | null;
           rut?: string | null;
           school_id?: string;
+          second_last_name?: string | null;
           status?: Database["public"]["Enums"]["request_status"];
           student_id?: string | null;
           user_id?: string;
@@ -1428,13 +1440,17 @@ export type Database = {
       my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
       register_account_request: {
         Args: {
+          p_address?: string;
+          p_birth_date?: string;
           p_email: string;
           p_first_last_name: string;
           p_first_name: string;
           p_kind: Database["public"]["Enums"]["request_kind"];
+          p_middle_name?: string;
           p_phone: string;
           p_rut: string;
           p_school_id: string;
+          p_second_last_name?: string;
           p_user_id: string;
         };
         Returns: string;

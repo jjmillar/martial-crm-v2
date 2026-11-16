@@ -34,7 +34,7 @@ check('staff see their school owner (not the platform admin)', own.length === 1 
 
 // Requests from the landing page go to that school's owner only
 const S = await newUser(db, 'alumna')
-const req = (await asService(`select public.register_account_request($1,$2,'alumno','Ana','Uno','11111111-1','ana@test.cl',null) id`, [a, S])).rows[0].id
+const req = (await asService(`select public.register_account_request($1,$2,'alumno','Ana','Uno','11111111-1','ana@test.cl',null,null,'Dos','2000-01-01','Calle 1') id`, [a, S])).rows[0].id
 check('owner sees requests of their school', (await as(db, O1, `select count(*)::int c from public.account_requests`)).rows[0].c === 1)
 check("another owner doesn't", (await as(db, O2, `select count(*)::int c from public.account_requests`)).rows[0].c === 0)
 const o2dec = await tryAs(db, O2, `select public.decide_account_request($1, true)`, [req])

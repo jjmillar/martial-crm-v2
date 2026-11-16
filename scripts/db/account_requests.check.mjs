@@ -9,7 +9,7 @@ const s2 = (await as(db, CEO, `select (public.create_school('Dojo Dos','dojo-dos
 await db.query(`insert into public.school_members (school_id, user_id, role) values ($1,$2,'admin'), ($1,$3,'user'), ($4,$5,'admin')`, [s1, A, U, s2, X])
 const asService = async (sql, params = []) => { await db.query(`select set_config('request.jwt.claims', '{}', false)`); return db.query(sql, params) }
 const reg = (school, user, kind, rut, email, first = 'Ana', last = 'Pérez') =>
-  asService(`select public.register_account_request($1,$2,$3,$4,$5,$6,$7,null) id`, [school, user, kind, first, last, rut, email]).then((r) => r.rows[0].id)
+  asService(`select public.register_account_request($1,$2,$3,$4,$5,$6,$7,null,null,$8,$9,$10) id`, [school, user, kind, first, last, rut, email, 'Soto', '2001-02-03', 'Calle QA 1']).then((r) => r.rows[0].id)
 
 
 const S1 = await newUser(db, 'alumna'), S2 = await newUser(db, 'alumno2'), M1 = await newUser(db, 'profe'), Z = await newUser(db, 'random')
@@ -19,8 +19,10 @@ check('even a perfect RUT + email match is NOT linked automatically', (await db.
 const r2 = await reg(s1, S2, 'alumno', '7654321-6', 'nuevo@test.cl', 'Nuevo', 'Alumno')
 const r3 = await reg(s1, M1, 'miembro', null, 'profe@test.cl', 'Pedro', 'Profe')
 const r4 = await reg(s2, Z, 'alumno', '12345678-5', 'z@test.cl')
-const noRut = await asService(`select public.register_account_request($1,$2,'alumno','a','b',null,'x@test.cl',null)`, [s1, Z]).then(() => true, () => false)
+const noRut = await asService(`select public.register_account_request($1,$2,'alumno','a','b',null,'x@test.cl',null,null,'c','2001-01-01','Calle 1')`, [s1, Z]).then(() => true, () => false)
 check('a student request needs a RUT', noRut === false)
+const noData = await asService(`select public.register_account_request($1,$2,'alumno','a','b','11111111-1','x@test.cl',null)`, [s1, Z]).then(() => true, () => false)
+check('a student request needs second surname, birth date and address', noData === false)
 
 check('pending accounts have no access', (await as(db, S2, `select count(*)::int c from public.classes`)).rows[0].c === 0 && (await as(db, M1, `select count(*)::int c from public.students`)).rows[0].c === 0)
 check('applicant sees only their own request', (await as(db, S2, `select kind from public.account_requests`)).rows.map((r) => r.kind).join() === 'alumno')
@@ -36,11 +38,12 @@ const xDec = await tryAs(db, X, `select public.decide_account_request($1, true)`
 check('admin of another school cannot approve', !xDec.ok, xDec.err)
 
 await as(db, CEO, `select public.decide_account_request($1, true, $2)`, [r1, existing])
-check('CEO approves a student by linking the existing record', (await db.query(`select user_id from public.students where id=$1`, [existing])).rows[0].user_id === S1)
+const linked = (await db.query(`select user_id, second_last_name, birth_date::text bd, address, email from public.students where id=$1`, [existing])).rows[0]
+check('CEO approves a student by linking the existing record, filling its blanks only', linked.user_id === S1 && linked.second_last_name === 'Soto' && linked.bd === '2001-02-03' && linked.address === 'Calle QA 1' && linked.email === 'sofi@test.cl', linked)
 check('the linked student reaches the portal', (await as(db, S1, `select count(*)::int c from public.students`)).rows[0].c === 1)
 const newId = (await as(db, CEO, `select public.decide_account_request($1, true) id`, [r2])).rows[0].id
-const ns = (await db.query(`select first_name, rut, user_id from public.students where id=$1`, [newId])).rows[0]
-check('CEO approves a student by creating a new record', ns.first_name === 'Nuevo' && ns.rut === '7654321-6' && ns.user_id === S2, ns)
+const ns = (await db.query(`select first_name, rut, user_id, second_last_name, birth_date::text bd, address from public.students where id=$1`, [newId])).rows[0]
+check('CEO approves a student by creating a new record with all the sign-up data', ns.first_name === 'Nuevo' && ns.rut === '7654321-6' && ns.user_id === S2 && ns.second_last_name === 'Soto' && ns.bd === '2001-02-03' && ns.address === 'Calle QA 1', ns)
 await as(db, CEO, `select public.decide_account_request($1, true, null, 'user')`, [r3])
 check('approving a member adds them to the school with the chosen role', (await db.query(`select role from public.school_members where user_id=$1 and school_id=$2`, [M1, s1])).rows[0]?.role === 'user')
 check('the approved member now sees school data', (await as(db, M1, `select count(*)::int c from public.students`)).rows[0].c === 2)

@@ -36,6 +36,10 @@ Deno.serve(async (req: Request) => {
     const email = str(body.email, 200).toLowerCase()
     const phone = str(body.phone, 30)
     const password = typeof body.password === 'string' ? body.password : ''
+    const middle = str(body.middle_name, 60)
+    const last2 = str(body.second_last_name, 60)
+    const birth = str(body.birth_date, 10)
+    const address = str(body.address, 200)
 
     if (!kind) return json({ error: 'Tipo de cuenta inválido.' }, 400)
     if (kind === 'alumno' && !slug) return json({ error: 'Falta la escuela.' }, 400)
@@ -43,6 +47,12 @@ Deno.serve(async (req: Request) => {
     if (!/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Correo inválido.' }, 400)
     if (password.length < 8) return json({ error: 'La contraseña debe tener al menos 8 caracteres.' }, 400)
     if (kind === 'alumno' && !rut) return json({ error: 'Escribe tu RUT.' }, 400)
+    if (kind === 'alumno') {
+      if (!last2) return json({ error: 'Escribe tu segundo apellido.' }, 400)
+      const today = new Date().toISOString().slice(0, 10)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(birth) || birth < '1900-01-01' || birth > today) return json({ error: 'Fecha de nacimiento inválida.' }, 400)
+      if (!address) return json({ error: 'Escribe tu dirección.' }, 400)
+    }
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
     const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -66,7 +76,7 @@ Deno.serve(async (req: Request) => {
     if (existing) return json({ error: 'Ese correo ya tiene una cuenta. Inicia sesión.' }, 409)
 
     const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email, password, email_confirm: true, user_metadata: { full_name: `${first} ${last}` },
+      email, password, email_confirm: true, user_metadata: { full_name: [first, middle, last, last2].filter(Boolean).join(' ') },
     })
     if (createError || !created?.user) {
       console.error('Create user error:', createError)
@@ -80,6 +90,7 @@ Deno.serve(async (req: Request) => {
       : await admin.rpc('register_account_request', {
         p_school_id: schoolId!, p_user_id: userId, p_kind: 'alumno',
         p_first_name: first, p_first_last_name: last, p_rut: rut || null, p_email: email, p_phone: phone || null,
+        p_middle_name: middle || null, p_second_last_name: last2, p_birth_date: birth, p_address: address,
       })
     if (regError) {
       console.error('Register error:', regError)

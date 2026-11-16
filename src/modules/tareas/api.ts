@@ -6,13 +6,14 @@ import { useSchool } from '../../lib/school'
 export type Req = {
   id: string; school_id: string; kind: 'alumno' | 'miembro'; first_name: string; first_last_name: string
   rut: string | null; email: string; phone: string | null; created_at: string
+  middle_name: string | null; second_last_name: string | null; birth_date: string | null; address: string | null
 }
 
 export const pendingKey = ['account-requests', 'pendiente'] as const
 
 export async function listPending(): Promise<Req[]> {
   const { data, error } = await supabase.from('account_requests')
-    .select('id, school_id, kind, first_name, first_last_name, rut, email, phone, created_at')
+    .select('id, school_id, kind, first_name, middle_name, first_last_name, second_last_name, rut, email, phone, birth_date, address, created_at')
     .eq('status', 'pendiente').order('created_at')
   if (error) throw error
   return data as Req[]

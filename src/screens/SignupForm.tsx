@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { formatRut, normalizeRut } from '../lib/rut'
 import { Icon } from '../ui/Icon'
+import { todayIso, yearsSince } from '../lib/dates'
 
 const ACTIVE_SCHOOL_KEY = 'mcrm.activeSchool'
 
@@ -18,25 +19,30 @@ type Props = {
 export function SignupForm({ kind, school, head, loginTo }: Props) {
   const { signIn } = useAuth()
   const navigate = useNavigate()
-  const [f, setF] = useState({ first_name: '', first_last_name: '', rut: '', email: '', phone: '', password: '', password2: '' })
+  const [f, setF] = useState({ first_name: '', middle_name: '', first_last_name: '', second_last_name: '', rut: '', email: '', phone: '', birth_date: '', address: '', password: '', password2: '' })
   const [show, setShow] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const set = (k: keyof typeof f, v: string) => { setF((x) => ({ ...x, [k]: v })); setError(null) }
   const student = kind === 'alumno'
+  const age = yearsSince(f.birth_date || null)
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!f.first_name.trim() || !f.first_last_name.trim()) return setError('Escribe tu nombre y apellido.')
+    if (!f.first_name.trim() || !f.first_last_name.trim()) return setError(student ? 'Escribe tu nombre y tu apellido paterno.' : 'Escribe tu nombre y apellido.')
+    if (student && !f.second_last_name.trim()) return setError('Escribe tu apellido materno.')
     const rut = f.rut.trim() ? normalizeRut(f.rut) : null
     if (student && !rut) return setError('Escribe un RUT válido. Ej: 12.345.678-5')
     if (f.rut.trim() && !rut) return setError('RUT inválido. Ej: 12.345.678-5')
     if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) return setError('Correo inválido.')
+    if (student && (!f.birth_date || f.birth_date > todayIso() || f.birth_date < '1900-01-01')) return setError('Indica tu fecha de nacimiento.')
+    if (student && !f.address.trim()) return setError('Escribe tu dirección.')
     if (f.password.length < 8) return setError('La contraseña debe tener al menos 8 caracteres.')
     if (f.password !== f.password2) return setError('Las contraseñas no coinciden.')
     setBusy(true)
     const { error: fnError } = await supabase.functions.invoke('account-signup', {
-      body: { kind, school_slug: school?.slug, first_name: f.first_name, first_last_name: f.first_last_name, rut, email: f.email, phone: f.phone, password: f.password },
+      body: { kind, school_slug: school?.slug, first_name: f.first_name, first_last_name: f.first_last_name, rut,
+        ...(student ? { middle_name: f.middle_name, second_last_name: f.second_last_name, birth_date: f.birth_date, address: f.address } : {}), email: f.email, phone: f.phone, password: f.password },
     })
     if (fnError) {
       const ctx = (fnError as { context?: Response }).context
@@ -56,8 +62,19 @@ export function SignupForm({ kind, school, head, loginTo }: Props) {
   return (
     <form className="auth__card card rise" onSubmit={onSubmit} noValidate>
       <div className="auth__head">{head}</div>
-      <div className="field"><label htmlFor="r-first">Nombre</label><input id="r-first" className="input" autoComplete="given-name" value={f.first_name} onChange={(e) => set('first_name', e.target.value)} /></div>
-      <div className="field"><label htmlFor="r-last">Apellido</label><input id="r-last" className="input" autoComplete="family-name" value={f.first_last_name} onChange={(e) => set('first_last_name', e.target.value)} /></div>
+      {student ? (
+        <>
+          <div className="field"><label htmlFor="r-first">Primer nombre</label><input id="r-first" className="input" autoComplete="given-name" value={f.first_name} onChange={(e) => set('first_name', e.target.value)} /></div>
+          <div className="field"><label htmlFor="r-middle">Segundo nombre (opcional)</label><input id="r-middle" className="input" autoComplete="additional-name" value={f.middle_name} onChange={(e) => set('middle_name', e.target.value)} /></div>
+          <div className="field"><label htmlFor="r-last">Apellido paterno</label><input id="r-last" className="input" autoComplete="family-name" value={f.first_last_name} onChange={(e) => set('first_last_name', e.target.value)} /></div>
+          <div className="field"><label htmlFor="r-last2">Apellido materno</label><input id="r-last2" className="input" autoComplete="off" value={f.second_last_name} onChange={(e) => set('second_last_name', e.target.value)} /></div>
+        </>
+      ) : (
+        <>
+          <div className="field"><label htmlFor="r-first">Nombre</label><input id="r-first" className="input" autoComplete="given-name" value={f.first_name} onChange={(e) => set('first_name', e.target.value)} /></div>
+          <div className="field"><label htmlFor="r-last">Apellido</label><input id="r-last" className="input" autoComplete="family-name" value={f.first_last_name} onChange={(e) => set('first_last_name', e.target.value)} /></div>
+        </>
+      )}
       {student && (
         <div className="field">
           <label htmlFor="r-rut">RUT</label>
@@ -65,6 +82,15 @@ export function SignupForm({ kind, school, head, loginTo }: Props) {
         </div>
       )}
       <div className="field"><label htmlFor="r-email">Correo</label><input id="r-email" className="input" type="email" autoComplete="email" value={f.email} onChange={(e) => set('email', e.target.value)} /></div>
+      {student && (
+        <>
+          <div className="field">
+            <label htmlFor="r-birth">Fecha de nacimiento{age !== null && age >= 0 ? ` · ${age} ${age === 1 ? 'año' : 'años'}` : ''}</label>
+            <input id="r-birth" className="input" type="date" autoComplete="bday" min="1900-01-01" max={todayIso()} value={f.birth_date} onChange={(e) => set('birth_date', e.target.value)} />
+          </div>
+          <div className="field"><label htmlFor="r-address">Dirección</label><input id="r-address" className="input" autoComplete="street-address" placeholder="Calle, número, comuna" value={f.address} onChange={(e) => set('address', e.target.value)} /></div>
+        </>
+      )}
       <div className="field"><label htmlFor="r-phone">Teléfono (opcional)</label><input id="r-phone" className="input" type="tel" autoComplete="tel" placeholder="+56 9 1234 5678" value={f.phone} onChange={(e) => set('phone', e.target.value)} /></div>
       <div className="field">
         <label htmlFor="r-pw">Contraseña</label>

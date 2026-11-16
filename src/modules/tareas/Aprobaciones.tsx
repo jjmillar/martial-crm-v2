@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
-import { formatDate, santiagoDate } from '../../lib/dates'
+import { formatDate, santiagoDate, yearsSince } from '../../lib/dates'
 import { formatRut } from '../../lib/rut'
 import { roleLabel } from '../../lib/roles'
 import type { SchoolRole } from '../../lib/database.types'
@@ -47,7 +47,7 @@ export function Aprobaciones() {
     onMutate: () => setMsg(null),
     onSuccess: async (v) => {
       await Promise.all([qc.invalidateQueries({ queryKey: pendingKey }), qc.invalidateQueries({ queryKey: ['free-students'] }), qc.invalidateQueries({ queryKey: ['students'] }), qc.invalidateQueries({ queryKey: ['members'] })])
-      const name = `${v.r.first_name} ${v.r.first_last_name}`
+      const name = [v.r.first_name, v.r.middle_name, v.r.first_last_name, v.r.second_last_name].filter(Boolean).join(' ')
       setMsg({ ok: true, text: !v.approve ? `Solicitud de ${name} rechazada.` : v.r.kind === 'alumno' ? `${name} ya es alumno y puede entrar a completar su perfil.` : `${name} ya es parte del equipo (${roleLabel[v.role ?? 'user']}).` })
     },
     onError: (e: Error) => setMsg({ ok: false, text: e.message }),
@@ -66,7 +66,7 @@ export function Aprobaciones() {
       {reqs.isSuccess && reqs.data.length === 0 && <p className="hint">No hay cuentas por aprobar.</p>}
       <ul className="req-list">
         {reqs.data?.map((r) => {
-          const name = `${r.first_name} ${r.first_last_name}`
+          const name = [r.first_name, r.middle_name, r.first_last_name, r.second_last_name].filter(Boolean).join(' ')
           const options = (free.data ?? []).filter((s) => s.school_id === r.school_id)
           const match = r.kind === 'alumno'
             ? options.find((s) => rutKey(s.rut) && rutKey(s.rut) === rutKey(r.rut)) ?? options.find((s) => s.email && s.email.toLowerCase() === r.email)
@@ -78,6 +78,7 @@ export function Aprobaciones() {
                 <div className="req__who">
                   <strong>{name}</strong>
                   <span className="hint">{r.email}{r.phone ? ` · ${r.phone}` : ''}{r.rut ? ` · ${formatRut(r.rut)}` : ''}</span>
+                  {(r.birth_date || r.address) && <span className="hint">{[r.birth_date && `${yearsSince(r.birth_date)} años (${formatDate(r.birth_date)})`, r.address].filter(Boolean).join(' · ')}</span>}
                   <span className="hint">{schoolName(r.school_id)} · {formatDate(santiagoDate(r.created_at))}</span>
                 </div>
                 <span className={`tag ${r.kind === 'alumno' ? 'tag--accent' : ''}`}>{r.kind === 'alumno' ? 'Alumno' : 'Miembro del equipo'}</span>
