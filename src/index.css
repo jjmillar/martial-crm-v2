@@ -47,6 +47,11 @@ body {
   margin: 0;
 }
 
+/* No blue/grey flash when tapping on a phone: every control already shows its own pressed state. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
