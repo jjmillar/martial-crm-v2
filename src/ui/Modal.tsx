@@ -40,9 +40,10 @@ export function Modal({ open, onClose, children, label, labelledBy, wide, isolat
       className={`modal${wide ? ' modal--wide' : ''}`}
       aria-label={label}
       aria-labelledby={labelledBy}
-      onCancel={(e) => { e.preventDefault(); onClose() }}
+      // React passes a nested pop-up's cancel/close events up to this one: only react to our own dialog's.
+      onCancel={(e) => { if (e.target !== e.currentTarget) return; e.preventDefault(); onClose() }}
       // Closed by the browser while open (rare) → tell the owner; closed after our exit → drop the content now.
-      onClose={() => { if (open) onClose(); else setMounted(false) }}
+      onClose={(e) => { if (e.target !== e.currentTarget) return; if (open) onClose(); else setMounted(false) }}
       onClick={(e) => { if (isolate) e.stopPropagation(); if (e.target === e.currentTarget) onClose() }}
       {...(isolate ? { onSubmit: stop, onChange: stop, onInput: stop, onKeyDown: stop } : {})}
     >

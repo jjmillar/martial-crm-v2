@@ -109,16 +109,136 @@
   text-align: center;
 }
 
-.chips--catalog li {
+/* Catalog chips (skills, specialties). Desktop: colored edit/delete icons float over the chip's corner on hover.
+   Phone (no hover): a long press opens the edit/delete pop-up, so the icons never show there. */
+.chips--catalog {
+  row-gap: 12px;
+}
+
+.chips--catalog .cat-chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   color: var(--text);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
 }
 
-.chips--catalog li.is-off {
-  color: var(--faint);
-  text-decoration: line-through;
+.cat-chip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cat-chip:hover,
+.cat-chip:focus-within {
+  border-color: color-mix(in srgb, var(--text) 30%, var(--line));
+  background: var(--surface-2);
+}
+
+.cat-chip__tools {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  z-index: 1;
+  display: inline-flex;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity var(--dur-exit) var(--ease-in), transform var(--dur-exit) var(--ease-in);
+}
+
+.cat-chip:hover .cat-chip__tools,
+.cat-chip:focus-within .cat-chip__tools {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition: opacity var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+
+.cat-tool {
+  --tool: var(--text);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--tool) 45%, var(--line));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tool) 16%, var(--surface));
+  color: var(--tool);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.cat-tool:hover {
+  background: color-mix(in srgb, var(--tool) 30%, var(--surface));
+  transform: scale(1.08);
+}
+
+.cat-tool:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.cat-tool--edit {
+  --tool: #3d9be0;
+}
+
+.cat-tool--delete {
+  --tool: var(--danger);
+}
+
+.catalog__touch-hint {
+  display: none;
+}
+
+@media (hover: none) {
+  .cat-chip__tools {
+    display: none;
+  }
+
+  .catalog__touch-hint {
+    display: block;
+  }
+}
+
+/* Long-press pop-up (phone) */
+.cat-sheet {
+  display: grid;
+  gap: 12px;
+}
+
+.cat-sheet__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.cat-sheet__row .field:last-child {
+  flex: 1;
+}
+
+.cat-sheet__row .catalog__icon {
+  width: 64px;
+}
+
+.btn.cat-sheet__delete {
+  color: var(--danger);
+}
+
+.cat-sheet__confirm {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
 
 .chip-action {
