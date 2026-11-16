@@ -736,6 +736,7 @@ export type Database = {
           phone: string | null;
           slug: string;
           trial_enabled: boolean;
+          trial_min_hours: number;
           trial_note: string | null;
           updated_at: string;
         };
@@ -767,6 +768,7 @@ export type Database = {
           phone?: string | null;
           slug: string;
           trial_enabled?: boolean;
+          trial_min_hours?: number;
           trial_note?: string | null;
           updated_at?: string;
         };
@@ -797,6 +799,7 @@ export type Database = {
           phone?: string | null;
           slug?: string;
           trial_enabled?: boolean;
+          trial_min_hours?: number;
           trial_note?: string | null;
           updated_at?: string;
         };
@@ -1316,6 +1319,7 @@ export type Database = {
           phone: string | null;
           slug: string;
           trial_enabled: boolean;
+          trial_min_hours: number;
           trial_note: string | null;
           updated_at: string;
         };

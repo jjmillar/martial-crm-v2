@@ -381,3 +381,7 @@
   grid-column: 1 / -1;
   justify-self: start;
 }
+
+.agenda__hours {
+  max-width: 140px;
+}

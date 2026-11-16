@@ -12,6 +12,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
+    // The browser tab shows the school's own logo (the app icon when it has none).
+    icons: s.logo_url ? { icon: s.logo_url, apple: s.logo_url } : undefined,
     openGraph: { title: s.name, description, type: 'website', locale: 'es_CL', images: image ? [image] : undefined },
     twitter: { card: image ? 'summary_large_image' : 'summary', title: s.name, description, images: image ? [image] : undefined },
   }

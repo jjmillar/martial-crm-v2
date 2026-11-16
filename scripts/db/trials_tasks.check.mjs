@@ -25,7 +25,18 @@ let L = (await as(db, null, `select public.school_landing('dojo-a') l`)).rows[0]
 check('trial block is hidden while disabled', L.trial === null, L.trial)
 const off = await tryAs(db, null, `select public.book_trial('dojo-a',$1,$2,'Pedro','+56 9 1111 1111')`, [slot, day])
 check('cannot book while disabled', !off.ok, off.err)
-await as(db, O1, `update public.schools set trial_enabled=true, trial_note='Trae ropa cómoda' where id=$1`, [a])
+check('minimum notice defaults to 24 hours', (await as(db, O1, `select trial_min_hours h from public.schools where id=$1`, [a])).rows[0].h === 24)
+// 48 h of notice: tomorrow's slot (at most ~43 h away) is neither offered nor bookable.
+await as(db, O1, `update public.schools set trial_enabled=true, trial_min_hours=48 where id=$1`, [a])
+L = (await as(db, null, `select public.school_landing('dojo-a') l`)).rows[0].l
+check('slots inside the notice window are not offered', L.trial.slots.length === 2 && L.trial.slots[0].date !== day, L.trial.slots)
+const tooLate = await tryAs(db, null, `select public.book_trial('dojo-a',$1,$2,'Pedro','+56 9 1111 1111')`, [slot, day])
+check('booking inside the notice window is rejected', !tooLate.ok && tooLate.err.includes('too late'), tooLate.err)
+const badHours = await tryAs(db, O1, `update public.schools set trial_min_hours=500 where id=$1`, [a])
+check('notice is capped at 168 hours', !badHours.ok, badHours.err)
+const staffHours = await tryAs(db, M, `update public.schools set trial_min_hours=0 where id=$1`, [a])
+check('staff (user role) cannot change the notice', !staffHours.ok || staffHours.affected === 0, staffHours.err)
+await as(db, O1, `update public.schools set trial_enabled=true, trial_min_hours=0, trial_note='Trae ropa cómoda' where id=$1`, [a])
 L = (await as(db, null, `select public.school_landing('dojo-a') l`)).rows[0].l
 check('landing lists upcoming slot dates', L.trial.note === 'Trae ropa cómoda' && L.trial.slots.length === 3 && L.trial.slots[0].date === day && L.trial.slots[0].free === 1, L.trial)
 check('trial_availability is not directly callable', !(await tryAs(db, null, `select public.trial_availability($1)`, [a])).ok)

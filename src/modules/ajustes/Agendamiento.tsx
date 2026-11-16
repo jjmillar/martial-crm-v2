@@ -19,6 +19,7 @@ export function Agendamiento({ school }: { school: School }) {
   const bookingsKey = ['trial-bookings', school.id]
   const [enabled, setEnabled] = useState(school.trial_enabled)
   const [note, setNote] = useState(school.trial_note ?? '')
+  const [minHours, setMinHours] = useState(String(school.trial_min_hours))
   const [n, setN] = useState({ weekday: 1, start: '19:00', end: '20:00', capacity: 2 })
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const today = todayIso()
@@ -45,7 +46,9 @@ export function Agendamiento({ school }: { school: School }) {
   const saveSettings = useMutation({
     mutationFn: async () => {
       if (enabled && !(slots.data ?? []).some((s) => s.active)) throw new Error('Agrega al menos un horario antes de activar el agendamiento.')
-      const { error } = await supabase.from('schools').update({ trial_enabled: enabled, trial_note: note.trim() || null }).eq('id', school.id)
+      const hours = Number(minHours)
+      if (minHours.trim() === '' || !Number.isInteger(hours) || hours < 0 || hours > 168) throw new Error('La anticipación debe ser un número de horas entre 0 y 168 (7 días).')
+      const { error } = await supabase.from('schools').update({ trial_enabled: enabled, trial_note: note.trim() || null, trial_min_hours: hours }).eq('id', school.id)
       if (error) throw new Error('No se pudo guardar. Solo los administradores pueden cambiarlo.')
       await reload()
       await refresh()
@@ -102,6 +105,15 @@ export function Agendamiento({ school }: { school: School }) {
         label="Recibir clases de prueba gratis"
         hint={school.landing_enabled ? 'Muestra el formulario de agendamiento en la landing page.' : 'Tu landing page está oculta: actívala para que se vea el agendamiento.'}
       />
+      <div className="field">
+        <label htmlFor="ag-hours">Anticipación mínima para agendar (horas)</label>
+        <input id="ag-hours" className="input agenda__hours" type="number" inputMode="numeric" min={0} max={168} step={1} value={minHours} onChange={(e) => { setMinHours(e.target.value); setMsg(null) }} aria-describedby="ag-hours-hint" />
+        <p className="hint" id="ag-hours-hint">
+          {Number(minHours) > 0
+            ? `En la landing solo aparecen los horarios que empiezan en ${minHours} ${Number(minHours) === 1 ? 'hora' : 'horas'} o más. Ej: con 24, una clase del jueves a las 19:00 se puede agendar hasta el miércoles a las 19:00.`
+            : 'Con 0 se puede agendar hasta que empiece la clase, incluso el mismo día.'}
+        </p>
+      </div>
       <div className="field">
         <label htmlFor="ag-note">Indicaciones para quien agenda (opcional)</label>
         <textarea id="ag-note" className="input" rows={2} maxLength={300} value={note} onChange={(e) => { setNote(e.target.value); setMsg(null) }} placeholder="Ej: Llega 10 minutos antes, con ropa cómoda y agua." />
