@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { readPersisted, writePersisted } from '../../lib/persist'
 import { Link, useSearchParams } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
@@ -48,12 +49,13 @@ function StaffAttendance() {
   const { activeSchool } = useSchool()
   const schoolId = activeSchool?.id
   const [params, setParams] = useSearchParams()
-  const view = (params.get('vista') as View | null) ?? 'day'
-  const date = params.get('fecha') ?? todayIso()
+  // The URL wins (links, back button); otherwise the last view (device) and date (this session) come back.
+  const view = (params.get('vista') as View | null) ?? readPersisted<View>('asistencia.vista', 'day')
+  const date = params.get('fecha') ?? readPersisted('asistencia.fecha', todayIso(), 'session')
   const go = (next: { vista?: View; fecha?: string }) => {
     const p = new URLSearchParams(params)
-    if (next.vista) p.set('vista', next.vista)
-    if (next.fecha) p.set('fecha', next.fecha)
+    if (next.vista) { p.set('vista', next.vista); writePersisted('asistencia.vista', next.vista) }
+    if (next.fecha) { p.set('fecha', next.fecha); writePersisted('asistencia.fecha', next.fecha, 'session') }
     setParams(p, { replace: true })
   }
   const today = todayIso()

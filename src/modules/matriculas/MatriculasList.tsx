@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { usePersisted } from '../../lib/persist'
 import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
@@ -26,8 +27,8 @@ export function MatriculasList() {
   const { activeSchool } = useSchool()
   const schoolId = activeSchool?.id
   const q = useQuery({ queryKey: enrollmentsKey(schoolId), queryFn: () => listEnrollments(schoolId!), enabled: Boolean(schoolId) })
-  const [filter, setFilter] = useState<Filter>('vigentes')
-  const [search, setSearch] = useState('')
+  const [filter, setFilter] = usePersisted<Filter>('inscripciones.filtro', 'vigentes')
+  const [search, setSearch] = usePersisted('inscripciones.q', '', 'session')
 
   const withPhase = useMemo(() => (q.data ?? []).map((e) => ({ ...e, phase: phaseOf(e) })), [q.data])
   const counts = useMemo(() => Object.fromEntries(filters.map((f) => [f.id, withPhase.filter((e) => matches(f.id, e.phase)).length])) as Record<Filter, number>, [withPhase])

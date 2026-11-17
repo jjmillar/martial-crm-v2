@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { usePersisted } from '../../lib/persist'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
@@ -87,7 +88,7 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
   const attKey = attendanceKey(cls.id, date)
   const present = useQuery({ queryKey: attKey, queryFn: () => listAttendance(cls.id, date) })
   const [search, setSearch] = useState('')
-  const [showAll, setShowAll] = useState(false)
+  const [showAll, setShowAll] = usePersisted('asistencia.todosLosAlumnos', false)
   const [error, setError] = useState<string | null>(null)
 
   const enrolledIds = useMemo(() => new Set((enrollments.data ?? []).filter((e) => ['activa', 'por_vencer'].includes(phaseOf(e))).map((e) => e.student_id)), [enrollments.data])

@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { usePersisted } from '../../lib/persist'
 import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
@@ -16,9 +17,9 @@ export function ClasesList() {
   const canEdit = role === 'admin' || role === 'ceo'
   const classes = useQuery({ queryKey: classesKey(schoolId), queryFn: () => listClasses(schoolId!), enabled: Boolean(schoolId) })
   const tags = useQuery({ queryKey: ['tags', schoolId], queryFn: () => listTags(schoolId!), enabled: Boolean(schoolId) })
-  const [q, setQ] = useState('')
-  const [day, setDay] = useState(0)
-  const [showInactive, setShowInactive] = useState(false)
+  const [q, setQ] = usePersisted('clases.q', '', 'session')
+  const [day, setDay] = usePersisted('clases.dia', 0)
+  const [showInactive, setShowInactive] = usePersisted('clases.inactivas', false)
 
   const tagById = useMemo(() => new Map((tags.data ?? []).map((t) => [t.id, t])), [tags.data])
   const rows = useMemo(() => {

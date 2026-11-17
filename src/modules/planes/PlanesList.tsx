@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
+import { usePersisted } from '../../lib/persist'
 import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
@@ -21,7 +22,7 @@ export function PlanesList() {
   const canEdit = role === 'admin' || role === 'ceo'
   const plans = useQuery({ queryKey: plansKey(schoolId), queryFn: () => listPlans(schoolId!), enabled: Boolean(schoolId) })
   const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
-  const [showInactive, setShowInactive] = useState(false)
+  const [showInactive, setShowInactive] = usePersisted('planes.inactivos', false)
 
   const spName = useMemo(() => new Map((specialties.data ?? []).map((s) => [s.id, s.name])), [specialties.data])
   const inactiveCount = (plans.data ?? []).filter((p) => !p.active).length

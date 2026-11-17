@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
+import { usePersisted } from '../../lib/persist'
 import { Link } from '../../lib/nav'
 import { formatCLP } from '../../lib/money'
 import { formatDate, santiagoDate } from '../../lib/dates'
@@ -16,7 +17,7 @@ type Entry =
   | { kind: 'report'; at: string; s: Submission; concept: string }
 
 export function PaymentHistory({ payments, reports = [], staff = false }: { payments: PaymentRow[]; reports?: (Submission & { concept: string })[]; staff?: boolean }) {
-  const [shown, setShown] = useState(FIRST)
+  const [shown, setShown] = usePersisted(staff ? 'pagos.historial' : 'mispagos.historial', FIRST, 'session')
   const entries = useMemo<Entry[]>(() => [
     ...payments.filter((p) => p.status === 'pagado' || p.status === 'reembolsado')
       .map((p) => ({ kind: 'payment' as const, at: p.paid_at ?? p.updated_at ?? p.created_at, p })),

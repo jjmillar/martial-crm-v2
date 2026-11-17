@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { usePersisted } from '../../lib/persist'
 import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
@@ -18,8 +19,8 @@ export function AlumnosList() {
   const { activeSchool } = useSchool()
   const schoolId = activeSchool?.id
   const students = useQuery({ queryKey: studentsKey(schoolId), queryFn: () => listStudents(schoolId!), enabled: Boolean(schoolId) })
-  const [q, setQ] = useState('')
-  const [filter, setFilter] = useState<Filter>('activos')
+  const [q, setQ] = usePersisted('alumnos.q', '', 'session')
+  const [filter, setFilter] = usePersisted<Filter>('alumnos.filtro', 'activos')
 
   const rows = useMemo(() => {
     const needle = normalize(q.trim())

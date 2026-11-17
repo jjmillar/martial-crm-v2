@@ -53,3 +53,19 @@ When building something new:
   - Example: `src/modules/pagos/PaymentHistory.tsx`.
 - Related items share one menu entry and one page. For example, "Pagos y planes" (`/app/pagos`) shows payments, then plans, then the history. `/app/planes` redirects to `/app/pagos#planes`.
 - Filters (`.segmented`) are allowed: they narrow down the list in place. They are not tabs.
+
+## 4. The app remembers each screen's state
+
+What you choose on a screen is still there when you leave and come back, anywhere in the app. Use `usePersisted(key, initial, scope)` from `src/lib/persist.ts` instead of `useState` for this kind of state. For views kept in the URL, use `readPersisted`/`writePersisted`.
+
+- `'local'` (default): **preferences**, kept on this device.
+  - View: day, week or month.
+  - Filters: status, day, specialty.
+  - Toggles: "Mostrar inactivos", "Todos los alumnos".
+- `'session'`: **where you were**, kept while the browser session lasts. A new session starts fresh.
+  - The date being viewed.
+  - Search text.
+  - How much of a history is expanded.
+- The URL always wins (links and the back button). When the URL has no value, the remembered one is used.
+- Not persisted: half-filled forms, open pop-ups, confirmations, errors.
+- Keys: `<screen>.<what>`, for example `asistencia.vista` or `pagos.filtro`.

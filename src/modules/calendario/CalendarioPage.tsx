@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { readPersisted, writePersisted } from '../../lib/persist'
 import { Link, useSearchParams } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
@@ -25,12 +26,13 @@ export function CalendarioPage() {
   const classes = useQuery({ queryKey: classesKey(schoolId), queryFn: () => listClasses(schoolId!), enabled: Boolean(schoolId) })
 
   // View and date live in the URL so the back button and shared links work.
-  const view = (params.get('vista') as View | null) ?? ((activeSchool?.default_calendar_view as View | undefined) ?? 'week')
-  const date = params.get('fecha') ?? todayIso()
+  // The URL wins; otherwise the last view chosen on this device (else the school's default) and this session's date.
+  const view = (params.get('vista') as View | null) ?? readPersisted<View>('calendario.vista', (activeSchool?.default_calendar_view as View | undefined) ?? 'week')
+  const date = params.get('fecha') ?? readPersisted('calendario.fecha', todayIso(), 'session')
   const go = (next: { vista?: View; fecha?: string }) => {
     const p = new URLSearchParams(params)
-    if (next.vista) p.set('vista', next.vista)
-    if (next.fecha) p.set('fecha', next.fecha)
+    if (next.vista) { p.set('vista', next.vista); writePersisted('calendario.vista', next.vista) }
+    if (next.fecha) { p.set('fecha', next.fecha); writePersisted('calendario.fecha', next.fecha, 'session') }
     setParams(p, { replace: true })
   }
 

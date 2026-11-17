@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { usePersisted } from '../../lib/persist'
 import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
@@ -16,9 +17,9 @@ export function ProfesoresList() {
   const canEdit = role === 'admin' || role === 'ceo'
   const teachers = useQuery({ queryKey: teachersKey(schoolId), queryFn: () => listTeachers(schoolId!), enabled: Boolean(schoolId) })
   const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
-  const [q, setQ] = useState('')
-  const [specialty, setSpecialty] = useState('')
-  const [showInactive, setShowInactive] = useState(false)
+  const [q, setQ] = usePersisted('profesores.q', '', 'session')
+  const [specialty, setSpecialty] = usePersisted('profesores.especialidad', '')
+  const [showInactive, setShowInactive] = usePersisted('profesores.inactivos', false)
 
   const spName = useMemo(() => new Map((specialties.data ?? []).map((s) => [s.id, s.name])), [specialties.data])
 

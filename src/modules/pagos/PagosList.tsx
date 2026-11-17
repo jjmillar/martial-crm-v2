@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { usePersisted } from '../../lib/persist'
 import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
@@ -44,8 +45,8 @@ function StaffPagos() {
   const q = useQuery({ queryKey: paymentsKey(schoolId), queryFn: () => listPayments(schoolId!), enabled: Boolean(schoolId) && feesReady })
   // Transfers students reported from the payment gateway, waiting for the CEO.
   const subs = useQuery({ queryKey: submissionsKey(`school:${schoolId}`), queryFn: () => latestSubmissions({ schoolId }), enabled: Boolean(schoolId) })
-  const [filter, setFilter] = useState<Filter>('pendiente')
-  const [search, setSearch] = useState('')
+  const [filter, setFilter] = usePersisted<Filter>('pagos.filtro', 'pendiente')
+  const [search, setSearch] = usePersisted('pagos.q', '', 'session')
 
   const thisMonth = todayIso().slice(0, 7)
   const stats = useMemo(() => {
