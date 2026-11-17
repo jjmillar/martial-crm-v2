@@ -45,7 +45,7 @@ export function MisPagos() {
               <p className="hint">Cuando tu escuela registre un cobro aparecerá aquí, listo para pagar.</p>
             </div>
           ) : (
-            <ul className="plan-grid" data-motion>
+            <ul className="plan-grid pay-grid" data-motion>
               {owed.map((p) => {
                 const s = subs.data?.get(p.id)
                 const review = s?.status === 'pendiente'
@@ -58,9 +58,11 @@ export function MisPagos() {
                         {review && <span className="tag tag--review">En revisión</span>}
                         {rejected && <span className="tag tag--pay-fallido">Rechazado</span>}
                       </div>
-                      <h3 className="plan-card__name">{p.concept}</h3>
-                      <p className="plan-card__price">{formatCLP(p.amount)}</p>
-                      {rejected && <p className="pay-card__note">La escuela no confirmó tu transferencia{s?.reject_reason ? `: ${s.reject_reason}` : ''}. Revisa los datos e inténtalo de nuevo.</p>}
+                      <div className="pay-card__row">
+                        <h3 className="plan-card__name">{p.concept}</h3>
+                        <p className="plan-card__price">{formatCLP(p.amount)}</p>
+                      </div>
+                      {rejected && <p className="pay-card__note">{s?.reject_reason ? `Motivo: ${s.reject_reason}` : 'La escuela no pudo confirmar tu transferencia.'}</p>}
                       <div className="pay-card__action">
                         {review
                           ? <p className="hint">Informaste la transferencia. Tu escuela la está revisando.</p>

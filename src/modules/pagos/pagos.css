@@ -329,14 +329,38 @@
 }
 
 /* "Por pagar": one card per payment, same look as the plan cards */
+.plan-grid.pay-grid {
+  align-items: start; /* each card only as tall as its content */
+}
+.pay-grid .plan-card {
+  height: auto;
+}
+.pay-card__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pay-card__row .plan-card__name {
+  min-width: 0;
+}
+.pay-card__row .plan-card__price {
+  flex: none;
+  font-size: 22px;
+}
 .pay-card__action {
   margin-top: auto; /* the button sits at the bottom, aligned across cards */
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
+  padding-top: 4px;
+}
+.pay-card__action .btn {
+  min-height: 38px;
+}
+.pay-card__action .hint {
+  font-size: 13px;
 }
 .pay-card__note {
   color: var(--danger);
-  font-size: 14px;
+  font-size: 13px;
 }
 .pay-card.is-review {
   border-color: color-mix(in srgb, #6aa9f0 45%, var(--line));
