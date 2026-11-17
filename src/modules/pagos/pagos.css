@@ -327,3 +327,20 @@
   gap: 10px;
   margin-left: auto;
 }
+
+/* "Por pagar": one card per payment, same look as the plan cards */
+.pay-card__action {
+  margin-top: auto; /* the button sits at the bottom, aligned across cards */
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.pay-card__note {
+  color: var(--danger);
+  font-size: 14px;
+}
+.pay-card.is-review {
+  border-color: color-mix(in srgb, #6aa9f0 45%, var(--line));
+}
+.pay-card.is-rejected {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--line));
+}

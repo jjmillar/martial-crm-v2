@@ -26,34 +26,52 @@ export function MisPagos() {
       <header className="page-head">
         <span className="eyebrow">{activeSchool?.name}</span>
         <h1>Pagos y planes</h1>
-        <p className="hint">{total ? `Tienes ${formatCLP(total)} por pagar.` : 'Estás al día.'}</p>
+        {total > 0 && <p className="hint">Tienes {formatCLP(total)} por pagar.</p>}
       </header>
       {(pays.isLoading || subs.isLoading) && <p className="hint">Cargando…</p>}
 
-      {owed.length > 0 && (
-        <section className="card form-section" aria-labelledby="mp-owed">
-          <h2 id="mp-owed">Por pagar</h2>
-          <ul className="my-pays" data-motion>
-            {owed.map((p) => {
-              const s = subs.data?.get(p.id)
-              const review = s?.status === 'pendiente'
-              return (
-                <li key={p.id} className="my-pay">
-                  <span className="my-pay__main">
-                    <strong>{p.concept}</strong>
-                    <span className="hint">{p.due_date ? `Vence el ${formatDate(p.due_date)}` : 'Sin fecha de vencimiento'}</span>
-                    {s?.status === 'rechazada' && <span className="field__error">La escuela no confirmó tu transferencia{s.reject_reason ? `: ${s.reject_reason}` : ''}.</span>}
-                  </span>
-                  <span className="my-pay__side">
-                    <b className="pay-amount">{formatCLP(p.amount)}</b>
-                    {review
-                      ? <span className="tag tag--review">En revisión</span>
-                      : <Link className="btn" to={payHref(p.id)}><Icon name="wallet" size={16} /> Pagar</Link>}
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
+      {pays.isSuccess && (
+        <section className="pp-section" id="por-pagar" aria-labelledby="mp-owed">
+          <div className="pp-section__head">
+            <div>
+              <h2 id="mp-owed">Por pagar</h2>
+              {owed.length > 0 && <p className="hint">Paga por transferencia: tu escuela la confirma y queda como pagado.</p>}
+            </div>
+          </div>
+          {owed.length === 0 ? (
+            <div className="card plan-card pay-card pay-card--ok">
+              <span className="eyebrow">Sin pagos pendientes</span>
+              <h3 className="plan-card__name">Estás al día</h3>
+              <p className="hint">Cuando tu escuela registre un cobro aparecerá aquí, listo para pagar.</p>
+            </div>
+          ) : (
+            <ul className="plan-grid" data-motion>
+              {owed.map((p) => {
+                const s = subs.data?.get(p.id)
+                const review = s?.status === 'pendiente'
+                const rejected = s?.status === 'rechazada'
+                return (
+                  <li key={p.id}>
+                    <article className={`card plan-card pay-card${review ? ' is-review' : ''}${rejected ? ' is-rejected' : ''}`}>
+                      <div className="plan-card__tags">
+                        <span className="eyebrow">{p.due_date ? `Vence el ${formatDate(p.due_date)}` : 'Sin vencimiento'}</span>
+                        {review && <span className="tag tag--review">En revisión</span>}
+                        {rejected && <span className="tag tag--pay-fallido">Rechazado</span>}
+                      </div>
+                      <h3 className="plan-card__name">{p.concept}</h3>
+                      <p className="plan-card__price">{formatCLP(p.amount)}</p>
+                      {rejected && <p className="pay-card__note">La escuela no confirmó tu transferencia{s?.reject_reason ? `: ${s.reject_reason}` : ''}. Revisa los datos e inténtalo de nuevo.</p>}
+                      <div className="pay-card__action">
+                        {review
+                          ? <p className="hint">Informaste la transferencia. Tu escuela la está revisando.</p>
+                          : <Link className="btn btn--block" to={payHref(p.id)}><Icon name="wallet" size={16} /> {rejected ? 'Pagar de nuevo' : 'Pagar'}</Link>}
+                      </div>
+                    </article>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </section>
       )}
 
