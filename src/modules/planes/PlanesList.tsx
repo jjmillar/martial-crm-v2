@@ -11,6 +11,7 @@ import { cycleInfo, planFeatures } from './cycles'
 import { SchoolFilter } from '../../ui/SchoolFilter'
 import { myEnrollments } from '../portal/api'
 import { todayIso } from '../../lib/dates'
+import { PagosTabs } from '../pagos/PagosTabs'
 
 export function PlanesList() {
   const { activeSchool, role, myStudent } = useSchool()
@@ -34,13 +35,14 @@ export function PlanesList() {
       <header className="page-head page-head--row">
         <div>
           {student ? <span className="eyebrow">{activeSchool.name}</span> : <SchoolFilter />}
-          <h1>Planes</h1>
+          <h1>Pagos y planes</h1>
           {Boolean(plans.data?.length) && <p className="hint">{student ? 'Los planes de tu escuela. Para cambiarte de plan, habla con tu escuela.' : 'Lo que ofrece tu escuela. El plan predeterminado se sugiere primero al matricular.'}</p>}
         </div>
         {canEdit && Boolean(plans.data?.length) && (
           <Link className="fab" to="nuevo" aria-label="Nuevo plan" title="Nuevo plan"><Icon name="plus" size={22} /></Link>
         )}
       </header>
+      <PagosTabs />
 
       {inactiveCount > 0 && !student && (
         <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivos (${inactiveCount})`} />

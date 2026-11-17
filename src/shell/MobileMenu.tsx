@@ -137,7 +137,7 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
   }
 
   const pos = drag ?? spotToXY(spot)
-  const anyActive = nav.some((m) => pathname.startsWith(`/app/${m.path}`))
+  const anyActive = nav.some((m) => [m.path, ...(m.also ?? [])].some((p) => pathname.startsWith(`/app/${p}`)))
 
   return (
     <>
@@ -177,7 +177,7 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
 
           <nav className="sheet__grid" aria-label="Secciones">
             {nav.map((m) => (
-              <NavLink key={m.id} to={`/app/${m.path}`} className="sheet__link">
+              <NavLink key={m.id} to={`/app/${m.path}`} also={m.also?.map((p) => `/app/${p}`)} className="sheet__link">
                 {m.icon && <Icon name={m.icon} size={22} />}
                 <span>{m.label}</span>
                 {m.id === 'tareas' && pending > 0 && <span className="nav-badge sheet__badge">{pending}</span>}

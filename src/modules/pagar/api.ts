@@ -35,6 +35,14 @@ export async function latestSubmissions(filter: { studentId?: string; schoolId?:
 }
 export const submissionsKey = (k: string | undefined) => ['payment-submissions', k] as const
 
+/** Every transfer report of a student, with the payment's concept (for the payment history). */
+export async function listMySubmissions(studentId: string): Promise<(Submission & { concept: string })[]> {
+  const { data, error } = await supabase.from('payment_submissions').select(`${subCols}, payment:payments(concept)`)
+    .eq('student_id', studentId).order('created_at', { ascending: false }).limit(200)
+  if (error) throw error
+  return (data as unknown as (Submission & { payment: { concept: string } | null })[]).map((s) => ({ ...s, concept: s.payment?.concept ?? 'Pago' }))
+}
+
 export async function submitPayment(paymentId: string, reference: string): Promise<void> {
   const { error } = await supabase.rpc('submit_payment', { p_payment_id: paymentId, p_method: 'transferencia', p_reference: reference })
   if (!error) return

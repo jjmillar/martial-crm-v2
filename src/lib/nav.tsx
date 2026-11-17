@@ -120,13 +120,14 @@ export function Link({ to, replace, state, onClick, ...rest }: LinkProps) {
   )
 }
 
-type NavLinkProps = Omit<LinkProps, 'className'> & { className?: string | ((s: { isActive: boolean }) => string); end?: boolean }
+type NavLinkProps = Omit<LinkProps, 'className'> & { className?: string | ((s: { isActive: boolean }) => string); end?: boolean; also?: string[] }
 
 /** Link that knows whether it points at the current section (adds "active", like the menu expects). */
-export function NavLink({ to, className, end, ...rest }: NavLinkProps) {
+export function NavLink({ to, className, end, also, ...rest }: NavLinkProps) {
   const { pathname, search } = useHere()
   const href = resolvePath(to, pathname, search).split(/[?#]/)[0]
-  const isActive = end ? pathname === href : pathname === href || pathname.startsWith(href.endsWith('/') ? href : `${href}/`)
+  const under = (h: string) => pathname === h || pathname.startsWith(h.endsWith('/') ? h : `${h}/`)
+  const isActive = end ? pathname === href : under(href) || (also ?? []).some(under)
   const cls = typeof className === 'function' ? className({ isActive }) : [className, isActive ? 'active' : ''].filter(Boolean).join(' ')
   return <Link to={to} className={cls || undefined} aria-current={isActive ? 'page' : undefined} {...rest} />
 }

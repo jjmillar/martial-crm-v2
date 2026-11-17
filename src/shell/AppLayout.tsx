@@ -30,7 +30,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         <nav className="nav" aria-label="Secciones">
           {nav.map((m) => (
-            <NavLink key={m.id} to={`/app/${m.path}`} className="nav__link">
+            <NavLink key={m.id} to={`/app/${m.path}`} also={m.also?.map((p) => `/app/${p}`)} className="nav__link">
               {m.icon && <Icon name={m.icon} />}
               <span>{m.label}</span>
               {m.id === 'tareas' && pending > 0 && <span className="nav-badge" aria-label={`${pending} pendientes`}>{pending}</span>}

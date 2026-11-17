@@ -32,22 +32,22 @@
   font-variant-numeric: tabular-nums;
 }
 
-.tag--pay-pagado {
+.tag.tag--pay-pagado {
   color: var(--ok);
   border-color: color-mix(in srgb, var(--ok) 45%, transparent);
 }
 
-.tag--pay-pendiente {
+.tag.tag--pay-pendiente {
   color: #e8c547;
   border-color: color-mix(in srgb, #e8c547 45%, transparent);
 }
 
-.tag--pay-fallido {
+.tag.tag--pay-fallido {
   color: var(--danger);
   border-color: color-mix(in srgb, var(--danger) 45%, transparent);
 }
 
-.tag--pay-reembolsado {
+.tag.tag--pay-reembolsado {
   color: var(--muted);
 }
 
@@ -206,7 +206,7 @@
 .checkout__state--ok svg {
   color: var(--ok);
 }
-.tag--review {
+.tag.tag--review {
   color: #6aa9f0;
   border-color: color-mix(in srgb, #6aa9f0 45%, transparent);
 }
@@ -249,4 +249,110 @@
 .my-pays-page {
   display: grid;
   gap: 16px;
+}
+
+/* "Pagos y planes" tabs: an underline tab bar under the title */
+.section-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.section-tabs::-webkit-scrollbar {
+  display: none;
+}
+.section-tabs__tab {
+  position: relative;
+  flex: none;
+  padding: 10px 14px 12px;
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--dur) var(--ease);
+}
+.section-tabs__tab::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  bottom: -1px;
+  left: 10px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform var(--dur) var(--ease-out);
+}
+.section-tabs__tab:hover {
+  color: var(--text);
+}
+.section-tabs__tab[aria-current='page'] {
+  color: var(--text);
+}
+.section-tabs__tab[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+/* Payment history: one card per month with its total */
+.pay-history {
+  display: grid;
+  gap: 12px;
+}
+.pay-history__month {
+  display: grid;
+  gap: 10px;
+}
+.pay-history__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.pay-history__head h2 {
+  font-size: 18px;
+}
+.pay-history__total {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.pay-history__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pay-history__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  color: inherit;
+  text-decoration: none;
+}
+.pay-history__list li:last-child .pay-history__row {
+  border-bottom: 0;
+}
+.pay-history__row--link:hover strong {
+  text-decoration: underline;
+}
+.pay-history__main {
+  display: grid;
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.pay-history__main strong {
+  overflow-wrap: anywhere;
+}
+.pay-history__side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
 }

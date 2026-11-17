@@ -11,6 +11,9 @@ import { listPayments, methodLabel, paymentsKey, statusLabel } from './api'
 import { SchoolFilter } from '../../ui/SchoolFilter'
 import { latestSubmissions, submissionsKey } from '../pagar/api'
 import { MisPagos } from '../pagar/MisPagos'
+import { PagosTabs } from './PagosTabs'
+import { usePagosTab } from './pagosTab'
+import { PaymentHistory } from './PaymentHistory'
 
 type Filter = PaymentStatus | 'todos'
 const filters: { id: Filter; label: string }[] = [
@@ -29,6 +32,7 @@ export function PagosList() {
 
 function StaffPagos() {
   const { activeSchool, role } = useSchool()
+  const tab = usePagosTab()
   const schoolId = activeSchool?.id
   const isAdmin = role === 'admin' || role === 'ceo'
   // Admins: make sure due enrollment fees exist before listing (the daily job does the same; this is idempotent).
@@ -70,10 +74,15 @@ function StaffPagos() {
       <header className="page-head page-head--row">
         <div>
           <SchoolFilter />
-          <h1>Pagos</h1>
+          <h1>Pagos y planes</h1>
         </div>
-        {Boolean(q.data?.length) && <Link className="fab" to="nuevo" aria-label="Registrar pago" title="Registrar pago"><Icon name="plus" size={22} /></Link>}
+        {Boolean(q.data?.length) && <Link className="fab" to="/app/pagos/nuevo" aria-label="Registrar pago" title="Registrar pago"><Icon name="plus" size={22} /></Link>}
       </header>
+      <PagosTabs />
+
+      {tab === 'historial' ? (
+        q.isLoading ? <p className="hint">Cargando…</p> : <PaymentHistory payments={q.data ?? []} staff />
+      ) : (<>
 
       {q.isLoading && <p className="hint">Cargando…</p>}
       {q.isError && <p className="alert">No se pudieron cargar los pagos.</p>}
@@ -132,6 +141,7 @@ function StaffPagos() {
           </li>
         ))}
       </ul>
+      </>)}
     </div>
   )
 }
