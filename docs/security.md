@@ -70,3 +70,10 @@ aunque la funcionalidad esté lista.
 - **Protección contra contraseñas filtradas (HaveIBeenPwned):** requiere el plan Pro de Supabase.
 - **Dominio de correo propio verificado en Resend:** sin él, los correos salen desde `onboarding@resend.dev`.
 - **Exigir MFA a todos los CEO** (hoy es opcional y recomendado): se puede activar cuando todos lo tengan configurado.
+
+## Platform operator ("el CRM del CRM", 2026-11-18)
+- One operator account (`platform_operators`), signs in with a username; Auth maps it to `<usuario>@plataforma.martialcrm.invalid` (reserved domain, never receives mail). No password reset by email: recovery only through the service role.
+- Two-step verification is mandatory: `is_platform_operator()` requires an `aal2` session, so every `platform_*` function and the `platform_plans` policies refuse a password-only session.
+- Least privilege: the operator is not a school member and reads no school data. It sees per-customer aggregates (`platform_customers()`: name, email, schools, active student count, subscription) and changes subscriptions only through `platform_update_subscription()`, which records every change in `subscription_events`.
+- `platform_admins` (the old "sees every school" CEO) is empty; `is_ceo()` no longer matches anyone.
+- A suspended/cancelled subscription closes the customer's schools for owner, team and students in the RLS helpers (`school_blocked()`), and `is_owner()` turns false so they cannot create schools around the block. Data is kept.

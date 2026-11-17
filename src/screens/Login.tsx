@@ -26,13 +26,13 @@ export function Login() {
     setError(null)
     setNotice(null)
     if (!supabaseConfigured) return setError(configError)
-    if (!email.trim()) return setError('Escribe tu correo.')
+    if (!email.trim()) return setError(mode === 'login' ? 'Escribe tu correo o usuario.' : 'Escribe tu correo.')
 
     setBusy(true)
     if (mode === 'login') {
       const { error: err } = await signIn(email.trim(), password)
       setBusy(false)
-      if (err) return setError('Correo o contraseña incorrectos.')
+      if (err) return setError('Usuario o contraseña incorrectos.')
       navigate(from, { replace: true })
     } else {
       const { error: err } = await sendPasswordReset(email.trim())
@@ -63,8 +63,8 @@ export function Login() {
           </div>
 
           <div className="field">
-            <label htmlFor="email">Correo</label>
-            <input id="email" className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <label htmlFor="email">{mode === 'login' ? 'Correo o usuario' : 'Correo'}</label>
+            <input id="email" className="input" type={mode === 'login' ? 'text' : 'email'} autoComplete={mode === 'login' ? 'username' : 'email'} autoCapitalize="none" spellCheck={false} value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
 
           {mode === 'login' && (

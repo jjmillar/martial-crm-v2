@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import { loginEmail } from './loginEmail'
 import type { Profile } from './database.types'
 
 interface AuthContextType {
@@ -8,6 +9,8 @@ interface AuthContextType {
   user: User | null
   profile: Profile | null
   isCeo: boolean
+  /** The platform operator account ("el CRM del CRM"): it never sees schools, only the platform console. */
+  platform: Platform | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
@@ -17,6 +20,8 @@ interface AuthContextType {
   reloadProfile: () => Promise<void>
 }
 
+export type Platform = { username: string; verified: boolean }
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -24,6 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isCeo, setIsCeo] = useState<boolean>(false)
+  const [platform, setPlatform] = useState<Platform | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   // Only a different user blocks the UI. Token refreshes (hourly) and USER_UPDATED (password change) refresh in
   // the background; otherwise RequireAuth would unmount the app and wipe any half-filled form.
@@ -34,6 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loadedFor.current = null
       setProfile(null)
       setIsCeo(false)
+      setPlatform(null)
       setLoading(false)
       return
     }
@@ -41,11 +48,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       if (loadedFor.current !== currentUserId) setLoading(true)
       // CEO in the app = platform admin or a customer who owns schools (owners).
-      const [profileRes, ceoRes, ownerRes] = await Promise.all([
+      const [profileRes, ceoRes, ownerRes, whoRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', currentUserId).single(),
         supabase.rpc('is_ceo'),
         supabase.rpc('is_owner'),
+        supabase.rpc('platform_whoami'),
       ])
+      const who = whoRes.data as { operator?: boolean; username?: string; verified?: boolean } | null
+      setPlatform(who?.operator ? { username: who.username ?? '', verified: Boolean(who.verified) } : null)
 
       if (profileRes.data) {
         setProfile(profileRes.data)
@@ -58,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
       setProfile(null)
       setIsCeo(false)
+      setPlatform(null)
     } finally {
       setLoading(false)
     }
@@ -90,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loadedFor.current = null
         setProfile(null)
         setIsCeo(false)
+        setPlatform(null)
         setLoading(false)
       }
     })
@@ -101,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({ email: loginEmail(email), password })
     return { error: error ? new Error(error.message) : null }
   }
 
@@ -112,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null)
     setProfile(null)
     setIsCeo(false)
+    setPlatform(null)
   }
 
   const sendPasswordReset = async (email: string) => {
@@ -139,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         profile,
         isCeo,
+        platform,
         loading,
         signIn,
         signOut,

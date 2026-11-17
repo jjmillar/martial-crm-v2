@@ -826,6 +826,59 @@ export type Database = {
         };
         Relationships: [];
       };
+      platform_operators: {
+        Row: {
+          created_at: string;
+          user_id: string;
+          username: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          user_id: string;
+          username: string;
+        };
+        Update: {
+          created_at?: string;
+          user_id?: string;
+          username?: string;
+        };
+        Relationships: [];
+      };
+      platform_plans: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          max_schools: number | null;
+          max_students: number | null;
+          name: string;
+          period: string;
+          price_clp: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          max_schools?: number | null;
+          max_students?: number | null;
+          name: string;
+          period?: string;
+          price_clp?: number;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          max_schools?: number | null;
+          max_students?: number | null;
+          name?: string;
+          period?: string;
+          price_clp?: number;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -1246,6 +1299,88 @@ export type Database = {
             columns: ["school_id"];
             isOneToOne: false;
             referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      subscription_events: {
+        Row: {
+          actor: string | null;
+          at: string;
+          details: NonNullable<Json>;
+          id: number;
+          owner_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor?: string | null;
+          at?: string;
+          details?: NonNullable<Json>;
+          id?: never;
+          owner_id: string;
+        };
+        Update: {
+          actor?: string | null;
+          at?: string;
+          details?: NonNullable<Json>;
+          id?: never;
+          owner_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscription_events_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "owners";
+            referencedColumns: ["user_id"];
+          },
+        ];
+      };
+      subscriptions: {
+        Row: {
+          notes: string | null;
+          owner_id: string;
+          period_end: string | null;
+          plan_id: string | null;
+          status: Database["public"]["Enums"]["subscription_status"];
+          trial_ends: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          notes?: string | null;
+          owner_id: string;
+          period_end?: string | null;
+          plan_id?: string | null;
+          status?: Database["public"]["Enums"]["subscription_status"];
+          trial_ends?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          notes?: string | null;
+          owner_id?: string;
+          period_end?: string | null;
+          plan_id?: string | null;
+          status?: Database["public"]["Enums"]["subscription_status"];
+          trial_ends?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: true;
+            referencedRelation: "owners";
+            referencedColumns: ["user_id"];
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_plans";
             referencedColumns: ["id"];
           },
         ];
@@ -1690,11 +1825,66 @@ export type Database = {
       };
       is_ceo: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_owner: { Args: Record<PropertyKey, never>; Returns: boolean };
+      is_platform_operator: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
       is_school_owner: { Args: { p_school_id: string }; Returns: boolean };
       is_student_user: { Args: { p_school_id: string }; Returns: boolean };
       mfa_ok: { Args: Record<PropertyKey, never>; Returns: boolean };
+      my_blocked_schools: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          name: string;
+          school_id: string;
+          status: Database["public"]["Enums"]["subscription_status"];
+        }[];
+      };
       my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
+      platform_customers: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          created_at: string;
+          email: string;
+          full_name: string;
+          last_sign_in_at: string;
+          notes: string;
+          owner_id: string;
+          period: string;
+          period_end: string;
+          plan_id: string;
+          plan_name: string;
+          price_clp: number;
+          schools: Json;
+          status: Database["public"]["Enums"]["subscription_status"];
+          students: number;
+          trial_ends: string;
+          updated_at: string;
+        }[];
+      };
+      platform_events: {
+        Args: { p_limit?: number };
+        Returns: {
+          at: string;
+          customer: string;
+          details: Json;
+          id: number;
+          owner_id: string;
+        }[];
+      };
+      platform_update_subscription: {
+        Args: {
+          p_notes: string;
+          p_owner: string;
+          p_period_end: string;
+          p_plan: string;
+          p_status: Database["public"]["Enums"]["subscription_status"];
+          p_trial_ends: string;
+        };
+        Returns: undefined;
+      };
+      platform_whoami: { Args: Record<PropertyKey, never>; Returns: Json };
       rate_limit_hit: {
         Args: {
           p_bucket: string;
@@ -1770,6 +1960,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      school_blocked: { Args: { p_school_id: string }; Returns: boolean };
       school_landing: { Args: { p_slug: string }; Returns: Json };
       school_owner: {
         Args: { p_school_id: string };
@@ -1853,6 +2044,7 @@ export type Database = {
       request_kind: "alumno" | "miembro";
       request_status: "pendiente" | "aprobada" | "rechazada";
       school_role: "admin" | "user";
+      subscription_status: "prueba" | "activa" | "suspendida" | "cancelada";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -2000,6 +2192,7 @@ export const Constants = {
       request_kind: ["alumno", "miembro"],
       request_status: ["pendiente", "aprobada", "rechazada"],
       school_role: ["admin", "user"],
+      subscription_status: ["prueba", "activa", "suspendida", "cancelada"],
     },
   },
 } as const;
