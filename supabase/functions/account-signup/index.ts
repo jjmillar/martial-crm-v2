@@ -6,19 +6,14 @@
  *                  until the school's CEO approves it in "Pendientes".
  */
 
+import { clientIp, serveWithCors } from '../_shared/cors.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
 const json = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
 const str = (v: unknown, max = 120) => (typeof v === 'string' ? v.trim().slice(0, max) : '')
 
-Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response(null, { status: 200, headers: corsHeaders })
+serveWithCors(async (req: Request) => {
   if (req.method !== 'POST') return json({ error: 'Método no permitido' }, 405)
 
   try {
@@ -61,6 +56,9 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'Error inesperado' }, 500)
     }
     const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false } })
+    // At most 5 sign-ups per hour from the same connection (bots, account spam).
+    const { data: allowed } = await admin.rpc('rate_limit_hit', { p_bucket: 'signup', p_key: clientIp(req), p_max: 5, p_window_seconds: 3600 })
+    if (allowed === false) return json({ error: 'Demasiados registros desde tu conexión. Intenta de nuevo en un rato.' }, 429)
 
     let schoolId: string | null = null
     if (kind === 'alumno') {

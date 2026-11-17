@@ -11,7 +11,8 @@ import type { Landing } from './api'
 type Slot = NonNullable<Landing['trial']>['slots'][number]
 
 const errorText = (m: string) =>
-  m.includes('too late') ? 'Ese horario ya está muy cerca para agendarlo. Elige uno más adelante, por favor.'
+  m.includes('rate limited') ? 'Recibimos demasiadas reservas desde tu conexión. Espera un rato e inténtalo de nuevo.'
+  : m.includes('too late') ? 'Ese horario ya está muy cerca para agendarlo. Elige uno más adelante, por favor.'
     : m.includes('too many') ? 'Ya tienes clases de prueba agendadas con este teléfono. Si necesitas cambiarla, escríbenos.'
       : m.includes('not available') ? 'Ese horario ya no está disponible. Recarga la página y elige otro.'
         : m.includes('check') ? 'Revisa tus datos: nombre, un teléfono válido y, si lo pones, un correo válido.'

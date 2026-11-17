@@ -71,7 +71,7 @@ const schema = z
     is_default: z.boolean(),
     active: z.boolean(),
   })
-  .refine((v) => !(v.is_default && !v.active), { message: 'El plan predeterminado debe estar activo.', path: ['active'] })
+  .refine((v) => !(v.is_default && !v.active), { message: 'El plan predeterminado debe estar activo.', path: ['active'], when: () => true }) // show it together with field errors
 
 export function parsePlan(form: PlanForm): { ok: true; data: PlanPayload } | { ok: false; errors: Partial<Record<keyof PlanForm, string>> } {
   const r = schema.safeParse(form)

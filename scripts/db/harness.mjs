@@ -13,6 +13,8 @@ export async function boot(repo) {
     create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}'::jsonb, created_at timestamptz default now());
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claims', true)::jsonb->>'sub','')::uuid $$;
     create function auth.role() returns text language sql stable as $$ select current_setting('request.jwt.claims', true)::jsonb->>'role' $$;
+    create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;
+    create table auth.mfa_factors (id uuid primary key default gen_random_uuid(), user_id uuid not null, status text not null default 'verified');
     grant usage on schema auth to anon, authenticated;
     grant execute on all functions in schema auth to anon, authenticated;
     grant usage on schema public to anon, authenticated, service_role;
@@ -37,16 +39,16 @@ export async function newUser(db, name) {
 }
 
 // Run fn's SQL as a given user (or anon when id is null) inside a transaction that is rolled back if it throws.
-export async function as(db, id, sql, params = []) {
+export async function as(db, id, sql, params = [], extra = {}) {
   const role = id ? 'authenticated' : 'anon'
   await db.exec(`reset role`)
-  await db.query(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub: id ?? '', role })])
+  await db.query(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub: id ?? '', role, aal: 'aal1', ...extra })])
   await db.exec(`set role ${role}`)
   try { return await db.query(sql, params) } finally { await db.exec(`reset role`) }
 }
 
-export async function tryAs(db, id, sql, params = []) {
-  try { const r = await as(db, id, sql, params); return { ok: true, rows: r.rows, affected: r.affectedRows } } catch (e) { return { ok: false, err: e.message } }
+export async function tryAs(db, id, sql, params = [], extra = {}) {
+  try { const r = await as(db, id, sql, params, extra); return { ok: true, rows: r.rows, affected: r.affectedRows } } catch (e) { return { ok: false, err: e.message } }
 }
 
 const results = []

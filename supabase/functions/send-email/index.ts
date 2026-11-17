@@ -4,15 +4,11 @@
  * add payment receipts, announcements, etc. as new entries in `templates`.
  * Every attempt is written to public.email_log.
  */
+import { serveWithCors } from '../_shared/cors.ts'
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import { layout, sendEmail } from '../_shared/email.ts'
 
-const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
+const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
 
 type Ctx = {
   caller: SupabaseClient
@@ -94,8 +90,7 @@ const templates: Record<string, Template> = {
   },
 }
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response(null, { status: 200, headers: cors })
+serveWithCors(async (req: Request) => {
   if (req.method !== 'POST') return json({ error: 'Método no permitido' }, 405)
 
   try {

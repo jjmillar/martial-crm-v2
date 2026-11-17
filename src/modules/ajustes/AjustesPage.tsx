@@ -14,6 +14,7 @@ import { EscuelaPerfil } from './EscuelaPerfil'
 import { LandingSettings } from './LandingSettings'
 import { Exportar } from './Exportar'
 import { PasarelaPago } from './PasarelaPago'
+import { Actividad } from './Actividad'
 import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
@@ -42,7 +43,7 @@ export function AjustesPage() {
 }
 
 function SchoolSections() {
-  const { activeSchool } = useSchool()
+  const { activeSchool, role } = useSchool()
   const school = activeSchool!
   return (
     <>
@@ -69,6 +70,11 @@ function SchoolSections() {
       <Acc id="exportar" icon="share" title="Exportar datos" hint="Archivos CSV para Excel o Sheets">
         <Exportar schoolId={school.id} schoolName={school.name} />
       </Acc>
+      {role === 'ceo' && (
+        <Acc id="actividad" icon="lock" title="Registro de actividad" hint="Quién cambió datos bancarios, pagos y roles">
+          <Actividad schoolId={school.id} />
+        </Acc>
+      )}
       <Acc id="correos" icon="mail" title="Correos" hint="Correo de prueba e historial de envíos">
         <Correos schoolId={school.id} />
       </Acc>

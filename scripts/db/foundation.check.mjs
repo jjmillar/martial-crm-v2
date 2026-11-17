@@ -38,7 +38,8 @@ check('CEO sees all schools', (await as(db, CEO, `select count(*)::int c from pu
 // Isolation between schools
 const seenA = await as(db, A, `select id from public.schools`)
 check('admin A sees only own school', seenA.rows.length === 1 && seenA.rows[0].id === s1, seenA.rows)
-check('anon sees no schools', (await tryAs(db, null, `select id from public.schools`)).rows?.length === 0)
+const anonSchools = await tryAs(db, null, `select id from public.schools`)
+check('anon sees no schools', !anonSchools.ok || anonSchools.rows.length === 0, anonSchools.err)
 await tryAs(db, A, `update public.schools set name='hacked' where id=$1`, [s2])
 check('A cannot update school 2', (await db.query(`select name from public.schools where id=$1`, [s2])).rows[0].name === 'Dojo Dos')
 const joinB = await tryAs(db, A, `insert into public.school_members (school_id, user_id, role) values ($1,$2,'admin')`, [s2, A])

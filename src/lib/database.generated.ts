@@ -155,6 +155,48 @@ export type Database = {
           },
         ];
       };
+      audit_log: {
+        Row: {
+          action: string;
+          actor: string | null;
+          at: string;
+          details: NonNullable<Json>;
+          entity: string;
+          entity_id: string | null;
+          id: number;
+          school_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          action: string;
+          actor?: string | null;
+          at?: string;
+          details?: NonNullable<Json>;
+          entity: string;
+          entity_id?: string | null;
+          id?: never;
+          school_id?: string | null;
+        };
+        Update: {
+          action?: string;
+          actor?: string | null;
+          at?: string;
+          details?: NonNullable<Json>;
+          entity?: string;
+          entity_id?: string | null;
+          id?: never;
+          school_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       class_schedules: {
         Row: {
           class_id: string;
@@ -812,6 +854,28 @@ export type Database = {
           id?: string;
           phone?: string | null;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      rate_limits: {
+        Row: {
+          bucket: string;
+          hits: number;
+          key: string;
+          window_start: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          bucket: string;
+          hits?: number;
+          key: string;
+          window_start: string;
+        };
+        Update: {
+          bucket?: string;
+          hits?: number;
+          key?: string;
+          window_start?: string;
         };
         Relationships: [];
       };
@@ -1480,6 +1544,16 @@ export type Database = {
         Args: { p_path: string; p_payment_id: string };
         Returns: undefined;
       };
+      audit: {
+        Args: {
+          p_action: string;
+          p_details: Json;
+          p_entity: string;
+          p_id: string;
+          p_school: string;
+        };
+        Returns: undefined;
+      };
       book_trial: {
         Args: {
           p_date: string;
@@ -1594,7 +1668,17 @@ export type Database = {
       is_school_member: { Args: { p_school_id: string }; Returns: boolean };
       is_school_owner: { Args: { p_school_id: string }; Returns: boolean };
       is_student_user: { Args: { p_school_id: string }; Returns: boolean };
+      mfa_ok: { Args: Record<PropertyKey, never>; Returns: boolean };
       my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
+      rate_limit_hit: {
+        Args: {
+          p_bucket: string;
+          p_key: string;
+          p_max: number;
+          p_window_seconds: number;
+        };
+        Returns: boolean;
+      };
       register_account_request: {
         Args: {
           p_address?: string;
@@ -1613,6 +1697,7 @@ export type Database = {
         Returns: string;
       };
       register_owner: { Args: { p_user_id: string }; Returns: undefined };
+      request_ip: { Args: Record<PropertyKey, never>; Returns: string };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
       rut_key: { Args: { p_rut: string }; Returns: string };
       save_class_session: {

@@ -10,3 +10,6 @@
 # Data and auth stay in Supabase.
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+
+# Security headers (CSP, HSTS, etc.) live in next.config.ts so they also apply locally; see docs/security.md.

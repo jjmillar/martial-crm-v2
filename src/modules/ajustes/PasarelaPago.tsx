@@ -10,7 +10,8 @@ const ACCOUNT_TYPES = ['Cuenta corriente', 'Cuenta vista', 'Cuenta RUT', 'Cuenta
 // Payment gateway settings: the transfer data students see when they press "Pagar". Without an account number,
 // the transfer option tells students to contact the school.
 export function PasarelaPago({ school }: { school: School }) {
-  const { reload } = useSchool()
+  const { reload, role } = useSchool()
+  const canEdit = role === 'ceo'
   const [f, setF] = useState({
     bank: school.transfer_bank ?? '', type: school.transfer_account_type ?? '', number: school.transfer_account_number ?? '',
     holder: school.transfer_holder ?? '', rut: school.transfer_rut ? formatRut(school.transfer_rut) : '', email: school.transfer_email ?? '',
@@ -30,7 +31,7 @@ export function PasarelaPago({ school }: { school: School }) {
         transfer_bank: f.bank.trim() || null, transfer_account_type: f.type.trim() || null, transfer_account_number: f.number.trim() || null,
         transfer_holder: f.holder.trim() || null, transfer_rut: rut ? formatRut(rut) : null, transfer_email: f.email.trim().toLowerCase() || null,
       }).eq('id', school.id)
-      if (error) throw new Error('No se pudo guardar. Solo los administradores editan la escuela.')
+      if (error) throw new Error(error.message.includes('only the CEO') ? 'Solo el CEO puede cambiar los datos bancarios.' : 'No se pudo guardar los datos de transferencia.')
       await reload()
       return filled
     },
@@ -41,8 +42,9 @@ export function PasarelaPago({ school }: { school: School }) {
 
   return (
     <form className="form-section" onSubmit={onSubmit} noValidate>
-      <p className="hint">Cuando un alumno presiona <b>Pagar</b> (en Inicio o en Mis pagos), llega a la pasarela de pago. Por ahora el medio habilitado es la <b>transferencia</b>: ve estos datos, transfiere y te llega el pago a <b>Tareas → Pagos por aprobar</b>. Al aprobarlo queda como pagado.</p>
-      <div className="form-grid">
+      <p className="hint">Cuando un alumno presiona <b>Pagar</b> (en Inicio o en Mis pagos), llega a la pasarela de pago. Por ahora el medio habilitado es la <b>transferencia</b>: ve estos datos, transfiere y te llega el pago a <b>Tareas → Pagos por aprobar</b>. Al aprobarlo queda como pagado. Por seguridad, solo el CEO cambia estos datos y cada cambio queda registrado.</p>
+      {!canEdit && <p className="alert">Por seguridad, solo el CEO puede cambiar los datos bancarios. Cada cambio queda registrado.</p>}
+      <fieldset className="form-fieldset" disabled={!canEdit}><div className="form-grid">
         <div className="field"><label htmlFor="tr-bank">Banco</label><input id="tr-bank" className="input" maxLength={60} placeholder="Ej: Banco Estado" value={f.bank} onChange={(e) => set('bank', e.target.value)} /></div>
         <div className="field">
           <label htmlFor="tr-type">Tipo de cuenta</label>
@@ -55,9 +57,9 @@ export function PasarelaPago({ school }: { school: School }) {
         <div className="field"><label htmlFor="tr-holder">Titular</label><input id="tr-holder" className="input" maxLength={80} placeholder="Nombre o razón social" value={f.holder} onChange={(e) => set('holder', e.target.value)} /></div>
         <div className="field"><label htmlFor="tr-rut">RUT del titular</label><input id="tr-rut" className="input" maxLength={20} placeholder="76.123.456-7" value={f.rut} onChange={(e) => set('rut', e.target.value)} onBlur={() => { if (normalizeRut(f.rut)) set('rut', formatRut(f.rut)) }} /></div>
         <div className="field"><label htmlFor="tr-email">Correo para el comprobante (opcional)</label><input id="tr-email" className="input" type="email" maxLength={120} value={f.email} onChange={(e) => set('email', e.target.value)} /></div>
-      </div>
+      </div></fieldset>
       {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}
-      <div className="form-actions"><button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : 'Guardar datos de transferencia'}</button></div>
+      {canEdit && <div className="form-actions"><button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : 'Guardar datos de transferencia'}</button></div>}
     </form>
   )
 }

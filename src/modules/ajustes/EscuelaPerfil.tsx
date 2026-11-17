@@ -44,7 +44,7 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
       const ext = (file.name.split('.').pop() ?? 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png'
       const path = `${school.id}/logo-${Date.now()}.${ext}`
       const up = await supabase.storage.from('logos').upload(path, file, { contentType: file.type || undefined })
-      if (up.error) throw new Error(up.error.message.includes('mime') ? 'Formato no permitido: usa PNG, JPG, WEBP o SVG.' : 'No se pudo subir el logo.')
+      if (up.error) throw new Error(up.error.message.includes('mime') ? 'Formato no permitido: usa PNG, JPG o WEBP.' : 'No se pudo subir el logo.')
       const url = supabase.storage.from('logos').getPublicUrl(path).data.publicUrl
       const { error } = await supabase.from('schools').update({ logo_url: url }).eq('id', school.id)
       if (error) throw new Error('No se pudo guardar el logo.')
@@ -71,9 +71,9 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
         <span className="logo-box">{school.logo_url ? <img src={school.logo_url} alt={`Logo de ${school.name}`} /> : <span aria-hidden="true">{school.name.slice(0, 2).toUpperCase()}</span>}</span>
         <label className="btn btn--ghost file-btn">
           {logo.isPending ? 'Subiendo…' : school.logo_url ? 'Cambiar logo' : 'Subir logo'}
-          <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(e) => { const file = e.target.files?.[0]; if (file) logo.mutate(file); e.target.value = '' }} />
+          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) logo.mutate(file); e.target.value = '' }} />
         </label>
-        <span className="hint">PNG, JPG, WEBP o SVG, máx. 2 MB.</span>
+        <span className="hint">PNG, JPG o WEBP, máx. 2 MB.</span>
       </div>
       <div className="form-grid">
         <div className="field"><label htmlFor="sc-name">Nombre *</label><input id="sc-name" className="input" value={f.name} onChange={(e) => set('name', e.target.value)} /></div>
