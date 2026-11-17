@@ -282,3 +282,95 @@
   font-weight: 700;
   line-height: 1;
 }
+
+/* Aprobaciones: one list for everything waiting for a decision */
+.tareas__section-head.appr-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+.appr-head > div {
+  display: grid;
+  gap: 4px;
+}
+.appr-list {
+  display: grid;
+  margin: 0;
+  padding: 4px 16px;
+  list-style: none;
+}
+.appr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px 0 12px 12px;
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 3px 0 0 var(--class-color, var(--line));
+}
+.appr:last-child {
+  border-bottom: 0;
+}
+.appr--pay {
+  --class-color: #6aa9f0;
+}
+.appr--account {
+  --class-color: var(--accent);
+}
+.appr__main {
+  display: grid;
+  flex: 1 1 280px;
+  gap: 2px;
+  min-width: 0;
+}
+.appr__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.appr__title strong {
+  overflow-wrap: anywhere;
+}
+.appr__kind {
+  font-size: 11px;
+}
+.appr__amount {
+  font-variant-numeric: tabular-nums;
+}
+.appr__match {
+  color: var(--ok);
+}
+.appr__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.appr__actions .btn {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+.appr__actions .input {
+  width: auto;
+  min-height: 34px;
+  max-width: 220px;
+}
+.appr__actions--wide {
+  flex: 1 1 100%;
+}
+.appr__actions--wide .input {
+  flex: 1 1 200px;
+  max-width: none;
+}
+@media (max-width: 600px) {
+  /* the account selector takes the full line; Aprobar / Rechazar stay together below it */
+  .appr__actions .input {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}

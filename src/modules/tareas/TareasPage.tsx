@@ -5,28 +5,24 @@ import { useSchool } from '../../lib/school'
 import { formatDate, santiagoDate } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { Aprobaciones } from './Aprobaciones'
-import { PagosPorAprobar } from '../pagar/PagosPorAprobar'
-import { AsistenciasPorAprobar } from '../asistencia/AsistenciasPorAprobar'
 import { columns, listTasks, tasksKey, type Task, type TaskStatus } from './api'
 import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const DONE_SHOWN = 20
 const nowPos = () => Date.now() / 1000
 
-// Tareas: approvals (CEO) and the team's own tasks. Trial class bookings live in Asistencia, on their class card.
+// Tareas: one Aprobaciones section (attendance, payments, accounts) and the team's own tasks. Trial class bookings live in Asistencia, on their class card.
 // Simple fixed board: move tasks between columns and edit them; the columns themselves are not editable.
 export function TareasPage() {
-  const { activeSchool, role } = useSchool()
+  const { activeSchool } = useSchool()
   return (
     <div className="tareas">
       <header className="page-head">
         <SchoolFilter fallback="Tareas" />
         <h1>Tareas</h1>
-        <p className="hint">Asistencias, pagos y cuentas por aprobar, y las tareas del equipo, en un solo lugar.</p>
+        <p className="hint">Lo que espera tu aprobación y las tareas del equipo.</p>
       </header>
-      <AsistenciasPorAprobar />
-      {role === 'ceo' && <PagosPorAprobar />}
-      {role === 'ceo' && <Aprobaciones />}
+      <Aprobaciones />
       {activeSchool ? <Board schoolId={activeSchool.id} /> : <p className="hint">Selecciona una escuela para ver sus tareas.</p>}
     </div>
   )
