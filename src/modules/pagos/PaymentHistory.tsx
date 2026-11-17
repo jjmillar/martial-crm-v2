@@ -1,65 +1,49 @@
-import { useMemo, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from '../../lib/nav'
 import { formatCLP } from '../../lib/money'
-import { formatDate, monthTitle, santiagoDate } from '../../lib/dates'
+import { formatDate, santiagoDate } from '../../lib/dates'
 import type { Submission } from '../pagar/api'
 import { methodLabel, type PaymentRow } from './api'
 
-// Payment history grouped by month (newest first), with each month's total. Staff see who paid and open the
-// payment; students also see their transfer reports that are in review or were rejected (with the reason).
-const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1)
+// History at the end of "Pagos y planes": a short summary (last 3 transactions), "Mostrar más" shows the last 10,
+// then each "Cargar más transacciones" adds 10 more. Staff see who paid and open the payment; students also see
+// their transfer reports in review or rejected (with the reason).
+const FIRST = 3
+const PAGE = 10
 
 type Entry =
   | { kind: 'payment'; at: string; p: PaymentRow }
   | { kind: 'report'; at: string; s: Submission; concept: string }
 
 export function PaymentHistory({ payments, reports = [], staff = false }: { payments: PaymentRow[]; reports?: (Submission & { concept: string })[]; staff?: boolean }) {
-  const months = useMemo(() => {
-    const entries: Entry[] = [
-      ...payments.filter((p) => p.status === 'pagado' || p.status === 'reembolsado')
-        .map((p) => ({ kind: 'payment' as const, at: santiagoDate(p.paid_at ?? p.updated_at ?? p.created_at), p })),
-      ...reports.filter((s) => s.status !== 'aprobada') // approved ones show as the paid payment
-        .map((s) => ({ kind: 'report' as const, at: santiagoDate(s.decided_at ?? s.created_at), s, concept: s.concept })),
-    ].sort((a, b) => b.at.localeCompare(a.at))
-    const byMonth = new Map<string, Entry[]>()
-    for (const e of entries) byMonth.set(e.at.slice(0, 7), [...(byMonth.get(e.at.slice(0, 7)) ?? []), e])
-    return [...byMonth.entries()].map(([month, list]) => ({
-      month,
-      list,
-      total: list.reduce((n, e) => n + (e.kind === 'payment' && e.p.status === 'pagado' ? e.p.amount : 0), 0),
-      count: list.filter((e) => e.kind === 'payment' && e.p.status === 'pagado').length,
-    }))
-  }, [payments, reports])
+  const [shown, setShown] = useState(FIRST)
+  const entries = useMemo<Entry[]>(() => [
+    ...payments.filter((p) => p.status === 'pagado' || p.status === 'reembolsado')
+      .map((p) => ({ kind: 'payment' as const, at: p.paid_at ?? p.updated_at ?? p.created_at, p })),
+    ...reports.filter((s) => s.status !== 'aprobada') // approved ones show as the paid payment
+      .map((s) => ({ kind: 'report' as const, at: s.decided_at ?? s.created_at, s, concept: s.concept })),
+  ].sort((a, b) => b.at.localeCompare(a.at)), [payments, reports])
 
-  if (months.length === 0) {
-    return (
-      <div className="card empty">
-        <h2>Sin pagos todavía</h2>
-        <p className="hint">{staff ? 'Cuando confirmes pagos aparecerán aquí, ordenados por mes.' : 'Cuando tu escuela confirme tus pagos aparecerán aquí.'}</p>
-      </div>
-    )
-  }
+  const visible = entries.slice(0, shown)
+  const left = entries.length - visible.length
 
   return (
-    <div className="pay-history" data-motion>
-      {months.map((m) => (
-        <section key={m.month} className="card pay-history__month" aria-label={monthTitle(`${m.month}-01`)}>
-          <header className="pay-history__head">
-            <h2>{cap(monthTitle(`${m.month}-01`))}</h2>
-            {m.count > 0 && (
-              <span className="pay-history__total">
-                <b>{formatCLP(m.total)}</b>
-                <span className="hint">{m.count} {m.count === 1 ? 'pago' : 'pagos'}</span>
-              </span>
-            )}
-          </header>
-          <ul className="pay-history__list">
-            {m.list.map((e) => e.kind === 'payment' ? (
+    <section className="pp-section" id="historial" aria-labelledby="historial-h">
+      <div className="pp-section__head">
+        <div>
+          <h2 id="historial-h">Historial</h2>
+          <p className="hint">{entries.length ? `Últimas transacciones${staff ? ' de la escuela' : ''}.` : staff ? 'Los pagos que confirmes aparecerán aquí.' : 'Cuando tu escuela confirme tus pagos aparecerán aquí.'}</p>
+        </div>
+      </div>
+      {entries.length > 0 && (
+        <div className="card pay-history">
+          <ul className="pay-history__list" data-motion>
+            {visible.map((e) => e.kind === 'payment' ? (
               <li key={e.p.id}>
                 <Row
                   to={staff ? `/app/pagos/${e.p.id}` : null}
                   title={staff ? e.p.student?.full_name ?? 'Alumno' : e.p.concept}
-                  detail={[staff ? e.p.concept : null, methodLabel[e.p.method], formatDate(e.at)].filter(Boolean).join(' · ')}
+                  detail={[staff ? e.p.concept : null, methodLabel[e.p.method], formatDate(santiagoDate(e.at))].filter(Boolean).join(' · ')}
                   amount={e.p.amount}
                   tag={e.p.status === 'pagado' ? <span className="tag tag--pay-pagado">Pagado</span> : <span className="tag tag--pay-reembolsado">Reembolsado</span>}
                 />
@@ -76,9 +60,17 @@ export function PaymentHistory({ payments, reports = [], staff = false }: { paym
               </li>
             ))}
           </ul>
-        </section>
-      ))}
-    </div>
+          {left > 0 && (
+            <div className="pay-history__more">
+              <button type="button" className="btn btn--ghost" onClick={() => setShown((n) => (n < PAGE ? PAGE : n + PAGE))}>
+                {shown < PAGE ? 'Mostrar más' : 'Cargar más transacciones'}
+              </button>
+              <span className="hint">Mostrando {visible.length} de {entries.length}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   )
 }
 

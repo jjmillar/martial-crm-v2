@@ -41,3 +41,15 @@ When building something new:
 - Lint blocks `type="checkbox"` anywhere outside `Toggle.tsx` (`no-restricted-syntax` in `eslint.config.js`).
 - As a safety net, any checkbox renders as a switch anyway (global `input[type='checkbox']` rule in `ui/patterns.css`).
 - Mutually exclusive choices (filters, cycle, payment method) stay as segmented buttons (`.segmented`), and multiple selection of labels stays as chips (`.pick-chip`). Those are not on/off controls.
+
+## 3. One page, everything visible (no tabs)
+
+- A section shows all its content at once, stacked one block below the other. **No tabs** or anything else you have to click to reveal parts of a page. (The user's decision of 2026-11-17: "que salga todo altiro ahí mismo, sin hacerle click a otras cosas".)
+- Long lists that grow over time, like histories, go **at the end** of the page as a short summary:
+  - show the **last 3**;
+  - **"Mostrar más"** shows the last 10;
+  - **"Cargar más transacciones"** adds 10 more each time;
+  - show how many there are: "Mostrando N de M".
+  - Example: `src/modules/pagos/PaymentHistory.tsx`.
+- Related items share one menu entry and one page. For example, "Pagos y planes" (`/app/pagos`) shows payments, then plans, then the history. `/app/planes` redirects to `/app/pagos#planes`.
+- Filters (`.segmented`) are allowed: they narrow down the list in place. They are not tabs.

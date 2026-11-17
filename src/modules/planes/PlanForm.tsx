@@ -24,7 +24,7 @@ export function PlanEditor() {
     return <PlanForm key={copy ? `copy-${location.key}` : 'new'} initial={copy} />
   }
   if (plan.isLoading) return <p className="hint">Cargando…</p>
-  if (!plan.data) return <p className="alert">No encontramos ese plan. <Link to="..">Volver a planes</Link></p>
+  if (!plan.data) return <p className="alert">No encontramos ese plan. <Link to="/app/pagos#planes">Volver a planes</Link></p>
   return <PlanForm key={plan.data.id} plan={plan.data} />
 }
 
@@ -62,7 +62,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
       // Saving a default unmarks another plan, so refresh the whole list.
       await qc.invalidateQueries({ queryKey: plansKey(schoolId) })
       qc.setQueryData(['plan', p.id], p)
-      navigate('..', { replace: true, state: { flash: plan ? `Cambios en "${p.name}" guardados.` : `Plan "${p.name}" creado.` } })
+      navigate('/app/pagos#planes', { replace: true, state: { flash: plan ? `Cambios en "${p.name}" guardados.` : `Plan "${p.name}" creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })
@@ -71,7 +71,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
     mutationFn: () => deletePlan(plan!.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: plansKey(schoolId) })
-      navigate('..', { replace: true })
+      navigate('/app/pagos#planes', { replace: true })
     },
     onError: (e: Error) => {
       setConfirmDelete(false)
@@ -124,7 +124,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
   return (
     <form className="alumno-form" onSubmit={onSubmit} noValidate>
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Planes</Link>
+        <Link className="link-btn back-link" to="/app/pagos#planes"><Icon name="back" size={16} /> Pagos y planes</Link>
         <h1>{plan ? plan.name : 'Nuevo plan'}</h1>
         {!canEdit && <p className="hint">Solo lectura: los administradores editan los planes.</p>}
       </header>
@@ -211,7 +211,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
       {canEdit && (
         <div className="form-actions">
           <button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : plan ? 'Guardar cambios' : 'Crear plan'}</button>
-          <Link className="btn btn--ghost" to="..">Cancelar</Link>
+          <Link className="btn btn--ghost" to="/app/pagos#planes">Cancelar</Link>
           {plan && <button type="button" className="btn btn--ghost" onClick={duplicate}>Duplicar</button>}
           {plan && (
             <span className="form-actions__danger">

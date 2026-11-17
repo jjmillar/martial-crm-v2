@@ -251,73 +251,44 @@
   gap: 16px;
 }
 
-/* "Pagos y planes" tabs: an underline tab bar under the title */
-.section-tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--line);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.section-tabs::-webkit-scrollbar {
-  display: none;
-}
-.section-tabs__tab {
-  position: relative;
-  flex: none;
-  padding: 10px 14px 12px;
-  color: var(--muted);
-  font-weight: 600;
-  text-decoration: none;
-  transition: color var(--dur) var(--ease);
-}
-.section-tabs__tab::after {
-  content: '';
-  position: absolute;
-  right: 10px;
-  bottom: -1px;
-  left: 10px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--accent);
-  transform: scaleX(0);
-  transition: transform var(--dur) var(--ease-out);
-}
-.section-tabs__tab:hover {
-  color: var(--text);
-}
-.section-tabs__tab[aria-current='page'] {
-  color: var(--text);
-}
-.section-tabs__tab[aria-current='page']::after {
-  transform: scaleX(1);
-}
-
-/* Payment history: one card per month with its total */
-.pay-history {
+/* Sections of the "Pagos y planes" page (one page, no tabs) */
+.pp-section {
   display: grid;
   gap: 12px;
+  margin-top: 16px;
+  scroll-margin-top: 80px;
 }
-.pay-history__month {
-  display: grid;
-  gap: 10px;
-}
-.pay-history__head {
+.pp-section__head {
   display: flex;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
 }
-.pay-history__head h2 {
-  font-size: 18px;
+.pp-section__head > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
 }
-.pay-history__total {
-  display: flex;
-  align-items: baseline;
+.pp-section__head h2 {
+  font-size: 22px;
+}
+.pp-section__head .btn {
+  flex: none;
+}
+
+/* Payment history: short list, grows 10 at a time */
+.pay-history {
+  display: grid;
   gap: 8px;
-  font-variant-numeric: tabular-nums;
+  padding: 8px 16px;
+}
+.pay-history__more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 6px;
+  border-top: 1px solid var(--line);
 }
 .pay-history__list {
   display: grid;

@@ -6,19 +6,17 @@ import { formatDate } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { listStudentPayments } from '../pagos/api'
 import { latestSubmissions, listMySubmissions, payHref, submissionsKey } from './api'
-import { PagosTabs } from '../pagos/PagosTabs'
-import { usePagosTab } from '../pagos/pagosTab'
+import { PlanesList } from '../planes/PlanesList'
 import { PaymentHistory } from '../pagos/PaymentHistory'
 
-// "Pagos y planes" for students. Pagos: what they owe (with "Pagar", which opens the payment gateway) and what is in
-// review. Historial: what they paid, month by month, plus transfer reports in review or rejected.
+// "Pagos y planes" for students, all on one page: what they owe (with "Pagar", which opens the payment gateway), the
+// school's plans, and at the end the history (paid payments and transfer reports in review or rejected).
 export function MisPagos() {
   const { activeSchool, myStudent } = useSchool()
   const id = myStudent?.id
   const pays = useQuery({ queryKey: ['my-payments', id, 'all'], queryFn: () => listStudentPayments(id!), enabled: Boolean(id) })
   const subs = useQuery({ queryKey: submissionsKey(id), queryFn: () => latestSubmissions({ studentId: id }), enabled: Boolean(id) })
-  const tab = usePagosTab()
-  const reports = useQuery({ queryKey: ['payment-submissions', id, 'all'], queryFn: () => listMySubmissions(id!), enabled: Boolean(id) && tab === 'historial' })
+  const reports = useQuery({ queryKey: ['payment-submissions', id, 'all'], queryFn: () => listMySubmissions(id!), enabled: Boolean(id) })
   const all = (pays.data ?? []).filter((p) => p.status === 'pendiente' || p.status === 'pagado')
   const owed = all.filter((p) => p.status === 'pendiente')
   const total = owed.filter((p) => subs.data?.get(p.id)?.status !== 'pendiente').reduce((n, p) => n + p.amount, 0)
@@ -30,20 +28,9 @@ export function MisPagos() {
         <h1>Pagos y planes</h1>
         <p className="hint">{total ? `Tienes ${formatCLP(total)} por pagar.` : 'Estás al día.'}</p>
       </header>
-      <PagosTabs />
       {(pays.isLoading || subs.isLoading) && <p className="hint">Cargando…</p>}
 
-      {tab === 'historial' && pays.isSuccess && <PaymentHistory payments={pays.data} reports={reports.data ?? []} />}
-
-      {tab === 'pagos' && owed.length === 0 && pays.isSuccess && (
-        <div className="card empty">
-          <h2>Estás al día</h2>
-          <p className="hint">No tienes pagos pendientes. Revisa lo que ya pagaste en Historial.</p>
-          <Link className="btn btn--ghost" to="/app/pagos?vista=historial">Ver historial</Link>
-        </div>
-      )}
-
-      {tab === 'pagos' && owed.length > 0 && (
+      {owed.length > 0 && (
         <section className="card form-section" aria-labelledby="mp-owed">
           <h2 id="mp-owed">Por pagar</h2>
           <ul className="my-pays" data-motion>
@@ -70,6 +57,8 @@ export function MisPagos() {
         </section>
       )}
 
+      <PlanesList />
+      {pays.isSuccess && <PaymentHistory payments={pays.data} reports={reports.data ?? []} />}
     </div>
   )
 }

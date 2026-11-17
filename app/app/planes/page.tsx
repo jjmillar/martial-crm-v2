@@ -1,7 +1,6 @@
-'use client'
-import { ModulePage } from '@/shell/ModulePage'
-import { PlanesList } from '@/modules/planes/PlanesList'
+import { redirect } from 'next/navigation'
 
+// Plans are a section of "Pagos y planes" (/app/pagos#planes); old links land there.
 export default function Page() {
-  return <ModulePage id="planes"><PlanesList /></ModulePage>
+  redirect('/app/pagos#planes')
 }

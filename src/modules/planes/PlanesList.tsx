@@ -8,11 +8,10 @@ import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, specialtiesKey } from '../profesores/api'
 import { listPlans, plansKey } from './api'
 import { cycleInfo, planFeatures } from './cycles'
-import { SchoolFilter } from '../../ui/SchoolFilter'
 import { myEnrollments } from '../portal/api'
 import { todayIso } from '../../lib/dates'
-import { PagosTabs } from '../pagos/PagosTabs'
 
+/** The plans, as a section of the "Pagos y planes" page (staff edit them, students only read). */
 export function PlanesList() {
   const { activeSchool, role, myStudent } = useSchool()
   const schoolId = activeSchool?.id
@@ -28,21 +27,19 @@ export function PlanesList() {
   const inactiveCount = (plans.data ?? []).filter((p) => !p.active).length
   const rows = (plans.data ?? []).filter((p) => (showInactive && !student) || p.active)
 
-  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus planes.</p>
+  if (!activeSchool) return null
 
   return (
-    <div className="planes">
-      <header className="page-head page-head--row">
+    <section className="planes pp-section" id="planes" aria-labelledby="planes-h">
+      <div className="pp-section__head">
         <div>
-          {student ? <span className="eyebrow">{activeSchool.name}</span> : <SchoolFilter />}
-          <h1>Pagos y planes</h1>
+          <h2 id="planes-h">Planes</h2>
           {Boolean(plans.data?.length) && <p className="hint">{student ? 'Los planes de tu escuela. Para cambiarte de plan, habla con tu escuela.' : 'Lo que ofrece tu escuela. El plan predeterminado se sugiere primero al matricular.'}</p>}
         </div>
         {canEdit && Boolean(plans.data?.length) && (
-          <Link className="fab" to="nuevo" aria-label="Nuevo plan" title="Nuevo plan"><Icon name="plus" size={22} /></Link>
+          <Link className="btn btn--ghost" to="/app/planes/nuevo"><Icon name="plus" size={16} /> Nuevo plan</Link>
         )}
-      </header>
-      <PagosTabs />
+      </div>
 
       {inactiveCount > 0 && !student && (
         <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivos (${inactiveCount})`} />
@@ -56,7 +53,7 @@ export function PlanesList() {
           {canEdit ? (
             <>
               <p className="hint">Define lo que ofreces: mensualidades, packs de clases o una clase de prueba gratis.</p>
-              <Link className="btn" to="nuevo"><Icon name="plus" size={16} /> Crear plan</Link>
+              <Link className="btn" to="/app/planes/nuevo"><Icon name="plus" size={16} /> Crear plan</Link>
             </>
           ) : (
             <p className="hint">Un administrador de la escuela puede crearlos.</p>
@@ -69,7 +66,7 @@ export function PlanesList() {
           const cycle = cycleInfo(p.billing_cycle)
           return (
             <li key={p.id}>
-              <PlanCard student={student} className={`card plan-card${p.is_default && !student ? ' is-default' : ''}${myPlans.has(p.id) ? ' is-mine' : ''}${p.active ? '' : ' is-off'}`} to={p.id}>
+              <PlanCard student={student} className={`card plan-card${p.is_default && !student ? ' is-default' : ''}${myPlans.has(p.id) ? ' is-mine' : ''}${p.active ? '' : ' is-off'}`} to={`/app/planes/${p.id}`}>
                 <div className="plan-card__tags">
                   <span className="eyebrow">{p.specialty_id ? spName.get(p.specialty_id) ?? 'Disciplina' : 'Todas las disciplinas'}</span>
                   {myPlans.has(p.id) && <span className="tag tag--ok">Tu plan</span>}
@@ -91,7 +88,7 @@ export function PlanesList() {
           )
         })}
       </ul>
-    </div>
+    </section>
   )
 }
 
