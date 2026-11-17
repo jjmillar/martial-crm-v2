@@ -224,3 +224,16 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* Class cards (Marcar asistencia, Historial): a grid of small cards on wide screens, never a full-width strip.
+   Name on top, the action below it. */
+.checkin-list,
+.portal-att .today-list {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+.checkin-list li .today-list__name {
+  flex: 1 1 calc(100% - 64px);
+}
+.portal-att .today-list li {
+  flex-wrap: wrap;
+}

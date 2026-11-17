@@ -36,7 +36,7 @@
 /* Recent classes: a row of cards on wide screens instead of a tall column */
 @media (min-width: 900px) {
   .tile--history .today-list {
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   }
 }
 

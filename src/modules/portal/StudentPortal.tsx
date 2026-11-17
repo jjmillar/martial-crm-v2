@@ -9,6 +9,8 @@ import { formatCLP } from '../../lib/money'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
 import { payHref } from '../pagar/api'
+import { ShowMore } from '../../ui/ShowMore'
+import { useShowMore } from '../../ui/useShowMore'
 import { classStarted } from '../asistencia/api'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
 import {
@@ -36,6 +38,7 @@ export function TodayCheckIn() {
   const classes = useQuery({ queryKey: classesKey(schoolId), queryFn: () => listClasses(schoolId!), enabled: Boolean(schoolId) })
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
   const [error, setError] = useState<string | null>(null)
+  const pastMore = useShowMore('portal.pasadas')
 
   const blocksOn = (date: string) => {
     const wd = isoWeekday(date)
@@ -103,7 +106,8 @@ export function TodayCheckIn() {
       {past.length > 0 && (
         <>
           <p className="checkin-sub">¿Se te pasó marcar? Clases de los últimos {PAST_DAYS} días</p>
-          <ul className="checkin-list">{past.map(row)}</ul>
+          <ul className="checkin-list">{past.slice(0, pastMore.shown).map(row)}</ul>
+          <ShowMore shown={pastMore.shown} total={past.length} onMore={pastMore.more} />
         </>
       )}
     </div>
@@ -238,7 +242,7 @@ export function StudentHome() {
 
       <section className="tile tile--wide tile--history rise" style={{ animationDelay: '240ms' }}>
         <div className="tile__head"><span className="eyebrow">Últimas clases</span><Link className="link-btn" to="/app/asistencia">Ver todas</Link></div>
-        <AttendanceHistory rows={(att.data ?? []).slice(0, 4)} />
+        <AttendanceHistory rows={(att.data ?? []).slice(0, 3)} />
       </section>
     </div>
   )
@@ -276,6 +280,7 @@ function NextClass({ classes, today }: { classes: ClassFull[]; today: string }) 
 export function StudentAttendance() {
   const { school, studentId } = useMe()
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
+  const histMore = useShowMore('portal.historial')
   return (
     <div className="asistencia portal-att">
       <header className="page-head">
@@ -287,9 +292,10 @@ export function StudentAttendance() {
         <h2 id="mark-h">Marcar asistencia</h2>
         <TodayCheckIn />
       </section>
-      <section className="card form-section">
-        <h2>Historial</h2>
-        <AttendanceHistory rows={att.data ?? []} />
+      <section className="card form-section" aria-labelledby="hist-h">
+        <h2 id="hist-h">Historial</h2>
+        <AttendanceHistory rows={(att.data ?? []).slice(0, histMore.shown)} />
+        <ShowMore shown={histMore.shown} total={(att.data ?? []).length} onMore={histMore.more} />
       </section>
     </div>
   )
