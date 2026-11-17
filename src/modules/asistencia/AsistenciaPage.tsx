@@ -149,7 +149,9 @@ function StaffAttendance() {
               {d.sessions.length === 0 && <p className="hint">No hay clases este día.</p>}
               <ul className="att-stack">
                 {d.sessions.map((s) => {
-                  const n = counts.data?.get(`${s.cls.id}|${s.date}`) ?? 0
+                  const cnt = counts.data?.get(`${s.cls.id}|${s.date}`)
+                  const n = cnt?.present ?? 0
+                  const waiting = cnt?.pending ?? 0
                   const t = trialsOf(s).length
                   const v = cardView(s)
                   const live = s.date === today && hhmm(s.start_time) <= nowHHMM() && nowHHMM() < hhmm(s.end_time)
@@ -166,6 +168,7 @@ function StaffAttendance() {
                           <span className="att-card__tags">
                             {live && <span className="tag tag--ok">En curso</span>}
                             {s.date <= today && <span className="tag">{n} {n === 1 ? 'presente' : 'presentes'}</span>}
+                            {waiting > 0 && <span className="tag tag--wait">{waiting} por aprobar</span>}
                             {t > 0 && <span className="tag tag--accent">{t === 1 ? '1 clase de prueba' : `${t} clases de prueba`}</span>}
                           </span>
                         </span>

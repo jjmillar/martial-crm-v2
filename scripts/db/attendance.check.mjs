@@ -10,6 +10,8 @@ await db.query(`insert into public.school_members (school_id, user_id, role) val
 const one = async (who, sql, params) => (await as(db, who, sql, params)).rows[0].id
 const c1 = await one(A, `insert into public.classes (school_id, name) values ($1,'BJJ') returning id`, [s1])
 const c2 = await one(X, `insert into public.classes (school_id, name) values ($1,'Karate') returning id`, [s2])
+// c1 runs every day from 00:00, so "today" is always after its start (attendance only once the class has started)
+await as(db, A, `insert into public.class_schedules (school_id, class_id, weekday, start_time, end_time) select $1, $2, w, '00:00', '00:01' from generate_series(1, 7) w`, [s1, c1])
 const st1 = await one(A, `insert into public.students (school_id, first_name, first_last_name) values ($1,'Juan','Pérez') returning id`, [s1])
 const st2 = await one(X, `insert into public.students (school_id, first_name, first_last_name) values ($1,'Otro','Dos') returning id`, [s2])
 

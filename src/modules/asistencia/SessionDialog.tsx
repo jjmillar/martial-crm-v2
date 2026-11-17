@@ -12,7 +12,7 @@ import { listStudents, studentsKey } from '../alumnos/api'
 import { listTags, type ClassFull } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { CatalogoDialog } from '../ajustes/CatalogoDialog'
-import { attendanceKey, listAttendance, saveSession, view, type Mark, type Session, type TrialBooking } from './api'
+import { attendanceKey, classStarted, reviewAttendance, listAttendance, saveSession, view, type Mark, type Session, type TrialBooking } from './api'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
@@ -34,7 +34,7 @@ function SessionBody({ session, trials, onClose }: { session: Session; trials: T
   const { cls, date } = session
   const v = view(session)
   const today = todayIso()
-  const canMark = date <= today
+  const canMark = classStarted(date, session.start_time)
   return (
     <>
       <div className="modal__head">
@@ -67,7 +67,9 @@ function SessionBody({ session, trials, onClose }: { session: Session; trials: T
 
       <section className="sess-section" aria-labelledby="sess-att-h">
         <h3 id="sess-att-h">Asistencia</h3>
-        {canMark ? <Roster cls={cls} date={date} /> : <p className="hint">La asistencia se toma desde el día de la clase.</p>}
+        {canMark
+          ? <Roster cls={cls} date={date} />
+          : <p className="hint">La asistencia se toma cuando empieza la clase: {date === today ? `hoy desde las ${hhmm(session.start_time)}` : `el ${longDate(date).toLowerCase()} desde las ${hhmm(session.start_time)}`}.</p>}
       </section>
 
       <SessionInfo session={session} onSaved={onClose} />
@@ -91,6 +93,17 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
   const enrolledIds = useMemo(() => new Set((enrollments.data ?? []).filter((e) => ['activa', 'por_vencer'].includes(phaseOf(e))).map((e) => e.student_id)), [enrollments.data])
   const marks = useMemo(() => new Map((present.data ?? []).map((m) => [m.student_id, m])), [present.data])
   const pendingIds = useMemo(() => (present.data ?? []).filter((m) => !m.confirmed).map((m) => m.student_id), [present.data])
+  // Names of whoever marked or approved, for the record shown on each attendance.
+  const staffIds = useMemo(() => [...new Set((present.data ?? []).map((m) => m.confirmed_by).filter(Boolean))] as string[], [present.data])
+  const people = useQuery({
+    queryKey: ['profiles-names', staffIds.join()],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('id, full_name, email').in('id', staffIds)
+      return new Map((data ?? []).map((p) => [p.id, p.full_name || p.email || 'el equipo']))
+    },
+    enabled: staffIds.length > 0,
+  })
+  const who = (id: string | null | undefined) => (id && people.data?.get(id)) || 'el equipo'
   const roster = useMemo(() => {
     const needle = normalize(search.trim())
     return (students.data ?? [])
@@ -99,16 +112,17 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
       .filter((s) => !needle || normalize(s.full_name ?? '').includes(needle))
   }, [students.data, enrolledIds, marks, search, showAll])
 
-  type Action = 'mark' | 'confirm' | 'unmark'
+  type Action = 'mark' | 'confirm' | 'reject' | 'unmark'
+  const idsOf = (studentIds: string[]) => (present.data ?? []).filter((m) => studentIds.includes(m.student_id) && m.id).map((m) => m.id!)
   const toggle = useMutation({
     mutationFn: async ({ studentIds, action }: { studentIds: string[]; action: Action }) => {
+      if (action === 'confirm' || action === 'reject') return reviewAttendance(idsOf(studentIds), action === 'confirm')
       const base = () => supabase.from('attendance')
       const q = action === 'mark'
         ? base().insert(studentIds.map((student_id) => ({ school_id: schoolId, class_id: cls.id, student_id, date })))
-        : action === 'confirm'
-          ? base().update({ confirmed_at: new Date().toISOString() }).eq('class_id', cls.id).eq('date', date).in('student_id', studentIds)
-          : base().delete().eq('class_id', cls.id).eq('date', date).in('student_id', studentIds)
+        : base().delete().eq('class_id', cls.id).eq('date', date).in('student_id', studentIds)
       const { error } = await q
+      if (error?.message.includes('class not started')) throw new Error('La clase aún no empieza: la asistencia se toma desde su hora de inicio.')
       if (error && !error.message.includes('duplicate key')) throw error
     },
     // Optimistic: flip immediately, roll back on error.
@@ -117,7 +131,7 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
       await qc.cancelQueries({ queryKey: attKey })
       const prev = qc.getQueryData<Mark[]>(attKey) ?? []
       const ids = new Set(studentIds)
-      const next = action === 'unmark'
+      const next = action === 'unmark' || action === 'reject'
         ? prev.filter((m) => !ids.has(m.student_id))
         : action === 'confirm'
           ? prev.map((m) => (ids.has(m.student_id) ? { ...m, confirmed: true } : m))
@@ -125,14 +139,14 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
       qc.setQueryData<Mark[]>(attKey, next)
       return { prev }
     },
-    onError: (_e, _v, ctx) => {
+    onError: (e: Error, _v, ctx) => {
       if (ctx) qc.setQueryData(attKey, ctx.prev)
-      setError('No se pudo guardar la asistencia. Revisa tu conexión e intenta de nuevo.')
+      setError(e.message.startsWith('La clase') ? e.message : 'No se pudo guardar la asistencia. Revisa tu conexión e intenta de nuevo.')
     },
-    onSettled: () => Promise.all([qc.invalidateQueries({ queryKey: attKey }), qc.invalidateQueries({ queryKey: ['attendance-range'] })]),
+    onSettled: () => Promise.all([qc.invalidateQueries({ queryKey: attKey }), qc.invalidateQueries({ queryKey: ['attendance-range'] }), qc.invalidateQueries({ queryKey: ['attendance-pending'] })]),
   })
 
-  const count = marks.size
+  const count = marks.size - pendingIds.length
   const over = cls.capacity ? count > cls.capacity : false
 
   return (
@@ -150,10 +164,10 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
       </div>
       {error && <p className="alert" role="alert">{error}</p>}
       {over && <p className="alert">Se superó el cupo de la clase.</p>}
-      {pendingIds.length > 0 && (
+      {pendingIds.length > 1 && (
         <div className="att-pending">
-          <span>{pendingIds.length === 1 ? '1 alumno se marcó solo' : `${pendingIds.length} alumnos se marcaron solos`}. Confirma que vinieron.</span>
-          <button type="button" className="btn" onClick={() => toggle.mutate({ studentIds: pendingIds, action: 'confirm' })}>Confirmar {pendingIds.length > 1 ? 'todos' : ''}</button>
+          <span>{pendingIds.length === 1 ? '1 alumno marcó su asistencia' : `${pendingIds.length} alumnos marcaron su asistencia`}. Apruébala si vinieron.</span>
+          <button type="button" className="btn" onClick={() => toggle.mutate({ studentIds: pendingIds, action: 'confirm' })}><Icon name="check" size={16} /> Aprobar todos</button>
         </div>
       )}
       {students.isSuccess && roster.length === 0 && (
@@ -165,15 +179,25 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
         {roster.map((s) => {
           const m = marks.get(s.id)
           const pending = Boolean(m && !m.confirmed)
-          const action: Action = !m ? 'mark' : pending ? 'confirm' : 'unmark'
+          const record = m && !pending ? (m.self_marked ? `Marcó el alumno · aprobó ${who(m.confirmed_by)}` : `Marcó ${who(m.confirmed_by)}`) : null
           return (
             <li key={s.id}>
-              <button type="button" className={`att-student${pending ? ' is-pending' : ''}`} aria-pressed={Boolean(m)} onClick={() => toggle.mutate({ studentIds: [s.id], action })}>
-                <span className="att-check" aria-hidden="true">{m && <Icon name="check" size={16} />}</span>
-                <span className="att-student__name">{s.full_name}</span>
-                {pending && <span className="tag tag--wait">Se marcó · toca para confirmar</span>}
-                {!enrolledIds.has(s.id) && <span className="tag">Sin inscripción</span>}
-              </button>
+              {pending ? (
+                <div className="att-student is-pending">
+                  <span className="att-check" aria-hidden="true"><Icon name="clock" size={14} /></span>
+                  <span className="att-student__name">{s.full_name}<span className="hint">Marcó su asistencia · por aprobar</span></span>
+                  <span className="att-review">
+                    <button type="button" className="btn" onClick={() => toggle.mutate({ studentIds: [s.id], action: 'confirm' })}>Aprobar</button>
+                    <button type="button" className="btn btn--ghost" onClick={() => toggle.mutate({ studentIds: [s.id], action: 'reject' })}>Rechazar</button>
+                  </span>
+                </div>
+              ) : (
+                <button type="button" className="att-student" aria-pressed={Boolean(m)} onClick={() => toggle.mutate({ studentIds: [s.id], action: m ? 'unmark' : 'mark' })}>
+                  <span className="att-check" aria-hidden="true">{m && <Icon name="check" size={16} />}</span>
+                  <span className="att-student__name">{s.full_name}{record && <span className="hint">{record}</span>}</span>
+                  {!enrolledIds.has(s.id) && <span className="tag">Sin inscripción</span>}
+                </button>
+              )}
             </li>
           )
         })}

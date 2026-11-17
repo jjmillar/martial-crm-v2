@@ -1591,6 +1591,10 @@ export type Database = {
         Args: { p_class_id: string };
         Returns: string[];
       };
+      class_started: {
+        Args: { p_class_id: string; p_date: string };
+        Returns: boolean;
+      };
       create_school: {
         Args: { p_name: string; p_slug: string };
         Returns: {
@@ -1698,6 +1702,10 @@ export type Database = {
       };
       register_owner: { Args: { p_user_id: string }; Returns: undefined };
       request_ip: { Args: Record<PropertyKey, never>; Returns: string };
+      review_attendance: {
+        Args: { p_approve: boolean; p_ids: string[] };
+        Returns: number;
+      };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
       rut_key: { Args: { p_rut: string }; Returns: string };
       save_class_session: {

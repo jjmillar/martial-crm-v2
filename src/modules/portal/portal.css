@@ -195,3 +195,13 @@
   flex: 1;
   min-width: 0;
 }
+
+/* Phones: class name on its own line, the action (Marcar / Por aprobar / Desde las…) below it */
+@media (max-width: 600px) {
+  .checkin-list li .today-list__name {
+    flex: 1 1 calc(100% - 64px);
+  }
+  .checkin-list li .today-list__name strong {
+    overflow-wrap: normal;
+  }
+}

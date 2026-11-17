@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import { useReviewsCount } from '../pagar/api'
+import { pendingCheckIns, pendingCheckInsKey } from '../asistencia/api'
 
 // Account requests from the open sign-up (/registro). Only the CEO sees and decides them.
 export type Req = {
@@ -51,8 +52,9 @@ export function usePendingCount() {
   const tasks = useQuery({ queryKey: tasksKey(activeSchool?.id), queryFn: () => listTasks(activeSchool!.id), enabled: staff && Boolean(activeSchool), refetchInterval: 60_000 })
   const approvals = role === 'ceo' ? reqs.data?.length ?? 0 : 0
   const reviews = useReviewsCount()
+  const checkIns = useQuery({ queryKey: pendingCheckInsKey(activeSchool?.id), queryFn: () => pendingCheckIns(activeSchool!.id), enabled: staff && Boolean(activeSchool), refetchInterval: 60_000 })
   const fresh = staff ? (tasks.data ?? []).filter((t) => t.status === 'por_hacer' && t.kind !== 'manual').length : 0
-  return approvals + reviews + fresh
+  return approvals + reviews + (staff ? checkIns.data?.length ?? 0 : 0) + fresh
 }
 
 /** Only the account requests (for the dashboard tile). */

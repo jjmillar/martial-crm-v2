@@ -20,7 +20,7 @@ const tag2 = (await one(A, `insert into public.tags (school_id, label) values ($
 const cToday = (await one(A, `insert into public.classes (school_id, name) values ($1,'BJJ hoy') returning id`, [s1])).id
 const cOther = (await one(A, `insert into public.classes (school_id, name) values ($1,'Otro día') returning id`, [s1])).id
 const cForeign = (await one(X, `insert into public.classes (school_id, name) values ($1,'Ajena') returning id`, [s2])).id
-await as(db, A, `insert into public.class_schedules (school_id, class_id, weekday, start_time, end_time) values ($1,$2,$3,'19:00','20:00'), ($1,$4,$5,'19:00','20:00')`, [s1, cToday, today.w, cOther, otherDay])
+await as(db, A, `insert into public.class_schedules (school_id, class_id, weekday, start_time, end_time) values ($1,$2,$3,'00:00','00:01'), ($1,$4,$5,'19:00','20:00')`, [s1, cToday, today.w, cOther, otherDay])
 await as(db, X, `insert into public.class_schedules (school_id, class_id, weekday, start_time, end_time) values ($1,$2,$3,'19:00','20:00')`, [s2, cForeign, today.w])
 await as(db, A, `insert into public.class_tags (school_id, class_id, tag_id) values ($1,$2,$3), ($1,$2,$4)`, [s1, cToday, tag, tag2])
 await as(db, A, `insert into public.payments (school_id, student_id, concept, amount) values ($1,$2,'Cuota',1000), ($1,$3,'Cuota Beto',1000)`, [s1, sofia, beto])

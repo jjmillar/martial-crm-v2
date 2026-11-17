@@ -41,6 +41,7 @@ export async function checkIn(classId: string) {
   const { error } = await supabase.rpc('check_in', { p_class_id: classId })
   if (error) {
     if (error.message.includes('not scheduled today')) throw new Error('Esa clase no es hoy.')
+    if (error.message.includes('class not started')) throw new Error('La asistencia se marca cuando empieza la clase.')
     if (error.message.includes('not a student')) throw new Error('Tu cuenta no está vinculada a un alumno de esta escuela.')
     throw new Error('No se pudo marcar la asistencia. Intenta de nuevo.')
   }

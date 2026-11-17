@@ -273,3 +273,63 @@
   color: var(--faint);
   font-variant-numeric: tabular-nums;
 }
+
+/* Record under each name: who marked it and who approved it */
+.att-student__name .hint {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* A student's check-in waiting for approval: approve / reject */
+.att-review {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+.att-review .btn {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+/* Tareas → Asistencias por aprobar: compact rows in one card */
+.tareas__section-head.att-req-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+.att-req-head > div {
+  display: grid;
+  gap: 4px;
+}
+.att-req-list {
+  display: grid;
+  margin: 0;
+  padding: 4px 16px;
+  list-style: none;
+}
+.att-req {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 0 10px 12px;
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 3px 0 0 var(--class-color, var(--line));
+}
+.att-req:last-child {
+  border-bottom: 0;
+}
+.att-req__main {
+  display: grid;
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.att-req__main strong,
+.att-req__main .hint {
+  overflow-wrap: anywhere;
+}

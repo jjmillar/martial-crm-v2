@@ -9,6 +9,7 @@ import { formatCLP } from '../../lib/money'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
 import { payHref } from '../pagar/api'
+import { classStarted } from '../asistencia/api'
 import { classesKey, listClasses } from '../clases/api'
 import {
   checkIn, levelOf, myAttendance, myAttendanceKey, myEnrollments, myPendingPayments, progressKey, studentProgress, undoCheckIn,
@@ -20,7 +21,7 @@ function useMe() {
   return { schoolId: activeSchool?.id, school: activeSchool, studentId: myStudent?.id, name: myStudent?.full_name ?? '' }
 }
 
-/** Today's classes with a self check-in button (student). Staff confirm it from Asistencia. */
+/** Today's classes with a self check-in button (student), enabled once each class starts. The team approves it. */
 export function TodayCheckIn() {
   const { schoolId, studentId } = useMe()
   const qc = useQueryClient()
@@ -57,14 +58,16 @@ export function TodayCheckIn() {
             <li key={s.id} style={{ ['--class-color' as string]: c.color }}>
               <span className="today-list__time">{hhmm(s.start_time)}</span>
               <span className="today-list__name"><strong>{c.name}</strong><span className="hint">{hhmm(s.start_time)}–{hhmm(s.end_time)}{c.room ? ` · ${c.room}` : ''}</span></span>
-              {!a && (
+              {!a && (classStarted(today, s.start_time) ? (
                 <button type="button" className="btn" disabled={mark.isPending} onClick={() => mark.mutate(c.id)}>
-                  <Icon name="check" size={16} /> Marcar
+                  <Icon name="check" size={16} /> Marcar asistencia
                 </button>
-              )}
+              ) : (
+                <span className="tag" title="Podrás marcar tu asistencia cuando empiece la clase">Desde las {hhmm(s.start_time)}</span>
+              ))}
               {a && !a.confirmed_at && (
                 <span className="checkin-state">
-                  <span className="tag tag--wait">Por confirmar</span>
+                  <span className="tag tag--wait">Por aprobar</span>
                   <button type="button" className="link-btn" disabled={undo.isPending} onClick={() => undo.mutate(c.id)}>Deshacer</button>
                 </span>
               )}
@@ -85,7 +88,7 @@ function AttendanceHistory({ rows }: { rows: MyAttendance[] }) {
         <li key={a.id} style={{ ['--class-color' as string]: a.class?.color }}>
           <span className="today-list__time">{formatDate(a.date).slice(0, 5)}</span>
           <span className="today-list__name"><strong>{a.class?.name ?? 'Clase'}</strong><span className="hint">{a.self_marked ? 'Marcada por ti' : 'Marcada por tu profesor'}</span></span>
-          {a.confirmed_at ? <span className="tag tag--ok">+{XP_PER_CLASS} XP</span> : <span className="tag tag--wait">Por confirmar</span>}
+          {a.confirmed_at ? <span className="tag tag--ok">+{XP_PER_CLASS} XP</span> : <span className="tag tag--wait">Por aprobar</span>}
         </li>
       ))}
     </ul>
@@ -140,7 +143,7 @@ export function StudentHome() {
           <p className="hint">
             {p ? <><b>{p.level_xp}</b> / {XP_PER_LEVEL} XP · faltan {XP_PER_LEVEL - p.level_xp} para el nivel {p.level + 1}</> : 'Cargando…'}
           </p>
-          {p && <p className="hint">{p.xp} XP en total · {p.attended} {p.attended === 1 ? 'clase' : 'clases'}{p.pending ? ` · ${p.pending} por confirmar` : ''}</p>}
+          {p && <p className="hint">{p.xp} XP en total · {p.attended} {p.attended === 1 ? 'clase' : 'clases'}{p.pending ? ` · ${p.pending} por aprobar` : ''}</p>}
         </div>
       </section>
 
@@ -158,7 +161,7 @@ export function StudentHome() {
           <Link className="link-btn" to="/app/asistencia">Historial</Link>
         </div>
         <TodayCheckIn />
-        <p className="hint">Tu profesor confirma la asistencia; cada clase confirmada suma {XP_PER_CLASS} XP.</p>
+        <p className="hint">Marca tu asistencia cuando empiece la clase. Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
       </section>
 
       <section className="tile tile--wide rise" style={{ animationDelay: '120ms' }} aria-label="Skills">
@@ -212,7 +215,7 @@ export function StudentAttendance() {
       <header className="page-head">
         <span className="eyebrow">{school?.name}</span>
         <h1>Mi asistencia</h1>
-        <p className="hint">Marca las clases de hoy. Tu profesor la confirma y suma {XP_PER_CLASS} XP.</p>
+        <p className="hint">Marca tu asistencia cuando empiece la clase. Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
       </header>
       <section className="card form-section">
         <h2>Hoy</h2>
