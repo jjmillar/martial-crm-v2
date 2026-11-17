@@ -4,13 +4,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
 import { supabase } from '../../lib/supabase'
-import { formatDate, longDate, todayIso } from '../../lib/dates'
+import { addDays, formatDate, longDate, todayIso } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
 import { payHref } from '../pagar/api'
 import { classStarted } from '../asistencia/api'
-import { classesKey, listClasses } from '../clases/api'
+import { classesKey, listClasses, type ClassFull } from '../clases/api'
 import {
   checkIn, levelOf, myAttendance, myAttendanceKey, myEnrollments, myPendingPayments, progressKey, studentProgress, undoCheckIn,
   XP_PER_CLASS, XP_PER_LEVEL, type MyAttendance,
@@ -47,7 +47,7 @@ export function TodayCheckIn() {
   const mark = useMutation({ mutationFn: checkIn, onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
   const undo = useMutation({ mutationFn: undoCheckIn, onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
 
-  if (classes.isSuccess && todays.length === 0) return <p className="hint">Hoy no tienes clases programadas.</p>
+  if (classes.isSuccess && todays.length === 0) return <NextClass classes={classes.data} today={today} />
   return (
     <>
       {error && <p className="alert" role="alert">{error}</p>}
@@ -147,6 +147,15 @@ export function StudentHome() {
         </div>
       </section>
 
+      <section className="tile tile--wide rise" style={{ animationDelay: '60ms' }} id="marcar-asistencia">
+        <div className="tile__head">
+          <span className="eyebrow">Marcar asistencia</span>
+          <Link className="link-btn" to="/app/asistencia">Historial</Link>
+        </div>
+        <TodayCheckIn />
+        <p className="hint">Marca tu asistencia cuando empiece la clase. Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
+      </section>
+
       {incomplete.data && (
         <Link className="tile tile--wide tile--link tile--alert rise" to="/app/ajustes#ficha">
           <span className="eyebrow">Tu ficha</span>
@@ -155,14 +164,6 @@ export function StudentHome() {
         </Link>
       )}
 
-      <section className="tile tile--wide rise" style={{ animationDelay: '80ms' }}>
-        <div className="tile__head">
-          <span className="eyebrow">Hoy · marca tu asistencia</span>
-          <Link className="link-btn" to="/app/asistencia">Historial</Link>
-        </div>
-        <TodayCheckIn />
-        <p className="hint">Marca tu asistencia cuando empiece la clase. Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
-      </section>
 
       <section className="tile tile--wide rise" style={{ animationDelay: '120ms' }} aria-label="Skills">
         <div className="tile__head"><span className="eyebrow">Skills</span></div>
@@ -206,6 +207,34 @@ export function StudentHome() {
   )
 }
 
+/** No class today: show the next one, so the student knows when they can mark their attendance. */
+function NextClass({ classes, today }: { classes: ClassFull[]; today: string }) {
+  const next = useMemo(() => {
+    for (let i = 1; i <= 7; i++) {
+      const d = addDays(today, i)
+      const wd = isoWeekday(d)
+      const hit = classes.filter((c) => c.active)
+        .flatMap((c) => c.schedules.filter((x) => x.weekday === wd).map((x) => ({ c, x })))
+        .sort((a, b) => a.x.start_time.localeCompare(b.x.start_time))[0]
+      if (hit) return { ...hit, date: d }
+    }
+    return null
+  }, [classes, today])
+  if (!next) return <p className="hint">Tu escuela aún no tiene clases con horario.</p>
+  return (
+    <div className="checkin-next">
+      <p className="hint">Hoy no tienes clases. Tu próxima clase:</p>
+      <ul className="checkin-list">
+        <li style={{ ['--class-color' as string]: next.c.color }}>
+          <span className="today-list__time">{hhmm(next.x.start_time)}</span>
+          <span className="today-list__name"><strong>{next.c.name}</strong><span className="hint">{longDate(next.date)}{next.c.room ? ` · ${next.c.room}` : ''}</span></span>
+          <span className="tag">Desde las {hhmm(next.x.start_time)}</span>
+        </li>
+      </ul>
+    </div>
+  )
+}
+
 /** Asistencia for students: today's check-in and full history. */
 export function StudentAttendance() {
   const { school, studentId } = useMe()
@@ -217,8 +246,8 @@ export function StudentAttendance() {
         <h1>Mi asistencia</h1>
         <p className="hint">Marca tu asistencia cuando empiece la clase. Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
       </header>
-      <section className="card form-section">
-        <h2>Hoy</h2>
+      <section className="card form-section checkin-card" aria-labelledby="mark-h">
+        <h2 id="mark-h">Marcar asistencia</h2>
         <TodayCheckIn />
       </section>
       <section className="card form-section">
