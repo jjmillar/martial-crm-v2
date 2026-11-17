@@ -3,20 +3,15 @@ import { readPersisted, writePersisted } from '../../lib/persist'
 import { Link, useSearchParams } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
-import { addDays, dayMonth, longDate, monthGrid, monthTitle, startOfWeek, todayIso } from '../../lib/dates'
+import { addDays, longDate, monthGrid, monthTitle, startOfWeek, todayIso } from '../../lib/dates'
 import { hhmm, isoWeekday, weekdayShort } from '../../lib/weekdays'
-import { Icon } from '../../ui/Icon'
+import { DateNav } from '../../ui/DateNav'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
 import { SchoolFilter } from '../../ui/SchoolFilter'
 
 type View = 'day' | 'week' | 'month'
 type Slot = { id: string; cls: ClassFull; start: string; end: string; weekday: number }
 
-const views: { id: View; label: string }[] = [
-  { id: 'day', label: 'Día' },
-  { id: 'week', label: 'Semana' },
-  { id: 'month', label: 'Mes' },
-]
 const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
 
 export function CalendarioPage() {
@@ -51,11 +46,7 @@ export function CalendarioPage() {
   }, [classes.data])
   const slotsOn = (iso: string) => slotsByDay.get(isoWeekday(iso)) ?? []
 
-  const step = view === 'day' ? 1 : view === 'week' ? 7 : 0
-  const prev = () => go({ fecha: step ? addDays(date, -step) : shiftMonth(date, -1) })
-  const next = () => go({ fecha: step ? addDays(date, step) : shiftMonth(date, 1) })
   const weekStart = startOfWeek(date)
-  const title = view === 'day' ? longDate(date) : view === 'week' ? `${dayMonth(weekStart)} – ${dayMonth(addDays(weekStart, 6))}` : monthTitle(date)
   const today = todayIso()
 
   if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver su calendario.</p>
@@ -67,17 +58,7 @@ export function CalendarioPage() {
         <h1>Calendario</h1>
       </header>
 
-      <div className="cal-bar">
-        <div className="cal-nav">
-          <button type="button" className="icon-btn" onClick={prev} aria-label="Anterior"><Icon name="back" size={16} /></button>
-          <button type="button" className="btn btn--ghost cal-today" onClick={() => go({ fecha: todayIso() })}>Hoy</button>
-          <button type="button" className="icon-btn cal-next" onClick={next} aria-label="Siguiente"><Icon name="back" size={16} /></button>
-          <h2 className="cal-title">{title}</h2>
-        </div>
-        <div className="segmented" role="group" aria-label="Vista">
-          {views.map((v) => <button key={v.id} type="button" aria-pressed={view === v.id} onClick={() => go({ vista: v.id })}>{v.label}</button>)}
-        </div>
-      </div>
+      <DateNav view={view} date={date} onChange={go} />
 
       {classes.isLoading && <p className="hint">Cargando…</p>}
       {classes.isSuccess && slotsByDay.size === 0 && (
@@ -135,11 +116,6 @@ export function CalendarioPage() {
   )
 }
 
-function shiftMonth(iso: string, delta: number): string {
-  const [y, m] = iso.split('-').map(Number)
-  const d = new Date(Date.UTC(y, m - 1 + delta, 1))
-  return d.toISOString().slice(0, 10)
-}
 
 function SlotList({ date, slots }: { date: string; slots: Slot[] }) {
   return (

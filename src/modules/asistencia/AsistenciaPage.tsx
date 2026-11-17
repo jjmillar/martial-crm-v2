@@ -3,9 +3,10 @@ import { readPersisted, writePersisted } from '../../lib/persist'
 import { Link, useSearchParams } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
-import { addDays, dayMonth, longDate, monthTitle, startOfWeek, todayIso } from '../../lib/dates'
+import { addDays, longDate, startOfWeek, todayIso } from '../../lib/dates'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
+import { DateNav } from '../../ui/DateNav'
 import { classesKey, listClasses } from '../clases/api'
 import { StudentAttendance } from '../portal/StudentPortal'
 import { SchoolFilter } from '../../ui/SchoolFilter'
@@ -13,11 +14,6 @@ import { attendanceCounts, listSessions, sessionKey, syncSessions, trialBookings
 import { SessionDialog } from './SessionDialog'
 
 type View = 'day' | 'week' | 'month'
-const views: { id: View; label: string }[] = [
-  { id: 'day', label: 'Día' },
-  { id: 'week', label: 'Semana' },
-  { id: 'month', label: 'Mes' },
-]
 
 const nowHHMM = () => new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date())
 
@@ -26,10 +22,6 @@ function monthRange(iso: string): [string, string] {
   const first = `${iso.slice(0, 7)}-01`
   const last = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10)
   return [first, last]
-}
-function shiftMonth(iso: string, delta: number): string {
-  const [y, m] = iso.split('-').map(Number)
-  return new Date(Date.UTC(y, m - 1 + delta, 1)).toISOString().slice(0, 10)
 }
 function datesBetween(from: string, to: string): string[] {
   const out: string[] = []
@@ -106,10 +98,6 @@ function StaffAttendance() {
   const keyOf = (s: Session) => s.key
   const current = days.flatMap((d) => d.sessions).find((s) => keyOf(s) === openKey) ?? last
 
-  const step = view === 'day' ? 1 : view === 'week' ? 7 : 0
-  const prev = () => go({ fecha: step ? addDays(date, -step) : shiftMonth(date, -1) })
-  const next = () => go({ fecha: step ? addDays(date, step) : shiftMonth(date, 1) })
-  const title = view === 'day' ? longDate(date) : view === 'week' ? `${dayMonth(from)} – ${dayMonth(to)}` : monthTitle(date)
   const shownDays = view === 'day' ? days : days.filter((d) => d.sessions.length > 0)
   const noClasses = classes.isSuccess && !(classes.data ?? []).some((c) => c.active && c.schedules.length) && !(rows.data ?? []).length
 
@@ -122,17 +110,7 @@ function StaffAttendance() {
         <h1>Asistencia</h1>
       </header>
 
-      <div className="cal-bar">
-        <div className="cal-nav">
-          <button type="button" className="icon-btn" onClick={prev} aria-label="Anterior"><Icon name="back" size={16} /></button>
-          <button type="button" className="btn btn--ghost cal-today" onClick={() => go({ fecha: today })}>Hoy</button>
-          <button type="button" className="icon-btn cal-next" onClick={next} aria-label="Siguiente"><Icon name="back" size={16} /></button>
-          <h2 className="cal-title">{title}</h2>
-        </div>
-        <div className="segmented" role="group" aria-label="Vista">
-          {views.map((v) => <button key={v.id} type="button" aria-pressed={view === v.id} onClick={() => go({ vista: v.id })}>{v.label}</button>)}
-        </div>
-      </div>
+      <DateNav view={view} date={date} onChange={go} />
 
       {classes.isLoading && <p className="hint">Cargando…</p>}
       {noClasses && (

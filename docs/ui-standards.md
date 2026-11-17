@@ -69,3 +69,11 @@ What you choose on a screen is still there when you leave and come back, anywher
 - The URL always wins (links and the back button). When the URL has no value, the remembered one is used.
 - Not persisted: half-filled forms, open pop-ups, confirmations, errors.
 - Keys: `<screen>.<what>`, for example `asistencia.vista` or `pagos.filtro`.
+
+## 5. Date navigation
+
+Every screen that moves through days, weeks or months uses `<DateNav view date onChange>` from `src/ui/DateNav.tsx`:
+
+- one centered card;
+- Día · Semana · Mes on top;
+- ‹ date › below, with "Hoy", "Esta semana" or "Este mes" underneath, or "Volver a hoy" when you are on another period.

@@ -572,3 +572,79 @@ input[type='checkbox']:disabled {
   right: 12px;
   pointer-events: none;
 }
+
+/* Date navigation (Asistencia, Calendario): one centered block — views on top, ‹ date › below */
+.date-nav {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 14px 16px 12px;
+}
+.date-nav__views {
+  justify-self: center;
+}
+.date-nav__row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+  width: min(100%, 460px);
+}
+.date-nav__label {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  text-align: center;
+}
+.date-nav__title {
+  font-size: clamp(18px, 2.4vw, 22px);
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.date-nav__now {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.date-nav__today {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.date-nav__today:hover {
+  color: var(--text);
+}
+.date-nav__arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.date-nav__arrow:hover {
+  border-color: var(--faint);
+  background: var(--surface-2);
+}
+.date-nav__arrow:focus-visible,
+.date-nav__today:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.date-nav__arrow--next svg {
+  transform: scaleX(-1);
+}
