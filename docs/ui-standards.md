@@ -72,8 +72,12 @@ What you choose on a screen is still there when you leave and come back, anywher
 
 ## 5. Date navigation
 
-Every screen that moves through days, weeks or months uses `<DateNav view date onChange>` from `src/ui/DateNav.tsx`:
+Every screen that moves through days, weeks or months uses `<DateNav view date onChange>` from `src/ui/DateNav.tsx`. It is minimal:
 
-- one centered card;
-- Día · Semana · Mes on top;
-- ‹ date › below, with "Hoy", "Esta semana" or "Este mes" underneath, or "Volver a hoy" when you are on another period.
+- no card or background;
+- two lines at most:
+  - Día · Semana · Mes, small and centered;
+  - ‹ date › below it;
+- a small "Hoy" button appears only when you moved to another period.
+
+The app is minimalist: controls stay compact and never take more space than they need.

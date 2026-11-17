@@ -1,8 +1,8 @@
 import { addDays, startOfWeek, todayIso } from '../lib/dates'
 import { Icon } from './Icon'
 
-// Date navigation shared by Asistencia and Calendario: one block, centered. The Día · Semana · Mes switch on top,
-// then ‹ date › with a small line underneath ("Hoy" / "Esta semana" / "Este mes", or "Volver a hoy").
+// Date navigation shared by Asistencia and Calendario. Minimal, two lines at most, no card: Día · Semana · Mes on
+// top (centered), ‹ date › below, plus a small "Hoy" only when you moved to another period.
 export type DateView = 'day' | 'week' | 'month'
 const VIEWS: { id: DateView; label: string }[] = [
   { id: 'day', label: 'Día' },
@@ -51,20 +51,16 @@ export function DateNav({ view, date, onChange }: { view: DateView; date: string
   const go = (dir: 1 | -1) => onChange({ fecha: step ? addDays(date, dir * step) : shiftMonth(date, dir) })
   const now = current(view, date, today)
   return (
-    <section className="date-nav card" aria-label="Fechas">
+    <nav className="date-nav" aria-label="Fechas">
       <div className="segmented date-nav__views" role="group" aria-label="Vista">
         {VIEWS.map((v) => <button key={v.id} type="button" aria-pressed={view === v.id} onClick={() => onChange({ vista: v.id })}>{v.label}</button>)}
       </div>
       <div className="date-nav__row">
-        <button type="button" className="date-nav__arrow" onClick={() => go(-1)} aria-label="Anterior"><Icon name="back" size={18} /></button>
-        <div className="date-nav__label" aria-live="polite">
-          <h2 className="date-nav__title">{label(view, date)}</h2>
-          {now
-            ? <span className="date-nav__now">{now}</span>
-            : <button type="button" className="date-nav__today" onClick={() => onChange({ fecha: today })}>Volver a hoy</button>}
-        </div>
-        <button type="button" className="date-nav__arrow date-nav__arrow--next" onClick={() => go(1)} aria-label="Siguiente"><Icon name="back" size={18} /></button>
+        <button type="button" className="date-nav__arrow" onClick={() => go(-1)} aria-label="Anterior"><Icon name="back" size={16} /></button>
+        <h2 className="date-nav__title" aria-live="polite" title={now ?? undefined}>{label(view, date)}</h2>
+        <button type="button" className="date-nav__arrow date-nav__arrow--next" onClick={() => go(1)} aria-label="Siguiente"><Icon name="back" size={16} /></button>
+        <button type="button" className={`date-nav__today${now ? ' is-hidden' : ''}`} onClick={() => onChange({ fecha: today })} tabIndex={now ? -1 : 0} aria-hidden={now ? true : undefined}>Hoy</button>
       </div>
-    </section>
+    </nav>
   )
 }
