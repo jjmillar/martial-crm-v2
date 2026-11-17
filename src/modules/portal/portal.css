@@ -213,3 +213,14 @@
 .checkin-card h2 {
   font-size: 18px;
 }
+
+.checkin {
+  display: grid;
+  gap: 10px;
+}
+.checkin-sub {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}

@@ -1587,6 +1587,27 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      check_in_on: {
+        Args: { p_class_id: string; p_date: string };
+        Returns: {
+          class_id: string;
+          confirmed_at: string | null;
+          confirmed_by: string | null;
+          created_at: string;
+          created_by: string | null;
+          date: string;
+          id: string;
+          school_id: string;
+          self_marked: boolean;
+          student_id: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "attendance";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       class_snapshot_skills: {
         Args: { p_class_id: string };
         Returns: string[];
@@ -1798,6 +1819,10 @@ export type Database = {
       sync_class_sessions: { Args: { p_school_id: string }; Returns: number };
       trial_availability: { Args: { p_school_id: string }; Returns: Json };
       undo_check_in: { Args: { p_class_id: string }; Returns: undefined };
+      undo_check_in_on: {
+        Args: { p_class_id: string; p_date: string };
+        Returns: undefined;
+      };
       update_my_student: {
         Args: {
           p_address: string;

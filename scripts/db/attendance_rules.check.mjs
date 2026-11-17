@@ -56,4 +56,20 @@ check('rejecting removes the request', (await db.query(`select count(*)::int c f
 check('rejection is written to the audit log', (await db.query(`select count(*)::int c from public.audit_log where action='attendance_rejected' and entity_id=$1`, [rej])).rows[0].c === 1)
 const again = await tryAs(db, STAFF, `select public.review_attendance(array[$1]::uuid[], true) n`, [attId])
 check('reviewing an already approved one does nothing', again.ok && again.rows[0].n === 0)
+// Recent past classes: a student can mark one they forgot (up to 7 days back), still pending approval
+const back = (await db.query(`select ((now() at time zone 'America/Santiago')::date - 1)::text y, extract(isodow from (now() at time zone 'America/Santiago')::date - 1)::int yw, ((now() at time zone 'America/Santiago')::date - 8)::text old, extract(isodow from (now() at time zone 'America/Santiago')::date - 8)::int ow`)).rows[0]
+const yClass = (await as(db, OWNER, `insert into public.classes (school_id, name) values ($1,'Ayer') returning id`, [sc])).rows[0].id
+await as(db, OWNER, `insert into public.class_schedules (school_id, class_id, weekday, start_time, end_time) values ($1,$2,$3,'20:00','21:00'), ($1,$2,$4,'20:00','21:00')`, [sc, yClass, back.yw, back.ow === back.yw ? (back.yw % 7) + 1 : back.ow])
+const yci = await tryAs(db, ST, `select (public.check_in_on($1,$2)).* `, [yClass, back.y])
+check("student marks yesterday's class (pending request)", yci.ok && yci.rows[0].self_marked === true && yci.rows[0].confirmed_at === null, yci.err)
+const tooOld = await tryAs(db, ST, `select public.check_in_on($1,$2)`, [yClass, back.old])
+check('more than 7 days back is not allowed', !tooOld.ok && /date out of range/.test(tooOld.err), tooOld.err)
+const fut = await tryAs(db, ST, `select public.check_in_on($1, ((now() at time zone 'America/Santiago')::date + 1))`, [yClass])
+check('future dates are not allowed', !fut.ok)
+const wrongDay = await tryAs(db, ST, `select public.check_in_on($1,$2)`, [later, back.y])
+check('only on a day the class is scheduled', !wrongDay.ok || back.yw === now.w, wrongDay.err)
+const otherStudent = await tryAs(db, STAFF, `select public.check_in_on($1,$2)`, [yClass, back.y])
+check('staff (not a student) cannot check in', !otherStudent.ok)
+await as(db, ST, `select public.undo_check_in_on($1,$2)`, [yClass, back.y])
+check('student can undo a pending past check-in', (await db.query(`select count(*)::int c from public.attendance where class_id=$1 and date=$2`, [yClass, back.y])).rows[0].c === 0)
 report()

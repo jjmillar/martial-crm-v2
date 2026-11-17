@@ -21,7 +21,14 @@ function useMe() {
   return { schoolId: activeSchool?.id, school: activeSchool, studentId: myStudent?.id, name: myStudent?.full_name ?? '' }
 }
 
-/** Today's classes with a self check-in button (student), enabled once each class starts. The team approves it. */
+/** Days back a student can still mark a class they forgot (the database enforces the same window). */
+const PAST_DAYS = 7
+
+/**
+ * "Marcar asistencia" for students: today's classes (enabled once each starts) and the classes of the last
+ * 7 days not yet approved, so a forgotten one (e.g. yesterday's) can still be marked. Each mark is a request the
+ * school's team approves.
+ */
 export function TodayCheckIn() {
   const { schoolId, studentId } = useMe()
   const qc = useQueryClient()
@@ -30,55 +37,85 @@ export function TodayCheckIn() {
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
   const [error, setError] = useState<string | null>(null)
 
-  const wd = isoWeekday(today)
-  const todays = useMemo(
-    () => (classes.data ?? [])
-      .filter((c) => c.active)
-      .flatMap((c) => c.schedules.filter((s) => s.weekday === wd).map((s) => ({ c, s })))
-      .sort((a, b) => a.s.start_time.localeCompare(b.s.start_time)),
-    [classes.data, wd],
-  )
-  const mine = useMemo(() => new Map((att.data ?? []).filter((a) => a.date === today).map((a) => [a.class_id, a])), [att.data, today])
+  const blocksOn = (date: string) => {
+    const wd = isoWeekday(date)
+    return (classes.data ?? [])
+      .filter((c) => c.active && (!c.created_at || c.created_at.slice(0, 10) <= date))
+      .flatMap((c) => c.schedules.filter((s) => s.weekday === wd).map((s) => ({ c, s, date })))
+      .sort((a, b) => a.s.start_time.localeCompare(b.s.start_time))
+  }
+  const mine = useMemo(() => new Map((att.data ?? []).map((a) => [`${a.class_id}|${a.date}`, a])), [att.data])
+  const todays = useMemo(() => blocksOn(today), [classes.data, today]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Earlier days: only what is still to do (not marked, or waiting for approval). Approved ones live in Historial.
+  const past = useMemo(() => {
+    const out: ReturnType<typeof blocksOn> = []
+    for (let i = 1; i <= PAST_DAYS; i++) {
+      for (const b of blocksOn(addDays(today, -i))) {
+        const a = mine.get(`${b.c.id}|${b.date}`)
+        if (!a?.confirmed_at) out.push(b)
+      }
+    }
+    return out
+  }, [classes.data, mine, today]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = () => Promise.all([
     qc.invalidateQueries({ queryKey: myAttendanceKey(studentId) }),
     qc.invalidateQueries({ queryKey: progressKey(studentId) }),
   ])
-  const mark = useMutation({ mutationFn: checkIn, onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
-  const undo = useMutation({ mutationFn: undoCheckIn, onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
+  const mark = useMutation({ mutationFn: (v: { classId: string; date: string }) => checkIn(v.classId, v.date), onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
+  const undo = useMutation({ mutationFn: (v: { classId: string; date: string }) => undoCheckIn(v.classId, v.date), onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
 
-  if (classes.isSuccess && todays.length === 0) return <NextClass classes={classes.data} today={today} />
+  const row = ({ c, s, date }: { c: ClassFull; s: ClassFull['schedules'][number]; date: string }) => {
+    const a = mine.get(`${c.id}|${date}`)
+    const isToday = date === today
+    return (
+      <li key={`${s.id}|${date}`} style={{ ['--class-color' as string]: c.color }}>
+        <span className="today-list__time">{hhmm(s.start_time)}</span>
+        <span className="today-list__name">
+          <strong>{c.name}</strong>
+          <span className="hint">{isToday ? `${hhmm(s.start_time)}–${hhmm(s.end_time)}` : dayLabel(date, today)}{c.room ? ` · ${c.room}` : ''}</span>
+        </span>
+        {!a && (classStarted(date, s.start_time) ? (
+          <button type="button" className="btn" disabled={mark.isPending} onClick={() => mark.mutate({ classId: c.id, date })}>
+            <Icon name="check" size={16} /> Marcar asistencia
+          </button>
+        ) : (
+          <span className="tag" title="Podrás marcar tu asistencia cuando empiece la clase">Desde las {hhmm(s.start_time)}</span>
+        ))}
+        {a && !a.confirmed_at && (
+          <span className="checkin-state">
+            <span className="tag tag--wait">Por aprobar</span>
+            <button type="button" className="link-btn" disabled={undo.isPending} onClick={() => undo.mutate({ classId: c.id, date })}>Deshacer</button>
+          </span>
+        )}
+        {a?.confirmed_at && <span className="tag tag--ok"><Icon name="check" size={14} /> +{XP_PER_CLASS} XP</span>}
+      </li>
+    )
+  }
+
+  if (!classes.isSuccess) return <p className="hint">Cargando…</p>
   return (
-    <>
+    <div className="checkin">
       {error && <p className="alert" role="alert">{error}</p>}
-      <ul className="checkin-list">
-        {todays.map(({ c, s }) => {
-          const a = mine.get(c.id)
-          return (
-            <li key={s.id} style={{ ['--class-color' as string]: c.color }}>
-              <span className="today-list__time">{hhmm(s.start_time)}</span>
-              <span className="today-list__name"><strong>{c.name}</strong><span className="hint">{hhmm(s.start_time)}–{hhmm(s.end_time)}{c.room ? ` · ${c.room}` : ''}</span></span>
-              {!a && (classStarted(today, s.start_time) ? (
-                <button type="button" className="btn" disabled={mark.isPending} onClick={() => mark.mutate(c.id)}>
-                  <Icon name="check" size={16} /> Marcar asistencia
-                </button>
-              ) : (
-                <span className="tag" title="Podrás marcar tu asistencia cuando empiece la clase">Desde las {hhmm(s.start_time)}</span>
-              ))}
-              {a && !a.confirmed_at && (
-                <span className="checkin-state">
-                  <span className="tag tag--wait">Por aprobar</span>
-                  <button type="button" className="link-btn" disabled={undo.isPending} onClick={() => undo.mutate(c.id)}>Deshacer</button>
-                </span>
-              )}
-              {a?.confirmed_at && <span className="tag tag--ok"><Icon name="check" size={14} /> +{XP_PER_CLASS} XP</span>}
-            </li>
-          )
-        })}
-      </ul>
-    </>
+      {todays.length > 0
+        ? <ul className="checkin-list">{todays.map(row)}</ul>
+        : <NextClass classes={classes.data} today={today} />}
+      {past.length > 0 && (
+        <>
+          <p className="checkin-sub">¿Se te pasó marcar? Clases de los últimos {PAST_DAYS} días</p>
+          <ul className="checkin-list">{past.map(row)}</ul>
+        </>
+      )}
+    </div>
   )
 }
+
+/** "Ayer" / "Lunes 16 de noviembre" for the earlier days list. */
+function dayLabel(date: string, today: string): string {
+  if (date === addDays(today, -1)) return `Ayer, ${longDate(date).replace(/^[^,]+, /, '')}`
+  return longDate(date)
+}
+
 
 function AttendanceHistory({ rows }: { rows: MyAttendance[] }) {
   if (rows.length === 0) return <p className="hint">Todavía no tienes asistencias registradas.</p>
@@ -153,7 +190,7 @@ export function StudentHome() {
           <Link className="link-btn" to="/app/asistencia">Historial</Link>
         </div>
         <TodayCheckIn />
-        <p className="hint">Marca tu asistencia cuando empiece la clase. Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
+        <p className="hint">Marca tu asistencia desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
       </section>
 
       {incomplete.data && (
@@ -244,7 +281,7 @@ export function StudentAttendance() {
       <header className="page-head">
         <span className="eyebrow">{school?.name}</span>
         <h1>Mi asistencia</h1>
-        <p className="hint">Marca tu asistencia cuando empiece la clase. Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
+        <p className="hint">Marca tu asistencia desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
       </header>
       <section className="card form-section checkin-card" aria-labelledby="mark-h">
         <h2 id="mark-h">Marcar asistencia</h2>

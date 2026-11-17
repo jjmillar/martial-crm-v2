@@ -37,18 +37,19 @@ export async function myAttendance(studentId: string): Promise<MyAttendance[]> {
   return data as unknown as MyAttendance[]
 }
 
-export async function checkIn(classId: string) {
-  const { error } = await supabase.rpc('check_in', { p_class_id: classId })
+export async function checkIn(classId: string, date: string) {
+  const { error } = await supabase.rpc('check_in_on', { p_class_id: classId, p_date: date })
   if (error) {
-    if (error.message.includes('not scheduled today')) throw new Error('Esa clase no es hoy.')
+    if (error.message.includes('not scheduled')) throw new Error('Esa clase no tenía horario ese día.')
+    if (error.message.includes('date out of range')) throw new Error('Solo puedes marcar clases de los últimos 7 días.')
     if (error.message.includes('class not started')) throw new Error('La asistencia se marca cuando empieza la clase.')
     if (error.message.includes('not a student')) throw new Error('Tu cuenta no está vinculada a un alumno de esta escuela.')
     throw new Error('No se pudo marcar la asistencia. Intenta de nuevo.')
   }
 }
 
-export async function undoCheckIn(classId: string) {
-  const { error } = await supabase.rpc('undo_check_in', { p_class_id: classId })
+export async function undoCheckIn(classId: string, date: string) {
+  const { error } = await supabase.rpc('undo_check_in_on', { p_class_id: classId, p_date: date })
   if (error) throw new Error('No se pudo deshacer.')
 }
 
