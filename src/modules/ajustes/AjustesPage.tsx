@@ -13,6 +13,7 @@ import { Catalogo } from './Catalogo'
 import { EscuelaPerfil } from './EscuelaPerfil'
 import { LandingSettings } from './LandingSettings'
 import { Exportar } from './Exportar'
+import { PasarelaPago } from './PasarelaPago'
 import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
@@ -51,6 +52,9 @@ function SchoolSections() {
       </Acc>
       <Acc id="landing" icon="globe" title="Landing page" hint="Página pública, colores y fotos">
         <LandingSettings key={`landing-${school.id}`} school={school} />
+      </Acc>
+      <Acc id="pasarela" icon="wallet" title="Pasarela de pago" hint="Datos de transferencia para que tus alumnos paguen">
+        <PasarelaPago key={`pay-${school.id}`} school={school} />
       </Acc>
       <Acc id="agendamiento" icon="calendar" title="Agendamiento" hint="Clases de prueba gratis desde la landing">
         <Agendamiento key={`agenda-${school.id}`} school={school} />

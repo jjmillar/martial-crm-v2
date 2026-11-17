@@ -541,6 +541,77 @@ export type Database = {
         };
         Relationships: [];
       };
+      payment_submissions: {
+        Row: {
+          amount: number;
+          created_at: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          id: string;
+          method: Database["public"]["Enums"]["payment_method"];
+          payment_id: string;
+          reference: string | null;
+          reject_reason: string | null;
+          school_id: string;
+          status: Database["public"]["Enums"]["request_status"];
+          student_id: string;
+          submitted_by: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          method: Database["public"]["Enums"]["payment_method"];
+          payment_id: string;
+          reference?: string | null;
+          reject_reason?: string | null;
+          school_id: string;
+          status?: Database["public"]["Enums"]["request_status"];
+          student_id: string;
+          submitted_by?: string | null;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          method?: Database["public"]["Enums"]["payment_method"];
+          payment_id?: string;
+          reference?: string | null;
+          reject_reason?: string | null;
+          school_id?: string;
+          status?: Database["public"]["Enums"]["request_status"];
+          student_id?: string;
+          submitted_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payment_submissions_payment_id_fkey";
+            columns: ["payment_id"];
+            isOneToOne: false;
+            referencedRelation: "payments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payment_submissions_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payment_submissions_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       payments: {
         Row: {
           amount: number;
@@ -840,6 +911,12 @@ export type Database = {
           owner_id: string | null;
           phone: string | null;
           slug: string;
+          transfer_account_number: string | null;
+          transfer_account_type: string | null;
+          transfer_bank: string | null;
+          transfer_email: string | null;
+          transfer_holder: string | null;
+          transfer_rut: string | null;
           trial_enabled: boolean;
           trial_min_hours: number;
           trial_note: string | null;
@@ -872,6 +949,12 @@ export type Database = {
           owner_id?: string | null;
           phone?: string | null;
           slug: string;
+          transfer_account_number?: string | null;
+          transfer_account_type?: string | null;
+          transfer_bank?: string | null;
+          transfer_email?: string | null;
+          transfer_holder?: string | null;
+          transfer_rut?: string | null;
           trial_enabled?: boolean;
           trial_min_hours?: number;
           trial_note?: string | null;
@@ -903,6 +986,12 @@ export type Database = {
           owner_id?: string | null;
           phone?: string | null;
           slug?: string;
+          transfer_account_number?: string | null;
+          transfer_account_type?: string | null;
+          transfer_bank?: string | null;
+          transfer_email?: string | null;
+          transfer_holder?: string | null;
+          transfer_rut?: string | null;
           trial_enabled?: boolean;
           trial_min_hours?: number;
           trial_note?: string | null;
@@ -1456,6 +1545,12 @@ export type Database = {
           owner_id: string | null;
           phone: string | null;
           slug: string;
+          transfer_account_number: string | null;
+          transfer_account_type: string | null;
+          transfer_bank: string | null;
+          transfer_email: string | null;
+          transfer_holder: string | null;
+          transfer_rut: string | null;
           trial_enabled: boolean;
           trial_min_hours: number;
           trial_note: string | null;
@@ -1476,6 +1571,10 @@ export type Database = {
           p_student_id?: string;
         };
         Returns: string;
+      };
+      decide_payment_submission: {
+        Args: { p_approve: boolean; p_id: string; p_reason?: string };
+        Returns: undefined;
       };
       find_user_id_by_email: { Args: { p_email: string }; Returns: string };
       generate_enrollment_fees: {
@@ -1590,6 +1689,14 @@ export type Database = {
       student_public_profile: {
         Args: { p_handle: string; p_slug: string };
         Returns: Json;
+      };
+      submit_payment: {
+        Args: {
+          p_method: Database["public"]["Enums"]["payment_method"];
+          p_payment_id: string;
+          p_reference?: string;
+        };
+        Returns: string;
       };
       sync_all_class_sessions: {
         Args: Record<PropertyKey, never>;

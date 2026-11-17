@@ -8,6 +8,7 @@ import { formatDate, longDate, todayIso } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
+import { payHref } from '../pagar/api'
 import { classesKey, listClasses } from '../clases/api'
 import {
   checkIn, levelOf, myAttendance, myAttendanceKey, myEnrollments, myPendingPayments, progressKey, studentProgress, undoCheckIn,
@@ -185,10 +186,10 @@ export function StudentHome() {
       </section>
 
       <section className="tile rise" style={{ animationDelay: '200ms' }}>
-        <span className="eyebrow">Pagos pendientes</span>
+        <div className="tile__head"><span className="eyebrow">Pagos pendientes</span><Link className="link-btn" to="/app/pagos">Mis pagos</Link></div>
         {(pay.data ?? []).length === 0 ? <p className="hint">Estás al día.</p> : (
           <ul className="mini-list">
-            {pay.data!.map((x) => <li key={x.id}><span>{x.concept}</span><b>{formatCLP(x.amount)}</b></li>)}
+            {pay.data!.map((x) => <li key={x.id}><span>{x.concept}</span><b>{formatCLP(x.amount)}</b><Link className="link-btn" to={payHref(x.id)}>Pagar</Link></li>)}
           </ul>
         )}
       </section>

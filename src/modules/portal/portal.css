@@ -190,3 +190,8 @@
     transition: none;
   }
 }
+
+.mini-list li > span:first-child {
+  flex: 1;
+  min-width: 0;
+}

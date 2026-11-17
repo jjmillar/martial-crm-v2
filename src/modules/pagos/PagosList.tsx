@@ -9,6 +9,8 @@ import type { PaymentStatus } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { listPayments, methodLabel, paymentsKey, statusLabel } from './api'
 import { SchoolFilter } from '../../ui/SchoolFilter'
+import { latestSubmissions, submissionsKey } from '../pagar/api'
+import { MisPagos } from '../pagar/MisPagos'
 
 type Filter = PaymentStatus | 'todos'
 const filters: { id: Filter; label: string }[] = [
@@ -21,6 +23,11 @@ const filters: { id: Filter; label: string }[] = [
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
 export function PagosList() {
+  const { role } = useSchool()
+  return role === 'alumno' ? <MisPagos /> : <StaffPagos />
+}
+
+function StaffPagos() {
   const { activeSchool, role } = useSchool()
   const schoolId = activeSchool?.id
   const isAdmin = role === 'admin' || role === 'ceo'
@@ -33,6 +40,8 @@ export function PagosList() {
   })
   const feesReady = !isAdmin || !activeSchool?.enrollment_fee || fees.isFetched
   const q = useQuery({ queryKey: paymentsKey(schoolId), queryFn: () => listPayments(schoolId!), enabled: Boolean(schoolId) && feesReady })
+  // Transfers students reported from the payment gateway, waiting for the CEO.
+  const subs = useQuery({ queryKey: submissionsKey(`school:${schoolId}`), queryFn: () => latestSubmissions({ schoolId }), enabled: Boolean(schoolId) })
   const [filter, setFilter] = useState<Filter>('pendiente')
   const [search, setSearch] = useState('')
 
@@ -116,7 +125,9 @@ export function PagosList() {
               </span>
               {p.kind === 'matricula' && <span className="tag">Matrícula</span>}
               <span className="pay-amount">{formatCLP(p.amount)}</span>
-              <span className={`tag tag--pay-${p.status}`}>{statusLabel[p.status]}</span>
+              {p.status === 'pendiente' && subs.data?.get(p.id)?.status === 'pendiente'
+                ? <span className="tag tag--review">En revisión</span>
+                : <span className={`tag tag--pay-${p.status}`}>{statusLabel[p.status]}</span>}
             </Link>
           </li>
         ))}

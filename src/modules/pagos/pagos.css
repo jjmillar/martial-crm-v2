@@ -86,3 +86,152 @@
     margin-left: auto;
   }
 }
+
+/* Payment gateway (/app/pagar/<id>) */
+.checkout {
+  display: grid;
+  gap: var(--gap);
+  max-width: 640px;
+}
+.checkout__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.checkout__summary > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.checkout__amount {
+  margin: 0;
+  font-size: clamp(26px, 6vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.checkout__methods {
+  display: grid;
+  gap: 10px;
+}
+.checkout__method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out);
+}
+.checkout__method input {
+  accent-color: var(--accent);
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+.checkout__method > span {
+  display: grid;
+  gap: 2px;
+}
+.checkout__method.is-on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.checkout__method.is-off {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.transfer {
+  display: grid;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+.transfer__row {
+  display: grid;
+  grid-template-columns: minmax(96px, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.transfer__row:last-child {
+  border-bottom: 0;
+}
+.transfer dt {
+  color: var(--muted);
+  font-size: 14px;
+}
+.transfer dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.checkout__pay {
+  display: grid;
+  gap: 8px;
+}
+.checkout__pay .btn {
+  width: 100%;
+  justify-content: center;
+  min-height: 52px;
+  font-size: 17px;
+}
+.checkout__state {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.checkout__state > div {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.checkout__state--ok {
+  border-color: color-mix(in srgb, var(--ok) 45%, var(--line));
+}
+.checkout__state--ok svg {
+  color: var(--ok);
+}
+.tag--review {
+  color: #6aa9f0;
+  border-color: color-mix(in srgb, #6aa9f0 45%, transparent);
+}
+/* Student: my payments */
+.my-pays {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.my-pay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.my-pay__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.my-pay__side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* CEO review queue */
+.pay-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.pay-review__actions .input {
+  flex: 1 1 200px;
+}

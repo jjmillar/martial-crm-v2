@@ -5,6 +5,7 @@ import { useSchool } from '../../lib/school'
 import { formatDate, santiagoDate } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { Aprobaciones } from './Aprobaciones'
+import { PagosPorAprobar } from '../pagar/PagosPorAprobar'
 import { columns, listTasks, tasksKey, type Task, type TaskStatus } from './api'
 import { SchoolFilter } from '../../ui/SchoolFilter'
 
@@ -20,8 +21,9 @@ export function TareasPage() {
       <header className="page-head">
         <SchoolFilter fallback="Tareas" />
         <h1>Tareas</h1>
-        <p className="hint">Aprobaciones y las tareas del equipo, en un solo lugar.</p>
+        <p className="hint">Pagos y cuentas por aprobar, y las tareas del equipo, en un solo lugar.</p>
       </header>
+      {role === 'ceo' && <PagosPorAprobar />}
       {role === 'ceo' && <Aprobaciones />}
       {activeSchool ? <Board schoolId={activeSchool.id} /> : <p className="hint">Selecciona una escuela para ver sus tareas.</p>}
     </div>
