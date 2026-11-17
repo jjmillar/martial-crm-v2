@@ -82,6 +82,16 @@
 }
 
 @media (max-width: 560px) {
+  /* Payment rows on phones: name and concept get the full first line; tags, amount and status go below */
+  .student-row:has(.pay-amount) {
+    row-gap: 10px;
+  }
+  .student-row:has(.pay-amount) .student-row__main {
+    flex: 1 1 100%;
+  }
+  .student-row:has(.pay-amount) .student-row__main .hint {
+    white-space: normal;
+  }
   .student-row .pay-amount {
     margin-left: auto;
   }
@@ -234,4 +244,9 @@
 }
 .pay-review__actions .input {
   flex: 1 1 200px;
+}
+
+.my-pays-page {
+  display: grid;
+  gap: 16px;
 }

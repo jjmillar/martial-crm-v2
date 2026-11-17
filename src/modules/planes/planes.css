@@ -45,6 +45,7 @@ a.plan-card:focus-visible {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  min-height: 26px; /* same header height whether the plan has a tag or not */
 }
 
 .plan-card__tags .eyebrow {

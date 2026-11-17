@@ -326,6 +326,16 @@ input[type='checkbox']:disabled {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
+    /* soft fade on the right edge: shows there are more options to swipe to */
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+
+  .segmented--scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .segmented--scroll button:last-child {
+    margin-right: 20px;
   }
 
   .segmented--scroll button {
@@ -510,6 +520,9 @@ input[type='checkbox']:disabled {
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-self: start; /* never stretch in a grid header: the arrow stays next to the name */
+  align-self: start;
+  width: fit-content;
   max-width: 100%;
   color: var(--muted);
 }

@@ -125,13 +125,6 @@ export function StudentHome() {
         <p className="tile__lead">{longDate(today)}</p>
       </section>
 
-      {incomplete.data && (
-        <Link className="tile tile--wide tile--link tile--alert rise" to="/app/ajustes#ficha">
-          <span className="eyebrow">Tu ficha</span>
-          <p className="tile__big tile__big--sm">Completa tus datos</p>
-          <p className="hint">Teléfono, fecha de nacimiento y contacto de emergencia para tu escuela.</p>
-        </Link>
-      )}
 
       <section className="tile level-card rise" style={{ animationDelay: '40ms' }} aria-label="Tu nivel">
         <div className="level-badge" style={{ ['--pct' as string]: `${pct}%` }}>
@@ -150,6 +143,14 @@ export function StudentHome() {
           {p && <p className="hint">{p.xp} XP en total · {p.attended} {p.attended === 1 ? 'clase' : 'clases'}{p.pending ? ` · ${p.pending} por confirmar` : ''}</p>}
         </div>
       </section>
+
+      {incomplete.data && (
+        <Link className="tile tile--wide tile--link tile--alert rise" to="/app/ajustes#ficha">
+          <span className="eyebrow">Tu ficha</span>
+          <p className="tile__big tile__big--sm">Completa tus datos</p>
+          <p className="hint">Teléfono, fecha de nacimiento y contacto de emergencia para tu escuela.</p>
+        </Link>
+      )}
 
       <section className="tile tile--wide rise" style={{ animationDelay: '80ms' }}>
         <div className="tile__head">
@@ -185,7 +186,7 @@ export function StudentHome() {
         ) : <p className="hint">No tienes una inscripción activa.</p>}
       </section>
 
-      <section className="tile rise" style={{ animationDelay: '200ms' }}>
+      <section className="tile tile--span2 rise" style={{ animationDelay: '200ms' }}>
         <div className="tile__head"><span className="eyebrow">Pagos pendientes</span><Link className="link-btn" to="/app/pagos">Mis pagos</Link></div>
         {(pay.data ?? []).length === 0 ? <p className="hint">Estás al día.</p> : (
           <ul className="mini-list">
@@ -194,8 +195,8 @@ export function StudentHome() {
         )}
       </section>
 
-      <section className="tile rise" style={{ animationDelay: '240ms' }}>
-        <div className="tile__head"><span className="eyebrow">Últimas clases</span></div>
+      <section className="tile tile--wide tile--history rise" style={{ animationDelay: '240ms' }}>
+        <div className="tile__head"><span className="eyebrow">Últimas clases</span><Link className="link-btn" to="/app/asistencia">Ver todas</Link></div>
         <AttendanceHistory rows={(att.data ?? []).slice(0, 4)} />
       </section>
     </div>

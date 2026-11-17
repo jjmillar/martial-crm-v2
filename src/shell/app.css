@@ -133,16 +133,22 @@
 /* Page header with an action on the right (shared by modules) */
 .page-head.page-head--row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  flex-wrap: nowrap; /* the action button stays beside the title, also on phones */
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 
 .page-head--row > div {
   display: grid;
+  flex: 1 1 auto;
   gap: 8px;
   min-width: 0;
+}
+
+.page-head--row > .fab,
+.page-head--row > .btn {
+  flex: none;
 }
 
 .page-head--row h1 {

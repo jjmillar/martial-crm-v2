@@ -20,7 +20,7 @@ export function MisPagos() {
   const total = owed.filter((p) => subs.data?.get(p.id)?.status !== 'pendiente').reduce((n, p) => n + p.amount, 0)
 
   return (
-    <div className="pagos">
+    <div className="pagos my-pays-page">
       <header className="page-head">
         <span className="eyebrow">{activeSchool?.name}</span>
         <h1>Mis pagos</h1>

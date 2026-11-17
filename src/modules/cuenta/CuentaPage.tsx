@@ -86,7 +86,7 @@ export function CuentaSections() {
 
       <Acc id="seguridad" icon="lock" title="Verificación en dos pasos" hint="Código de una app además de tu contraseña"><Seguridad /></Acc>
 
-      <Acc id="contrasena" icon="eye" title="Contraseña">
+      <Acc id="contrasena" icon="eye" title="Contraseña" hint="Cambia la contraseña con que ingresas">
       <form className="card form-section" onSubmit={onPw} noValidate>
         <h2>Contraseña</h2>
         <div className="form-grid">

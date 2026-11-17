@@ -88,11 +88,11 @@ export function EscuelasPage() {
       <section className="school-grid" aria-label="Escuelas registradas" data-motion>
         {schools.map((s) => {
           const st = stats.data?.[s.id]
-          const facts: { icon: IconName; value: number | undefined; label: string }[] = [
-            { icon: 'users', value: st?.students_active, label: 'alumnos activos' },
-            { icon: 'teacher', value: st?.teachers_active, label: 'profesores' },
-            { icon: 'clock', value: st?.classes_active, label: 'clases activas' },
-            { icon: 'check', value: st?.attendance_30d, label: 'asistencias en 30 días' },
+          const facts: { icon: IconName; value: number | undefined; label: string; short: string }[] = [
+            { icon: 'users', value: st?.students_active, label: 'alumnos activos', short: 'Alumnos' },
+            { icon: 'teacher', value: st?.teachers_active, label: 'profesores', short: 'Profes' },
+            { icon: 'clock', value: st?.classes_active, label: 'clases activas', short: 'Clases' },
+            { icon: 'check', value: st?.attendance_30d, label: 'asistencias en 30 días', short: 'Asist. 30d' },
           ]
           return (
             <button key={s.id} type="button" className="card school-card" onClick={() => openEdit(s.id)} aria-label={`${s.name}: ver y editar`}>
@@ -111,6 +111,7 @@ export function EscuelasPage() {
                   <span key={f.label} className="school-card__fact" title={`${f.value ?? '—'} ${f.label}`}>
                     <Icon name={f.icon} size={16} />
                     <strong>{f.value ?? '—'}</strong>
+                    <span className="school-card__fact-label" aria-hidden="true">{f.short}</span>
                     <span className="sr-only">{f.label}</span>
                   </span>
                 ))}

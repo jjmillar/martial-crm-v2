@@ -53,4 +53,12 @@
   .student-row .belt {
     margin-left: 54px;
   }
+
+  /* With an avatar: name and details take the rest of the first line; the belt goes below them */
+  .student-row:has(.avatar) {
+    row-gap: 6px;
+  }
+  .student-row:has(.avatar) .student-row__main {
+    flex: 1 1 calc(100% - 54px);
+  }
 }
