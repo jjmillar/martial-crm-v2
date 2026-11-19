@@ -8,8 +8,8 @@ import { useSchool } from '../../lib/school'
 type Me = { id: string; phone: string | null; birth_date: string | null; address: string | null; emergency_contact: string | null; emergency_phone: string | null; medical_notes: string | null }
 
 export function MiFicha() {
-  const { myStudent } = useSchool()
-  const id = myStudent?.id
+  const { student } = useSchool()
+  const id = student?.id
   const q = useQuery({
     queryKey: ['my-student', id],
     queryFn: async () => {

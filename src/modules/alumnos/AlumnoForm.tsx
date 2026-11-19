@@ -10,6 +10,7 @@ import { Toggle } from '../../ui/Toggle'
 import { createStudent, deleteStudent, getStudent, studentsKey, updateStudent } from './api'
 import { beltSuggestions } from '../../lib/belts'
 import { emptyForm, formFromStudent, parseStudent, type StudentForm } from './schema'
+import { Family } from './Family'
 import { StudentEnrollments } from './StudentEnrollments'
 import { StudentPayments } from './StudentPayments'
 import { StudentLinks } from '../vinculos/Vinculos'
@@ -110,6 +111,7 @@ function AlumnoForm({ student }: { student?: Student }) {
               {[student.rut && formatRut(student.rut), age !== null && `${age} años`, `Inscrito el ${formatDate(student.enrollment_date)}`, tenure ? `${tenure} ${tenure === 1 ? 'año' : 'años'} en la escuela` : null].filter(Boolean).join(' · ')}
             </p>
           )}
+          {student && <Family studentId={student.id} userId={student.user_id ?? null} schoolId={student.school_id} />}
         </div>
       </header>
 

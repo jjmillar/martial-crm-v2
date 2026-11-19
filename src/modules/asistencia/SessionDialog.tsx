@@ -180,7 +180,7 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
         {roster.map((s) => {
           const m = marks.get(s.id)
           const pending = Boolean(m && !m.confirmed)
-          const record = m && !pending ? (m.self_marked ? `Marcó el alumno · aprobó ${who(m.confirmed_by)}` : `Marcó ${who(m.confirmed_by)}`) : null
+          const record = m && !pending ? (m.self_marked ? `Marcó ${m.by_guardian ? 'el apoderado' : 'el alumno'} · aprobó ${who(m.confirmed_by)}` : `Marcó ${who(m.confirmed_by)}`) : null
           return (
             <li key={s.id}>
               {pending ? (

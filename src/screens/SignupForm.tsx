@@ -13,10 +13,12 @@ type Props = {
   school?: { id: string; slug: string }
   head: ReactNode
   loginTo: string
+  /** School sign-up only: switch to "I have a code from my guardian". */
+  onClaim?: () => void
 }
 
 // Shared sign-up form: CEO on the main site, student on a school's landing page (tied to that school).
-export function SignupForm({ kind, school, head, loginTo }: Props) {
+export function SignupForm({ kind, school, head, loginTo, onClaim }: Props) {
   const { signIn } = useAuth()
   const navigate = useNavigate()
   const [f, setF] = useState({ first_name: '', middle_name: '', first_last_name: '', second_last_name: '', rut: '', email: '', phone: '', birth_date: '', address: '', password: '', password2: '' })
@@ -103,6 +105,7 @@ export function SignupForm({ kind, school, head, loginTo }: Props) {
       {error && <p className="alert" role="alert">{error}</p>}
       <button className="btn" type="submit" disabled={busy}>{busy ? 'Creando cuenta…' : 'Crear cuenta'}</button>
       <p className="hint">¿Ya tienes cuenta? <Link to={loginTo}>Inicia sesión</Link></p>
+      {onClaim && <p className="hint">¿Tu apoderado te dio un código? <button type="button" className="link-btn" onClick={onClaim}>Activar mi cuenta con el código</button></p>}
     </form>
   )
 }

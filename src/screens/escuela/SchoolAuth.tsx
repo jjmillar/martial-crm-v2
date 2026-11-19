@@ -1,10 +1,11 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { Link, Navigate, useNavigate, useParams } from '../../lib/nav'
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from '../../lib/nav'
 import { useAuth } from '../../lib/auth'
 import { Icon } from '../../ui/Icon'
 import { SignupForm } from '../SignupForm'
 import { brandStyle, useLanding, type Landing } from './api'
 import { NotAvailable } from './SchoolLanding'
+import { ClaimForm } from './ClaimForm'
 
 const ACTIVE_SCHOOL_KEY = 'mcrm.activeSchool'
 const rememberSchool = (id: string) => { try { localStorage.setItem(ACTIVE_SCHOOL_KEY, id) } catch { /* ignore */ } }
@@ -34,12 +35,17 @@ function useSchoolPage() {
 /** /e/<slug>/registro — student account tied to this school (pending until its CEO approves). */
 export function SchoolSignup() {
   const { q, s, signedIn } = useSchoolPage()
+  const [params] = useSearchParams()
+  // ?codigo=… comes from the link a guardian shares when handing the account over to their child.
+  const [claim, setClaim] = useState(params.get('codigo') !== null)
   if (q.isLoading) return <p className="hint school-page--loading">Cargando…</p>
   if (!s) return <NotAvailable />
   if (signedIn) { rememberSchool(s.id); return <Navigate to="/app" replace /> }
+  if (claim) return <Shell s={s}><ClaimForm school={{ id: s.id, slug: s.slug, name: s.name }} initialCode={params.get('codigo') ?? ''} onCancel={() => setClaim(false)} /></Shell>
   return (
     <Shell s={s}>
       <SignupForm
+        onClaim={() => setClaim(true)}
         kind="alumno"
         school={{ id: s.id, slug: s.slug }}
         loginTo={`/e/${s.slug}/ingresar`}

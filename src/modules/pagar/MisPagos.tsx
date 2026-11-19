@@ -12,8 +12,8 @@ import { PaymentHistory } from '../pagos/PaymentHistory'
 // "Pagos y planes" for students, all on one page: what they owe (with "Pagar", which opens the payment gateway), the
 // school's plans, and at the end the history (paid payments and transfer reports in review or rejected).
 export function MisPagos() {
-  const { activeSchool, myStudent } = useSchool()
-  const id = myStudent?.id
+  const { activeSchool, student } = useSchool()
+  const id = student?.id
   const pays = useQuery({ queryKey: ['my-payments', id, 'all'], queryFn: () => listStudentPayments(id!), enabled: Boolean(id) })
   const subs = useQuery({ queryKey: submissionsKey(id), queryFn: () => latestSubmissions({ studentId: id }), enabled: Boolean(id) })
   const reports = useQuery({ queryKey: ['payment-submissions', id, 'all'], queryFn: () => listMySubmissions(id!), enabled: Boolean(id) })

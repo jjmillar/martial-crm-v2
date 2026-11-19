@@ -1,4 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useState, type FormEvent } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { claimStudent } from './guardian'
+import { formatClaimCode } from '../../lib/claimCode'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
 import { supabase } from '../../lib/supabase'
@@ -69,6 +72,25 @@ export function PendingSignup() {
           <button type="button" className="btn btn--ghost" onClick={signOut}>Cerrar sesión</button>
         </div>
       </section>
+      <ClaimCode onDone={() => { void reload() }} />
     </div>
+  )
+}
+
+// Someone who already had a login and got a code from their guardian: link it here instead of signing up again.
+function ClaimCode({ onDone }: { onDone: () => void }) {
+  const [code, setCode] = useState('')
+  const claim = useMutation({ mutationFn: claimStudent, onSuccess: onDone })
+  function submit(e: FormEvent) { e.preventDefault(); if (code.replace(/-/g, '').length === 12) claim.mutate(code) }
+  return (
+    <form className="tile tile--full rise claim-tile" onSubmit={submit} noValidate>
+      <span className="eyebrow">¿Tu apoderado te dio un código?</span>
+      <p className="hint">Escríbelo para recibir tu ficha de alumno con tus asistencias, nivel y pagos.</p>
+      <div className="claim-tile__row">
+        <input className="input claim-code" aria-label="Código de tu apoderado" placeholder="1A2B-3C4D-5E6F" autoCapitalize="characters" spellCheck={false} value={code} onChange={(e) => { setCode(formatClaimCode(e.target.value)); claim.reset() }} />
+        <button type="submit" className="btn" disabled={claim.isPending || code.replace(/-/g, '').length !== 12}>{claim.isPending ? 'Activando…' : 'Usar código'}</button>
+      </div>
+      {claim.isError && <p className="alert" role="alert">{(claim.error as Error).message}</p>}
+    </form>
   )
 }

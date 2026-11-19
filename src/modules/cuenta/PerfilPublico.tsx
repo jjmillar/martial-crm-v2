@@ -15,8 +15,8 @@ type Row = {
 const key = (id: string | undefined) => ['my-public-profile', id] as const
 
 export function PerfilPublico() {
-  const { myStudent } = useSchool()
-  const id = myStudent?.id
+  const { student } = useSchool()
+  const id = student?.id
   const q = useQuery({
     queryKey: key(id),
     queryFn: async () => {

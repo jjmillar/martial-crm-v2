@@ -11,6 +11,7 @@ import { Wordmark } from '../ui/Wordmark'
 import { Flash } from '../ui/Flash'
 import { MobileMenu } from './MobileMenu'
 import { PendingSignup } from '../modules/portal/PendingSignup'
+import { PersonSwitcher } from '../modules/portal/PersonSwitcher'
 import { usePendingCount } from '../modules/tareas/api'
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -52,6 +53,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="main">
         <main className="content">
           <Flash />
+          <PersonSwitcher />
           {/* No role anywhere yet (e.g. a self-signup waiting for approval): one screen instead of empty pages. */}
           <PageMotion>{!loading && !role ? <PendingSignup /> : children}</PageMotion>
         </main>

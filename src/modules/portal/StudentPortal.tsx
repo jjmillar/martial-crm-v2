@@ -19,8 +19,10 @@ import {
 } from './api'
 
 function useMe() {
-  const { activeSchool, myStudent } = useSchool()
-  return { schoolId: activeSchool?.id, school: activeSchool, studentId: myStudent?.id, name: myStudent?.full_name ?? '' }
+  const { activeSchool, student, myStudent } = useSchool()
+  // The guardian may be looking at a child's portal: everything below acts for that child.
+  const child = Boolean(student && student.id !== myStudent?.id)
+  return { schoolId: activeSchool?.id, school: activeSchool, studentId: student?.id, name: student?.full_name ?? '', child }
 }
 
 /** Days back a student can still mark a class they forgot (the database enforces the same window). */
@@ -65,8 +67,8 @@ export function TodayCheckIn() {
     qc.invalidateQueries({ queryKey: myAttendanceKey(studentId) }),
     qc.invalidateQueries({ queryKey: progressKey(studentId) }),
   ])
-  const mark = useMutation({ mutationFn: (v: { classId: string; date: string }) => checkIn(v.classId, v.date), onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
-  const undo = useMutation({ mutationFn: (v: { classId: string; date: string }) => undoCheckIn(v.classId, v.date), onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
+  const mark = useMutation({ mutationFn: (v: { classId: string; date: string }) => checkIn(studentId!, v.classId, v.date), onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
+  const undo = useMutation({ mutationFn: (v: { classId: string; date: string }) => undoCheckIn(studentId!, v.classId, v.date), onMutate: () => setError(null), onSuccess: refresh, onError: (e: Error) => setError(e.message) })
 
   const row = ({ c, s, date }: { c: ClassFull; s: ClassFull['schedules'][number]; date: string }) => {
     const a = mine.get(`${c.id}|${date}`)
@@ -121,14 +123,14 @@ function dayLabel(date: string, today: string): string {
 }
 
 
-function AttendanceHistory({ rows }: { rows: MyAttendance[] }) {
-  if (rows.length === 0) return <p className="hint">Todavía no tienes asistencias registradas.</p>
+function AttendanceHistory({ rows, child = false }: { rows: MyAttendance[]; child?: boolean }) {
+  if (rows.length === 0) return <p className="hint">{child ? 'Todavía no tiene asistencias registradas.' : 'Todavía no tienes asistencias registradas.'}</p>
   return (
     <ul className="today-list">
       {rows.map((a) => (
         <li key={a.id} style={{ ['--class-color' as string]: a.class?.color }}>
           <span className="today-list__time">{formatDate(a.date).slice(0, 5)}</span>
-          <span className="today-list__name"><strong>{a.class?.name ?? 'Clase'}</strong><span className="hint">{a.self_marked ? 'Marcada por ti' : 'Marcada por tu profesor'}</span></span>
+          <span className="today-list__name"><strong>{a.class?.name ?? 'Clase'}</strong><span className="hint">{a.self_marked ? (child ? 'Marcada por ti (apoderado)' : 'Marcada por ti') : child ? 'Marcada por su profesor' : 'Marcada por tu profesor'}</span></span>
           {a.confirmed_at ? <span className="tag tag--ok">+{XP_PER_CLASS} XP</span> : <span className="tag tag--wait">Por aprobar</span>}
         </li>
       ))}
@@ -139,7 +141,7 @@ function AttendanceHistory({ rows }: { rows: MyAttendance[] }) {
 /** Inicio for students: level, XP, skills, today's check-in, plan and pending payments. */
 export function StudentHome() {
   const { profile } = useAuth()
-  const { school, studentId, name } = useMe()
+  const { school, studentId, name, child } = useMe()
   const today = todayIso()
   const progress = useQuery({ queryKey: progressKey(studentId), queryFn: () => studentProgress(studentId!), enabled: Boolean(studentId) })
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
@@ -156,7 +158,7 @@ export function StudentHome() {
   })
 
   const p = progress.data
-  const firstName = (profile?.full_name || name).split(' ')[0]
+  const firstName = (child ? name : profile?.full_name || name).split(' ')[0]
   const pct = p ? Math.round((p.level_xp / p.next_level_xp) * 100) : 0
   const topSkill = p?.skills[0]?.xp ?? 0
   const current = (enr.data ?? []).find((e) => e.status === 'activa')
@@ -164,9 +166,9 @@ export function StudentHome() {
   return (
     <div className="bento">
       <section className="tile tile--hero rise">
-        <span className="eyebrow">Alumno · {school?.name}</span>
-        <h1>Hola{firstName ? `, ${firstName}` : ''}.</h1>
-        <p className="tile__lead">{longDate(today)}</p>
+        <span className="eyebrow">{child ? 'Perfil de tu hijo' : 'Alumno'} · {school?.name}</span>
+        <h1>{child ? firstName : <>Hola{firstName ? `, ${firstName}` : ''}.</>}</h1>
+        <p className="tile__lead">{child ? `Como apoderado ves su nivel, su plan y sus pagos, y marcas su asistencia.` : longDate(today)}</p>
       </section>
 
 
@@ -194,10 +196,10 @@ export function StudentHome() {
           <Link className="link-btn" to="/app/asistencia">Historial</Link>
         </div>
         <TodayCheckIn />
-        <p className="hint">Marca tu asistencia desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
+        <p className="hint">{child ? `Marca la asistencia de ${firstName}` : 'Marca tu asistencia'} desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). La escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
       </section>
 
-      {incomplete.data && (
+      {incomplete.data && !child && (
         <Link className="tile tile--wide tile--link tile--alert rise" to="/app/ajustes#ficha">
           <span className="eyebrow">Tu ficha</span>
           <p className="tile__big tile__big--sm">Completa tus datos</p>
@@ -222,17 +224,17 @@ export function StudentHome() {
       </section>
 
       <section className="tile rise" style={{ animationDelay: '160ms' }}>
-        <span className="eyebrow">Mi plan</span>
+        <span className="eyebrow">{child ? 'Su plan' : 'Mi plan'}</span>
         {current ? (
           <>
             <p className="tile__big tile__big--sm">{current.plan?.name}</p>
             <p className="hint">{current.ends_at ? `Vigente hasta el ${formatDate(current.ends_at)}` : 'Sin fecha de vencimiento'}</p>
           </>
-        ) : <p className="hint">No tienes una inscripción activa.</p>}
+        ) : <p className="hint">{child ? 'No tiene una inscripción activa.' : 'No tienes una inscripción activa.'}</p>}
       </section>
 
       <section className="tile tile--span2 rise" style={{ animationDelay: '200ms' }}>
-        <div className="tile__head"><span className="eyebrow">Pagos pendientes</span><Link className="link-btn" to="/app/pagos">Mis pagos</Link></div>
+        <div className="tile__head"><span className="eyebrow">Pagos pendientes</span><Link className="link-btn" to="/app/pagos">{child ? 'Sus pagos' : 'Mis pagos'}</Link></div>
         {(pay.data ?? []).length === 0 ? <p className="hint">Estás al día.</p> : (
           <ul className="mini-list">
             {pay.data!.map((x) => <li key={x.id}><span>{x.concept}</span><b>{formatCLP(x.amount)}</b><Link className="link-btn" to={payHref(x.id)}>Pagar</Link></li>)}
@@ -242,7 +244,7 @@ export function StudentHome() {
 
       <section className="tile tile--wide tile--history rise" style={{ animationDelay: '240ms' }}>
         <div className="tile__head"><span className="eyebrow">Últimas clases</span><Link className="link-btn" to="/app/asistencia">Ver todas</Link></div>
-        <AttendanceHistory rows={(att.data ?? []).slice(0, 3)} />
+        <AttendanceHistory rows={(att.data ?? []).slice(0, 3)} child={child} />
       </section>
     </div>
   )
@@ -264,7 +266,7 @@ function NextClass({ classes, today }: { classes: ClassFull[]; today: string }) 
   if (!next) return <p className="hint">Tu escuela aún no tiene clases con horario.</p>
   return (
     <div className="checkin-next">
-      <p className="hint">Hoy no tienes clases. Tu próxima clase:</p>
+      <p className="hint">Hoy no hay clases. La próxima:</p>
       <ul className="checkin-list">
         <li style={{ ['--class-color' as string]: next.c.color }}>
           <span className="today-list__time">{hhmm(next.x.start_time)}</span>
@@ -278,15 +280,16 @@ function NextClass({ classes, today }: { classes: ClassFull[]; today: string }) 
 
 /** Asistencia for students: today's check-in and full history. */
 export function StudentAttendance() {
-  const { school, studentId } = useMe()
+  const { school, studentId, child, name } = useMe()
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
+  const first = name.split(' ')[0]
   const histMore = useShowMore('portal.historial')
   return (
     <div className="asistencia portal-att">
       <header className="page-head">
         <span className="eyebrow">{school?.name}</span>
-        <h1>Mi asistencia</h1>
-        <p className="hint">Marca tu asistencia desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). Tu escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
+        <h1>{child ? `Asistencia de ${first}` : 'Mi asistencia'}</h1>
+        <p className="hint">{child ? `Marca la asistencia de ${first}` : 'Marca tu asistencia'} desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). La escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
       </header>
       <section className="card form-section checkin-card" aria-labelledby="mark-h">
         <h2 id="mark-h">Marcar asistencia</h2>
@@ -294,7 +297,7 @@ export function StudentAttendance() {
       </section>
       <section className="card form-section" aria-labelledby="hist-h">
         <h2 id="hist-h">Historial</h2>
-        <AttendanceHistory rows={(att.data ?? []).slice(0, histMore.shown)} />
+        <AttendanceHistory rows={(att.data ?? []).slice(0, histMore.shown)} child={child} />
         <ShowMore shown={histMore.shown} total={(att.data ?? []).length} onMore={histMore.more} />
       </section>
     </div>

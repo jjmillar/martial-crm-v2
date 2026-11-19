@@ -237,3 +237,134 @@
 .portal-att .today-list li {
   flex-wrap: wrap;
 }
+
+/* Guardian (apoderado): who the portal is showing */
+.person-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  min-width: 0;
+}
+.person-switch .segmented {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Ajustes → Mis hijos */
+.kids {
+  display: grid;
+  gap: 14px;
+}
+.kids__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.kid {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+}
+.kid__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.kid__name {
+  display: grid;
+  min-width: 0;
+}
+.kid__name strong {
+  overflow-wrap: anywhere;
+}
+.kid__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  margin: 0;
+}
+.kid__facts dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.kid__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+.kid__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.kid__handover {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.kid__code code {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.kid__link {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+.kid__link .input {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+.kids__reqs {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.kids__req {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 12px 16px;
+}
+.kids__req-main {
+  display: grid;
+  min-width: 0;
+}
+.kids__req-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.claim-code {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.claim-tile {
+  display: grid;
+  gap: 8px;
+}
+.claim-tile__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.claim-tile__row .input {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.family a {
+  color: inherit;
+  text-decoration: underline;
+}

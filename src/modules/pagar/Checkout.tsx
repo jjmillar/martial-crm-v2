@@ -20,7 +20,7 @@ type Pay = { id: string; concept: string; amount: number; due_date: string | nul
 // school's transfer data, then "Pagar" sends it to the school's CEO, who approves it once the money arrives.
 export function Checkout() {
   const { id } = useParams()
-  const { myStudent } = useSchool()
+  const { student: myStudent } = useSchool()
   const pay = useQuery({
     queryKey: ['pay', id],
     queryFn: async () => {
@@ -38,7 +38,7 @@ export function Checkout() {
 }
 
 function Gateway({ p, last }: { p: Pay; last: Submission | null }) {
-  const { schools, myStudent } = useSchool()
+  const { schools, student: myStudent } = useSchool()
   const qc = useQueryClient()
   const school = schools.find((s) => s.id === p.school_id)
   // Read fresh: the school may have just set (or changed) its transfer data.

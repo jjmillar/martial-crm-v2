@@ -10,6 +10,7 @@ import { Acc } from '../../ui/Accordion'
 import { MiFicha } from './MiFicha'
 import { Seguridad } from './Seguridad'
 import { PerfilPublico } from './PerfilPublico'
+import { MisHijos } from '../portal/MisHijos'
 
 // "Mi cuenta" now lives inside Ajustes; old links (/app/cuenta#ficha) keep working.
 export function CuentaPage() {
@@ -20,7 +21,9 @@ export function CuentaPage() {
 // Personal settings for every role (S6 "personal profile"), as accordions inside Ajustes.
 export function CuentaSections() {
   const { user, profile, reloadProfile, updatePassword } = useAuth()
-  const { role, schools, memberships } = useSchool()
+  const { role, schools, memberships, wards, student, myStudent } = useSchool()
+  // Guardian looking at a child: the record and public profile sections act for that child.
+  const kid = student && student.id !== myStudent?.id ? (student.full_name ?? '').split(' ')[0] : null
   const [name, setName] = useState(profile?.full_name ?? '')
   const [phone, setPhone] = useState(profile?.phone ?? '')
   const [pw, setPw] = useState('')
@@ -81,8 +84,9 @@ export function CuentaSections() {
       </form>
       </Acc>
 
-      {role === 'alumno' && <Acc id="mi-ficha" icon="enroll" title="Mi ficha de alumno" hint="Contacto, emergencia y salud"><MiFicha /></Acc>}
-      {role === 'alumno' && <Acc id="perfil-publico" icon="globe" title="Mi perfil público" hint="Tu página personal: cinturón, nivel y skills"><PerfilPublico /></Acc>}
+      {role === 'alumno' && <Acc id="mi-ficha" icon="enroll" title={kid ? `Ficha de ${kid}` : 'Mi ficha de alumno'} hint="Contacto, emergencia y salud"><MiFicha /></Acc>}
+      {role === 'alumno' && <Acc id="perfil-publico" icon="globe" title={kid ? `Perfil público de ${kid}` : 'Mi perfil público'} hint={kid ? 'Parte privado: tú decides si se publica' : 'Tu página personal: cinturón, nivel y skills'}><PerfilPublico /></Acc>}
+      {role === 'alumno' && <Acc id="hijos" icon="users" title="Mis hijos" hint={wards.length ? `Apoderado de ${wards.length} ${wards.length === 1 ? 'alumno' : 'alumnos'}` : 'Agrega a tus hijos si entrenan en la escuela'}><MisHijos /></Acc>}
 
       <Acc id="seguridad" icon="lock" title="Verificación en dos pasos" hint="Código de una app además de tu contraseña"><Seguridad /></Acc>
 

@@ -4,6 +4,9 @@
  *  - kind "ceo"    (main site /registro): a customer creates a CEO account and can then create their schools.
  *  - kind "alumno" (a school's landing /e/<slug>/registro): a student account tied to THAT school, pending
  *                  until the school's CEO approves it in "Pendientes".
+ *  - kind "claim"  (a school's landing /e/<slug>/registro?codigo=…): a child whose guardian handed over the account
+ *                  creates their own login with the one-time code. No approval: the student record already exists,
+ *                  and it keeps its attendance, XP and payments.
  */
 
 import { clientIp, serveWithCors } from '../_shared/cors.ts'
@@ -23,6 +26,7 @@ serveWithCors(async (req: Request) => {
     } catch {
       return json({ error: 'Datos inválidos' }, 400)
     }
+    if (body.kind === 'claim') return await claim(req, body)
     const kind = body.kind === 'ceo' ? 'ceo' : body.kind === 'alumno' ? 'alumno' : ''
     const slug = str(body.school_slug, 60)
     const first = str(body.first_name, 60)
@@ -102,3 +106,44 @@ serveWithCors(async (req: Request) => {
     return json({ error: 'Error inesperado' }, 500)
   }
 })
+
+// Child account hand-over: validate the code first (no account is created for a wrong code), then create the login
+// and link it to the existing student record in one RPC (service role only).
+async function claim(req: Request, body: Record<string, unknown>) {
+  const code = str(body.code, 20).toUpperCase().replace(/[^0-9A-Z]/g, '')
+  const email = str(body.email, 200).toLowerCase()
+  const password = typeof body.password === 'string' ? body.password : ''
+  if (!/^[0-9A-F]{12}$/.test(code)) return json({ error: 'El código tiene 12 caracteres, por ejemplo 1A2B-3C4D-5E6F.' }, 400)
+  if (!/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Correo inválido.' }, 400)
+  if (password.length < 8) return json({ error: 'La contraseña debe tener al menos 8 caracteres.' }, 400)
+
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+  const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!SUPABASE_URL || !SERVICE) return json({ error: 'Error inesperado' }, 500)
+  const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false } })
+  // Codes are 48-bit and expire in 7 days; still, at most 10 attempts per hour per connection.
+  const { data: allowed } = await admin.rpc('rate_limit_hit', { p_bucket: 'claim', p_key: clientIp(req), p_max: 10, p_window_seconds: 3600 })
+  if (allowed === false) return json({ error: 'Demasiados intentos desde tu conexión. Intenta de nuevo en un rato.' }, 429)
+
+  const { data: info } = await admin.rpc('student_claim_info', { p_code: code })
+  const who = info as { full_name?: string; school_id?: string; slug?: string } | null
+  if (!who?.school_id) return json({ error: 'El código no es válido o ya venció. Pide uno nuevo a tu apoderado.' }, 400)
+  if (body.school_slug && body.school_slug !== who.slug) return json({ error: 'Ese código es de otra escuela.' }, 400)
+  const { data: existing } = await admin.rpc('find_user_id_by_email', { p_email: email })
+  if (existing) return json({ error: 'Ese correo ya tiene una cuenta. Entra con ella y escribe el código en tu perfil.' }, 409)
+
+  const { data: created, error: createError } = await admin.auth.admin.createUser({
+    email, password, email_confirm: true, user_metadata: { full_name: who.full_name ?? '' },
+  })
+  if (createError || !created?.user) {
+    const weak = createError?.message?.toLowerCase().includes('password')
+    return json({ error: weak ? 'La contraseña es muy débil: usa más caracteres, letras y números.' : 'No se pudo crear la cuenta.' }, 400)
+  }
+  const { error: claimError } = await admin.rpc('claim_student_as', { p_code: code, p_user: created.user.id, p_email: email })
+  if (claimError) {
+    console.error('Claim error:', claimError)
+    await admin.auth.admin.deleteUser(created.user.id)
+    return json({ error: 'El código no es válido o ya venció. Pide uno nuevo a tu apoderado.' }, 400)
+  }
+  return json({ ok: true, kind: 'claim', school_id: who.school_id })
+}

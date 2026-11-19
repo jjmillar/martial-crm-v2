@@ -14,7 +14,7 @@ import { todayIso } from '../../lib/dates'
 
 /** The plans, as a section of the "Pagos y planes" page (staff edit them, students only read). */
 export function PlanesList() {
-  const { activeSchool, role, myStudent } = useSchool()
+  const { activeSchool, role, student: myStudent } = useSchool()
   const schoolId = activeSchool?.id
   const student = role === 'alumno'
   const mine = useQuery({ queryKey: ['my-enrollments', myStudent?.id], queryFn: () => myEnrollments(myStudent!.id), enabled: student && Boolean(myStudent) })
