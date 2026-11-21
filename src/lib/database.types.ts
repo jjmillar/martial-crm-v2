@@ -32,3 +32,5 @@ export type Payment = Tables<'payments'>
 export type PaymentMethod = Enums<'payment_method'>
 export type PaymentStatus = Enums<'payment_status'>
 export type PaymentKind = Enums<'payment_kind'>
+export type DiscountCode = Tables<'discount_codes'>
+export type DiscountScope = Enums<'discount_scope'>

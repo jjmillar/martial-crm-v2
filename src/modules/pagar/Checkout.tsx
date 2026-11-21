@@ -7,6 +7,8 @@ import { formatCLP } from '../../lib/money'
 import { formatDate, santiagoDate } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { latestSubmissions, submissionsKey, submitPayment, transferOf, type Submission, type Transfer } from './api'
+import { CodeField } from '../descuentos/CodeField'
+import { redeemOnPayment } from '../descuentos/api'
 
 type Method = 'transferencia' | 'tarjeta'
 const methods: { id: Method; label: string; hint: string; enabled: boolean }[] = [
@@ -14,7 +16,7 @@ const methods: { id: Method; label: string; hint: string; enabled: boolean }[] =
   { id: 'tarjeta', label: 'Tarjeta de débito o crédito', hint: 'Próximamente', enabled: false },
 ]
 
-type Pay = { id: string; concept: string; amount: number; due_date: string | null; status: string; school_id: string }
+type Pay = { id: string; concept: string; amount: number; due_date: string | null; status: string; school_id: string; discount_amount: number; discount_code: string | null }
 
 // The payment gateway: every "Pagar" in the app lands here. Choose a method (only transfer for now), see the
 // school's transfer data, then "Pagar" sends it to the school's CEO, who approves it once the money arrives.
@@ -24,7 +26,7 @@ export function Checkout() {
   const pay = useQuery({
     queryKey: ['pay', id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('payments').select('id, concept, amount, due_date, status, school_id').eq('id', id!).maybeSingle()
+      const { data, error } = await supabase.from('payments').select('id, concept, amount, due_date, status, school_id, discount_amount, discount_code').eq('id', id!).maybeSingle()
       if (error) throw error
       return data as Pay | null
     },
@@ -82,8 +84,20 @@ function Gateway({ p, last }: { p: Pay; last: Submission | null }) {
           <strong>{p.concept}</strong>
           {p.due_date && <span className="hint">Vence el {formatDate(p.due_date)}</span>}
         </div>
-        <p className="checkout__amount">{formatCLP(p.amount)}</p>
+        <div className="checkout__total">
+          {p.discount_amount > 0 && <s className="hint">{formatCLP(p.amount + p.discount_amount)}</s>}
+          <p className="checkout__amount">{formatCLP(p.amount)}</p>
+        </div>
       </section>
+      {p.discount_amount > 0 && (
+        <p className="checkout__discount" role="status"><Icon name="tag" size={16} /> <span>Código <b>{p.discount_code}</b>: −{formatCLP(p.discount_amount)}</span></p>
+      )}
+      {!paid && !inReview && p.discount_amount === 0 && (
+        <CodeField apply={(c) => redeemOnPayment(p.id, c)} onApplied={() => Promise.all([
+          qc.invalidateQueries({ queryKey: ['pay', p.id] }),
+          qc.invalidateQueries({ queryKey: ['my-payments'] }),
+        ])} />
+      )}
 
       {paid ? (
         <section className="card checkout__state checkout__state--ok" role="status">

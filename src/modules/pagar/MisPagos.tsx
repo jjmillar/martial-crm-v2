@@ -62,6 +62,7 @@ export function MisPagos() {
                         <h3 className="plan-card__name">{p.concept}</h3>
                         <p className="plan-card__price">{formatCLP(p.amount)}</p>
                       </div>
+                      {p.discount_amount > 0 && <p className="pay-card__disc"><Icon name="tag" size={14} /> {p.discount_code}: −{formatCLP(p.discount_amount)}</p>}
                       {rejected && <p className="pay-card__note">{s?.reject_reason ? `Motivo: ${s.reject_reason}` : 'La escuela no pudo confirmar tu transferencia.'}</p>}
                       <div className="pay-card__action">
                         {review

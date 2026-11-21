@@ -13,6 +13,7 @@ import { SchoolFilter } from '../../ui/SchoolFilter'
 import { latestSubmissions, submissionsKey } from '../pagar/api'
 import { MisPagos } from '../pagar/MisPagos'
 import { PlanesList } from '../planes/PlanesList'
+import { DescuentosSection } from '../descuentos/DescuentosSection'
 import { PaymentHistory } from './PaymentHistory'
 
 type Filter = PaymentStatus | 'todos'
@@ -137,6 +138,7 @@ function StaffPagos() {
       </ul>
 
       <PlanesList />
+      <DescuentosSection />
       {q.isSuccess && <PaymentHistory payments={q.data} staff />}
     </div>
   )

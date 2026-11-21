@@ -9,6 +9,8 @@ import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { listPlans, plansKey } from '../planes/api'
 import { cycleInfo } from '../planes/cycles'
+import { CodeField } from '../descuentos/CodeField'
+import { redeemOnEnrollment, removeFromEnrollment, valueLabel } from '../descuentos/api'
 import {
   createEnrollment, deleteEnrollment, enrollmentsKey, getEnrollment, phaseLabel, phaseOf, updateEnrollment,
   type EnrollmentRow,
@@ -213,6 +215,11 @@ function MatriculaDetalle({ e }: { e: EnrollmentRow }) {
     onError: (err: Error) => setMsg({ ok: false, text: err.message }),
   })
 
+  const unDiscount = useMutation({
+    mutationFn: () => removeFromEnrollment(e.id),
+    onSuccess: async () => { setMsg({ ok: true, text: 'Descuento quitado: los próximos pagos del plan serán a precio normal.' }); await refresh() },
+    onError: (err: Error) => setMsg({ ok: false, text: err.message }),
+  })
   const remove = useMutation({
     mutationFn: () => deleteEnrollment(e.id),
     onSuccess: async () => {
@@ -263,6 +270,24 @@ function MatriculaDetalle({ e }: { e: EnrollmentRow }) {
         </div>
         <p className="hint">Pausar conserva la inscripción sin contarla como vigente. Para registrar el pago, ve a Pagos.</p>
       </section>
+
+      {(e.discount_code || e.status !== 'cancelada') && (
+        <section className="card form-section">
+          <h2>Descuento permanente</h2>
+          {e.discount_code ? (
+            <>
+              <div className="form-actions">
+                <span><b>{e.discount_code}</b> · −{valueLabel({ percent: e.discount_percent, amount: e.discount_fixed })} en cada pago del plan</span>
+                {isAdmin && <button type="button" className="btn btn--ghost" disabled={unDiscount.isPending} onClick={() => unDiscount.mutate()}>Quitar descuento</button>}
+              </div>
+              <p className="hint">Se descuenta en cada pago nuevo de esta inscripción.</p>
+            </>
+          ) : (
+            <CodeField label="Aplicar un código de descuento permanente" apply={(c) => redeemOnEnrollment(e.id, c)}
+              onApplied={async (r) => { setMsg({ ok: true, text: `Código ${r.code} aplicado: los pagos de este plan tendrán el descuento.` }); await refresh(); await qc.invalidateQueries({ queryKey: ['payments'] }) }} />
+          )}
+        </section>
+      )}
 
       <section className="card form-section">
         <h2>Detalle</h2>

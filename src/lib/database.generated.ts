@@ -527,6 +527,149 @@ export type Database = {
           },
         ];
       };
+      discount_codes: {
+        Row: {
+          active: boolean;
+          amount: number | null;
+          code: string;
+          created_at: string;
+          created_by: string | null;
+          description: string | null;
+          id: string;
+          max_uses: number | null;
+          percent: number | null;
+          plan_id: string | null;
+          school_id: string;
+          scope: Database["public"]["Enums"]["discount_scope"];
+          updated_at: string;
+          valid_from: string | null;
+          valid_until: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          amount?: number | null;
+          code: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          id?: string;
+          max_uses?: number | null;
+          percent?: number | null;
+          plan_id?: string | null;
+          school_id: string;
+          scope?: Database["public"]["Enums"]["discount_scope"];
+          updated_at?: string;
+          valid_from?: string | null;
+          valid_until?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          amount?: number | null;
+          code?: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          id?: string;
+          max_uses?: number | null;
+          percent?: number | null;
+          plan_id?: string | null;
+          school_id?: string;
+          scope?: Database["public"]["Enums"]["discount_scope"];
+          updated_at?: string;
+          valid_from?: string | null;
+          valid_until?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "discount_codes_plan_id_school_id_fkey";
+            columns: ["plan_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "discount_codes_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      discount_redemptions: {
+        Row: {
+          code_id: string;
+          created_at: string;
+          discount: number;
+          enrollment_id: string | null;
+          id: string;
+          payment_id: string | null;
+          redeemed_by: string | null;
+          school_id: string;
+          student_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          code_id: string;
+          created_at?: string;
+          discount?: number;
+          enrollment_id?: string | null;
+          id?: string;
+          payment_id?: string | null;
+          redeemed_by?: string | null;
+          school_id: string;
+          student_id: string;
+        };
+        Update: {
+          code_id?: string;
+          created_at?: string;
+          discount?: number;
+          enrollment_id?: string | null;
+          id?: string;
+          payment_id?: string | null;
+          redeemed_by?: string | null;
+          school_id?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "discount_redemptions_code_id_school_id_fkey";
+            columns: ["code_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "discount_codes";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "discount_redemptions_enrollment_id_fkey";
+            columns: ["enrollment_id"];
+            isOneToOne: false;
+            referencedRelation: "enrollments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "discount_redemptions_payment_id_fkey";
+            columns: ["payment_id"];
+            isOneToOne: false;
+            referencedRelation: "payments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "discount_redemptions_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "discount_redemptions_student_id_school_id_fkey";
+            columns: ["student_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       email_log: {
         Row: {
           created_at: string;
@@ -579,6 +722,10 @@ export type Database = {
         Row: {
           created_at: string;
           created_by: string | null;
+          discount_code: string | null;
+          discount_code_id: string | null;
+          discount_fixed: number | null;
+          discount_percent: number | null;
           ends_at: string | null;
           enrollment_fee: number;
           id: string;
@@ -595,6 +742,10 @@ export type Database = {
         Insert: {
           created_at?: string;
           created_by?: string | null;
+          discount_code?: string | null;
+          discount_code_id?: string | null;
+          discount_fixed?: number | null;
+          discount_percent?: number | null;
           ends_at?: string | null;
           enrollment_fee?: number;
           id?: string;
@@ -610,6 +761,10 @@ export type Database = {
         Update: {
           created_at?: string;
           created_by?: string | null;
+          discount_code?: string | null;
+          discount_code_id?: string | null;
+          discount_fixed?: number | null;
+          discount_percent?: number | null;
           ends_at?: string | null;
           enrollment_fee?: number;
           id?: string;
@@ -623,6 +778,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "enrollments_discount_code_id_fkey";
+            columns: ["discount_code_id"];
+            isOneToOne: false;
+            referencedRelation: "discount_codes";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "enrollments_plan_id_school_id_fkey";
             columns: ["plan_id", "school_id"];
@@ -740,6 +902,9 @@ export type Database = {
           confirmed_by: string | null;
           created_at: string;
           created_by: string | null;
+          discount_amount: number;
+          discount_code: string | null;
+          discount_code_id: string | null;
           due_date: string | null;
           enrollment_id: string | null;
           id: string;
@@ -760,6 +925,9 @@ export type Database = {
           confirmed_by?: string | null;
           created_at?: string;
           created_by?: string | null;
+          discount_amount?: number;
+          discount_code?: string | null;
+          discount_code_id?: string | null;
           due_date?: string | null;
           enrollment_id?: string | null;
           id?: string;
@@ -779,6 +947,9 @@ export type Database = {
           confirmed_by?: string | null;
           created_at?: string;
           created_by?: string | null;
+          discount_amount?: number;
+          discount_code?: string | null;
+          discount_code_id?: string | null;
           due_date?: string | null;
           enrollment_id?: string | null;
           id?: string;
@@ -793,6 +964,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "payments_discount_code_id_fkey";
+            columns: ["discount_code_id"];
+            isOneToOne: false;
+            referencedRelation: "discount_codes";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "payments_enrollment_id_school_id_fkey";
             columns: ["enrollment_id", "school_id"];
@@ -2011,6 +2189,28 @@ export type Database = {
         Args: { p_approve: boolean; p_id: string; p_reason?: string };
         Returns: undefined;
       };
+      discount_code_uses: {
+        Args: { p_school_id: string };
+        Returns: {
+          code_id: string;
+          saved: number;
+          uses: number;
+        }[];
+      };
+      discount_lookup: {
+        Args: {
+          p_code: string;
+          p_no_plan: boolean;
+          p_plan: string;
+          p_school: string;
+          p_student: string;
+        };
+        Returns: Record<string, unknown>;
+      };
+      discount_of: {
+        Args: { p_amount: number; p_fixed: number; p_percent: number };
+        Returns: number;
+      };
       find_user_id_by_email: { Args: { p_email: string }; Returns: string };
       generate_enrollment_fees: {
         Args: { p_school_id?: string; p_today?: string };
@@ -2096,6 +2296,14 @@ export type Database = {
         };
         Returns: boolean;
       };
+      redeem_discount: {
+        Args: { p_code: string; p_payment_id: string };
+        Returns: Json;
+      };
+      redeem_discount_enrollment: {
+        Args: { p_code: string; p_enrollment_id: string };
+        Returns: Json;
+      };
       register_account_request: {
         Args: {
           p_address?: string;
@@ -2114,6 +2322,11 @@ export type Database = {
         Returns: string;
       };
       register_owner: { Args: { p_user_id: string }; Returns: undefined };
+      remove_discount: { Args: { p_payment_id: string }; Returns: undefined };
+      remove_enrollment_discount: {
+        Args: { p_enrollment_id: string };
+        Returns: undefined;
+      };
       request_child: {
         Args: {
           p_address: string;
@@ -2257,6 +2470,7 @@ export type Database = {
         | "avanzado"
         | "ninos"
         | "competicion";
+      discount_scope: "pago" | "plan";
       enrollment_status: "activa" | "pausada" | "cancelada";
       gender: "masculino" | "femenino" | "otro";
       payment_kind: "plan" | "matricula" | "otro";
@@ -2405,6 +2619,7 @@ export const Constants = {
         "ninos",
         "competicion",
       ],
+      discount_scope: ["pago", "plan"],
       enrollment_status: ["activa", "pausada", "cancelada"],
       gender: ["masculino", "femenino", "otro"],
       payment_kind: ["plan", "matricula", "otro"],

@@ -8,6 +8,8 @@ import type { PaymentKind, PaymentMethod, PaymentStatus } from '../../lib/databa
 import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { listStudentEnrollments, phaseOf } from '../matriculas/api'
+import { CodeField } from '../descuentos/CodeField'
+import { redeemOnPayment, removeFromPayment, valueLabel } from '../descuentos/api'
 import {
   attachReceipt, createPayment, deletePayment, emailReceipt, getPayment, kindLabel, methodLabel, paymentsKey, receiptUrl, statusLabel, updatePayment, uploadReceipt,
   type PaymentRow,
@@ -57,6 +59,7 @@ function NuevoPago() {
     return (students.data ?? []).filter((s) => s.active && (!needle || normalize(s.full_name ?? '').includes(needle)))
   }, [students.data, search])
 
+  const enr = current.find((x) => x.id === enrollmentId)
   function pickEnrollment(id: string) {
     setEnrollmentId(id)
     const e = current.find((x) => x.id === id)
@@ -158,6 +161,7 @@ function NuevoPago() {
           <div className="field">
             <label htmlFor="pg-amount">Monto (CLP) *</label>
             <input id="pg-amount" className="input" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} onBlur={() => { const n = parseCLP(amount); if (n !== null && !Number.isNaN(n)) setAmount(formatCLP(n)) }} placeholder="$35.000" />
+            {kind === 'plan' && enr?.discount_code && <span className="hint">Esta inscripción tiene el código {enr.discount_code} (−{valueLabel({ percent: enr.discount_percent, amount: enr.discount_fixed })}): se descuenta al guardar.</span>}
           </div>
           <div className="field">
             <label htmlFor="pg-due">Vence</label>
@@ -236,6 +240,11 @@ function PagoDetalle({ p }: { p: PaymentRow }) {
     onSuccess: () => setMsg({ ok: true, text: `Comprobante enviado a ${p.student?.email}.` }),
     onError: (e: Error) => setMsg({ ok: false, text: e.message }),
   })
+  const unDiscount = useMutation({
+    mutationFn: () => removeFromPayment(p.id),
+    onSuccess: async () => { setMsg({ ok: true, text: 'Descuento quitado: el pago vuelve a su monto original.' }); await refresh() },
+    onError: (e: Error) => setMsg({ ok: false, text: e.message }),
+  })
   const remove = useMutation({
     mutationFn: () => deletePayment(p.id, p.receipt_path),
     onSuccess: async () => { await refresh(); navigate('..', { replace: true }) },
@@ -257,10 +266,25 @@ function PagoDetalle({ p }: { p: PaymentRow }) {
           <div><dt>Registrado</dt><dd>{formatDate(santiagoDate(p.created_at))}</dd></div>
           <div><dt>Pagado</dt><dd>{p.paid_at ? formatDate(santiagoDate(p.paid_at)) : '—'}</dd></div>
           {p.due_date && <div><dt>Vence</dt><dd>{formatDate(p.due_date)}</dd></div>}
+          {p.discount_amount > 0 && <div><dt>Descuento</dt><dd>{p.discount_code} · −{formatCLP(p.discount_amount)} <span className="hint">(antes {formatCLP(p.amount + p.discount_amount)})</span></dd></div>}
           {p.enrollment?.plan && <div><dt>Inscripción</dt><dd><Link to={`/app/matriculas/${p.enrollment.id}`}>{p.enrollment.plan.name}</Link></dd></div>}
           {p.notes && <div className="facts__wide"><dt>Notas</dt><dd>{p.notes}</dd></div>}
         </dl>
       </section>
+
+      {(p.status === 'pendiente' || (p.status === 'pagado' && p.amount === 0)) && (p.discount_amount === 0 ? p.status === 'pendiente' : isAdmin) && (
+        <section className="card form-section">
+          <h2>Descuento</h2>
+          {p.discount_amount === 0 ? (
+            <CodeField label="Aplicar un código de descuento" apply={(c) => redeemOnPayment(p.id, c)} onApplied={async (r) => { setMsg({ ok: true, text: `Código ${r.code} aplicado: −${formatCLP(r.discount ?? 0)}.` }); await refresh() }} />
+          ) : (
+            <div className="form-actions">
+              <span className="hint">{p.discount_code} · −{formatCLP(p.discount_amount)}</span>
+              <button type="button" className="btn btn--ghost" disabled={unDiscount.isPending} onClick={() => unDiscount.mutate()}>Quitar descuento</button>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="card form-section">
         <h2>Comprobante</h2>
