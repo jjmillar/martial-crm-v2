@@ -13,7 +13,7 @@ import { listStudents, studentsKey } from '../alumnos/api'
 import { listTags, type ClassFull } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { CatalogoDialog } from '../ajustes/CatalogoDialog'
-import { attendanceKey, classStarted, reviewAttendance, listAttendance, saveSession, view, type Mark, type Session, type TrialBooking } from './api'
+import { attendanceKey, classStarted, incompleteKey, reviewAttendance, listAttendance, saveSession, setNotHeld, view, type Mark, type Session, type TrialBooking } from './api'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
@@ -71,6 +71,7 @@ function SessionBody({ session, trials, onClose }: { session: Session; trials: T
         {canMark
           ? <Roster cls={cls} date={date} />
           : <p className="hint">La asistencia se toma cuando empieza la clase: {date === today ? `hoy desde las ${hhmm(session.start_time)}` : `el ${longDate(date).toLowerCase()} desde las ${hhmm(session.start_time)}`}.</p>}
+        {canMark && session.row && <NotHeld session={session} />}
       </section>
 
       <SessionInfo session={session} onSaved={onClose} />
@@ -283,6 +284,29 @@ function SessionInfo({ session, onSaved }: { session: Session; onSaved: () => vo
         ) : <p>{v.description || 'Sin descripción.'}</p>}
         {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}
       </section>
+    </>
+  )
+}
+
+// A class that did not take place (holiday, suspended): leaves "Clases sin asistencia" in Tareas. Can be undone.
+function NotHeld({ session }: { session: Session }) {
+  const { activeSchool } = useSchool()
+  const qc = useQueryClient()
+  const [value, setValue] = useState(Boolean(session.row?.not_held))
+  const [error, setError] = useState<string | null>(null)
+  const save = useMutation({
+    mutationFn: (v: boolean) => setNotHeld(session.row!.id, v),
+    onMutate: (v) => { setError(null); setValue(v) },
+    onSuccess: () => Promise.all([
+      qc.invalidateQueries({ queryKey: ['class-sessions', activeSchool?.id] }),
+      qc.invalidateQueries({ queryKey: incompleteKey(activeSchool?.id) }),
+    ]),
+    onError: (e: Error, v) => { setValue(!v); setError(e.message) },
+  })
+  return (
+    <>
+      <Toggle checked={value} disabled={save.isPending} onChange={(v) => save.mutate(v)} label="La clase no se realizó" hint="Feriado o clase suspendida: deja de aparecer en Tareas como clase sin asistencia." />
+      {error && <p className="alert" role="alert">{error}</p>}
     </>
   )
 }

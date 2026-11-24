@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { formatCLP } from '../../lib/money'
+import { formatDate } from '../../lib/dates'
 
 // Audit log (CEO only): who changed the bank data, payment statuses, team roles, or deleted students.
 // Written only by database triggers; nobody can edit or erase it from the app.
@@ -27,6 +28,8 @@ function describe(r: Row): string {
     case 'member_removed': return 'Quitó a un miembro del equipo'
     case 'member_role_changed': { const [r0, r1] = (d.role ?? []) as string[]; return `Cambió un rol: ${roleEs[r0] ?? r0} → ${roleEs[r1] ?? r1}` }
     case 'student_deleted': return `Eliminó al alumno ${d.name ?? ''}`
+    case 'session_not_held': return `Marcó que la clase ${d.name ?? ''} del ${formatDate(String(d.date ?? ''))} no se realizó`
+    case 'session_held': return `Deshizo "no se realizó" en la clase ${d.name ?? ''} del ${formatDate(String(d.date ?? ''))}`
     default: return r.action
   }
 }

@@ -1,10 +1,13 @@
 import { supabase } from '../../lib/supabase'
 import type { ClassFull } from '../clases/api'
+import { addDays, todayIso } from '../../lib/dates'
 
 /** A stored class session (one class that took / takes place on one date), see class_sessions. */
 export type SessionRow = {
   id: string; number: number | null; class_id: string; schedule_id: string | null; date: string; start_time: string; end_time: string
   name: string; description: string | null; room: string | null; color: string; skill_ids: string[]; customized: boolean
+  /** The team marked that this class did not take place (holiday, suspended). */
+  not_held: boolean
   teacher: { full_name: string | null } | null
 }
 
@@ -57,7 +60,7 @@ export async function syncSessions(schoolId: string): Promise<number> {
 
 export async function listSessions(schoolId: string, from: string, to: string): Promise<SessionRow[]> {
   const { data, error } = await supabase.from('class_sessions')
-    .select('id, number, class_id, schedule_id, date, start_time, end_time, name, description, room, color, skill_ids, customized, teacher:teachers(full_name)')
+    .select('id, number, class_id, schedule_id, date, start_time, end_time, name, description, room, color, skill_ids, customized, not_held, teacher:teachers(full_name)')
     .eq('school_id', schoolId).gte('date', from).lte('date', to)
   if (error) throw error
   return data as SessionRow[]
@@ -118,4 +121,36 @@ export async function trialBookings(schoolId: string, from: string, to: string):
     .eq('school_id', schoolId).eq('status', 'agendada').gte('date', from).lte('date', to).order('created_at')
   if (error) throw error
   return data
+}
+
+/** Mark (or unmark) a past or current class as not held: it leaves "Clases sin asistencia" in Tareas. */
+export async function setNotHeld(sessionId: string, notHeld: boolean): Promise<void> {
+  const { error } = await supabase.rpc('set_session_not_held', { p_session_id: sessionId, p_not_held: notHeld })
+  if (error) throw new Error('No se pudo guardar. Intenta de nuevo.')
+}
+
+/** Days back that Tareas looks for classes without attendance. */
+export const INCOMPLETE_DAYS = 7
+const nowHHMM = () => new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date())
+
+export type IncompleteSession = SessionRow & { pending: number }
+export const incompleteKey = (schoolId: string | undefined) => ['sessions-incomplete', schoolId] as const
+
+/**
+ * Classes that already ended (today or the last 7 days) without a single confirmed attendance and not marked as not
+ * held: the class is not "complete" until it has at least one attendee. Newest first.
+ */
+const lastSync = new Map<string, number>()
+export async function incompleteSessions(schoolId: string): Promise<IncompleteSession[]> {
+  // Every class up to today must be stored; the badge polls every minute, so sync at most every 5 minutes.
+  if (Date.now() - (lastSync.get(schoolId) ?? 0) > 5 * 60_000) { await syncSessions(schoolId); lastSync.set(schoolId, Date.now()) }
+  const today = todayIso()
+  const from = addDays(today, -INCOMPLETE_DAYS)
+  const [rows, counts] = await Promise.all([listSessions(schoolId, from, today), attendanceCounts(schoolId, from, today)])
+  const now = nowHHMM()
+  return rows
+    .filter((r) => !r.not_held && (r.date < today || r.end_time.slice(0, 5) <= now))
+    .filter((r) => !counts.get(`${r.class_id}|${r.date}`)?.present)
+    .map((r) => ({ ...r, pending: counts.get(`${r.class_id}|${r.date}`)?.pending ?? 0 }))
+    .sort((a, b) => b.date.localeCompare(a.date) || b.start_time.localeCompare(a.start_time))
 }

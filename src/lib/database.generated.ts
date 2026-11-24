@@ -496,6 +496,7 @@ export type Database = {
           end_time: string;
           id: string;
           name: string;
+          not_held: boolean;
           number: number | null;
           room: string | null;
           schedule_id: string | null;
@@ -516,6 +517,7 @@ export type Database = {
           end_time: string;
           id?: string;
           name: string;
+          not_held?: boolean;
           number?: number | null;
           room?: string | null;
           schedule_id?: string | null;
@@ -535,6 +537,7 @@ export type Database = {
           end_time?: string;
           id?: string;
           name?: string;
+          not_held?: boolean;
           number?: number | null;
           room?: string | null;
           schedule_id?: string | null;
@@ -2816,6 +2819,10 @@ export type Database = {
       };
       set_class_details: {
         Args: { p_blocks: Json; p_class_id: string; p_tag_ids: string[] };
+        Returns: undefined;
+      };
+      set_session_not_held: {
+        Args: { p_not_held: boolean; p_session_id: string };
         Returns: undefined;
       };
       set_teacher_specialties: {

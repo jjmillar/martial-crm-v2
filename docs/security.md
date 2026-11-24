@@ -100,3 +100,6 @@ aunque la funcionalidad esté lista.
 - `student_arts`: the team writes (teachers promote), the student and guardian read their own. Composite FKs keep the student, art and belt in the same school/art; the degree can't exceed the belt's maximum (trigger). Arts or belts in use can't be deleted.
 - `achievements`: the team reads and manages them. Students and guardians only read their own, submit tournaments through `submit_achievement()` (rate limited to 10/hour per user, at most 5 pending) and withdraw pending ones with `withdraw_achievement()`. Graduations are written by an internal trigger. Milestones are computed by `student_milestones()`, an internal function with no grants, exposed through `student_achievements()`, which checks access.
 - The public profile only shows approved achievements, and only when the student turns on "Logros" (`show_achievements`). Same rule as before: no RUT, contact, address or birth date.
+
+## Classes without attendance (2026-11-24)
+- `class_sessions.not_held` ("no se realizó") is written only through `set_session_not_held()`. Any member of the school can call it, but not students, other schools or anon. It refuses future sessions, and every change is recorded in `audit_log`.

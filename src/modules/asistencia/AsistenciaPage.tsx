@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { readPersisted, writePersisted } from '../../lib/persist'
 import { Link, useSearchParams } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
@@ -98,6 +98,17 @@ function StaffAttendance() {
   const keyOf = (s: Session) => s.key
   const current = days.flatMap((d) => d.sessions).find((s) => keyOf(s) === openKey) ?? last
 
+  // ?clase=<key> (from Tareas → Clases sin asistencia) opens that card once the day is loaded.
+  const wanted = params.get('clase')
+  useEffect(() => {
+    if (!wanted || !rows.isSuccess) return
+    const s = days.flatMap((d) => d.sessions).find((x) => x.key === wanted)
+    if (s) { setLast(s); setOpenKey(s.key) }
+    const p = new URLSearchParams(params)
+    p.delete('clase')
+    setParams(p, { replace: true })
+  }, [wanted, rows.isSuccess, days]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const shownDays = view === 'day' ? days : days.filter((d) => d.sessions.length > 0)
   const noClasses = classes.isSuccess && !(classes.data ?? []).some((c) => c.active && c.schedules.length) && !(rows.data ?? []).length
 
@@ -147,7 +158,8 @@ function StaffAttendance() {
                           <span className="hint">{[v.teacher, v.room].filter(Boolean).join(' · ') || 'Sin profesor'}</span>
                           <span className="att-card__tags">
                             {live && <span className="tag tag--ok">En curso</span>}
-                            {s.date <= today && <span className="tag">{n} {n === 1 ? 'presente' : 'presentes'}</span>}
+                            {s.row?.not_held ? <span className="tag">No se realizó</span>
+                              : s.date <= today && <span className="tag">{n} {n === 1 ? 'presente' : 'presentes'}</span>}
                             {waiting > 0 && <span className="tag tag--wait">{waiting} por aprobar</span>}
                             {t > 0 && <span className="tag tag--accent">{t === 1 ? '1 clase de prueba' : `${t} clases de prueba`}</span>}
                           </span>

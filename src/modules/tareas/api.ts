@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import { useReviewsCount } from '../pagar/api'
-import { pendingCheckIns, pendingCheckInsKey } from '../asistencia/api'
+import { incompleteKey, incompleteSessions, pendingCheckIns, pendingCheckInsKey } from '../asistencia/api'
 import { pendingAchievements, pendingAchievementsKey } from '../artes/api'
 
 // Account requests from the open sign-up (/registro). Only the CEO sees and decides them.
@@ -46,7 +46,7 @@ export async function listTasks(schoolId: string): Promise<Task[]> {
   return data as Task[]
 }
 
-/** Badge for Tareas: accounts to approve (CEO) + automatic tasks still in "Por hacer". */
+/** Badge for Tareas: approvals, classes without attendance and automatic tasks still in "Por hacer". */
 export function usePendingCount() {
   const { role, activeSchool } = useSchool()
   const staff = role === 'ceo' || role === 'admin' || role === 'user'
@@ -57,8 +57,9 @@ export function usePendingCount() {
   const reviews = useReviewsCount()
   const checkIns = useQuery({ queryKey: pendingCheckInsKey(activeSchool?.id), queryFn: () => pendingCheckIns(activeSchool!.id), enabled: staff && Boolean(activeSchool), refetchInterval: 60_000 })
   const logros = useQuery({ queryKey: pendingAchievementsKey(activeSchool?.id), queryFn: () => pendingAchievements(activeSchool!.id), enabled: staff && Boolean(activeSchool), refetchInterval: 60_000 })
+  const classes = useQuery({ queryKey: incompleteKey(activeSchool?.id), queryFn: () => incompleteSessions(activeSchool!.id), enabled: staff && Boolean(activeSchool), refetchInterval: 60_000 })
   const fresh = staff ? (tasks.data ?? []).filter((t) => t.status === 'por_hacer' && t.kind !== 'manual').length : 0
-  return approvals + reviews + (staff ? (checkIns.data?.length ?? 0) + (logros.data?.length ?? 0) : 0) + fresh
+  return approvals + reviews + (staff ? (checkIns.data?.length ?? 0) + (logros.data?.length ?? 0) + (classes.data?.length ?? 0) : 0) + fresh
 }
 
 /** Only the account requests (for the dashboard tile). */
