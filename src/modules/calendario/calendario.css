@@ -102,12 +102,75 @@
   transform: translateY(3px);
 }
 
+.cal-grid__body {
+  position: relative;
+}
 .cal-grid__col {
   position: relative;
   border-left: 1px solid var(--line);
+}
+/* Hour lines are drawn per segment, so they stay aligned after a collapsed gap */
+.cal-seg,
+.cal-gap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.cal-seg {
   background-image:
     repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px var(--hour)),
     repeating-linear-gradient(to bottom, transparent 0 calc(var(--hour) / 2), color-mix(in srgb, var(--line) 45%, transparent) calc(var(--hour) / 2) calc(var(--hour) / 2 + 1px), transparent calc(var(--hour) / 2 + 1px) var(--hour));
+}
+/* A collapsed stretch with no classes: thin hatched band, labelled once across the week */
+.cal-gap {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--line) 55%, transparent) 0 1px, transparent 1px 7px);
+}
+.cal-gap__label {
+  position: absolute;
+  left: var(--gutter);
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+  white-space: nowrap;
+  z-index: 1;
+  isolation: isolate;
+}
+.cal-gap__label::before {
+  content: '';
+  position: absolute;
+  inset: 6px auto 6px 50%;
+  width: min(220px, 80%);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--surface);
+  z-index: -1;
+}
+
+/* Nothing scheduled in the range: a message, not a wall of empty hours */
+.cal-grid__empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 36px 16px;
+  text-align: center;
+  color: var(--muted);
+}
+.cal-grid__empty p {
+  margin: 0;
+  font-size: 15px;
+}
+.cal-grid__empty .link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .cal-grid__col.is-today {
   background-color: color-mix(in srgb, var(--accent) 5%, transparent);
