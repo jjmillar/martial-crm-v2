@@ -1,15 +1,17 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '../../lib/nav'
 import { useSchool } from '../../lib/school'
 import { formatCLP } from '../../lib/money'
 import { formatDate } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { listStudentPayments } from '../pagos/api'
-import { latestSubmissions, listMySubmissions, payHref, submissionsKey } from './api'
+import { doubleChecked, latestSubmissions, listMySubmissions, submissionsKey } from './api'
+import { PayDialog } from './Checkout'
 import { PlanesList } from '../planes/PlanesList'
 import { PaymentHistory } from '../pagos/PaymentHistory'
 
-// "Pagos y planes" for students, all on one page: what they owe (with "Pagar", which opens the payment gateway), the
+// "Pagos y planes" for students, all on one page: what they owe ("Pagar" opens the payment pop-up: transfer or cash, then
+// "Ya pagué"; the school confirms it), the
 // school's plans, and at the end the history (paid payments and transfer reports in review or rejected).
 export function MisPagos() {
   const { activeSchool, student } = useSchool()
@@ -19,6 +21,8 @@ export function MisPagos() {
   const reports = useQuery({ queryKey: ['payment-submissions', id, 'all'], queryFn: () => listMySubmissions(id!), enabled: Boolean(id) })
   const all = (pays.data ?? []).filter((p) => p.status === 'pendiente' || p.status === 'pagado')
   const owed = all.filter((p) => p.status === 'pendiente')
+  const [paying, setPaying] = useState<string | null>(null)
+  const [payOpen, setPayOpen] = useState(false)
   const total = owed.filter((p) => subs.data?.get(p.id)?.status !== 'pendiente').reduce((n, p) => n + p.amount, 0)
 
   return (
@@ -35,7 +39,7 @@ export function MisPagos() {
           <div className="pp-section__head">
             <div>
               <h2 id="mp-owed">Por pagar</h2>
-              {owed.length > 0 && <p className="hint">Paga por transferencia: tu escuela la confirma y queda como pagado.</p>}
+              {owed.length > 0 && <p className="hint">Paga por transferencia o en efectivo y avisa con "Ya pagué": tu escuela lo confirma y queda pagado ✓✓.</p>}
             </div>
           </div>
           {owed.length === 0 ? (
@@ -55,7 +59,7 @@ export function MisPagos() {
                     <article className={`card plan-card pay-card${review ? ' is-review' : ''}${rejected ? ' is-rejected' : ''}`}>
                       <div className="plan-card__tags">
                         <span className="eyebrow">{p.due_date ? `Vence el ${formatDate(p.due_date)}` : 'Sin vencimiento'}</span>
-                        {review && <span className="tag tag--review">En revisión</span>}
+                        {review && <span className="tag tag--review">Por confirmar</span>}
                         {rejected && <span className="tag tag--pay-fallido">Rechazado</span>}
                       </div>
                       <div className="pay-card__row">
@@ -66,8 +70,8 @@ export function MisPagos() {
                       {rejected && <p className="pay-card__note">{s?.reject_reason ? `Motivo: ${s.reject_reason}` : 'La escuela no pudo confirmar tu transferencia.'}</p>}
                       <div className="pay-card__action">
                         {review
-                          ? <p className="hint">Informaste la transferencia. Tu escuela la está revisando.</p>
-                          : <Link className="btn btn--block" to={payHref(p.id)}><Icon name="wallet" size={16} /> {rejected ? 'Pagar de nuevo' : 'Pagar'}</Link>}
+                          ? <p className="hint">Avisaste que pagaste ({s?.method === 'efectivo' ? 'efectivo' : 'transferencia'}). Tu escuela lo está confirmando.</p>
+                          : <button type="button" className="btn btn--block" onClick={() => { setPaying(p.id); setPayOpen(true) }}><Icon name="wallet" size={16} /> {rejected ? 'Pagar de nuevo' : 'Pagar'}</button>}
                       </div>
                     </article>
                   </li>
@@ -79,7 +83,8 @@ export function MisPagos() {
       )}
 
       <PlanesList />
-      {pays.isSuccess && <PaymentHistory payments={pays.data} reports={reports.data ?? []} />}
+      {pays.isSuccess && <PaymentHistory payments={pays.data} reports={reports.data ?? []} doubleIds={doubleChecked(subs.data)} />}
+      <PayDialog paymentId={paying} open={payOpen} onClose={() => setPayOpen(false)} more={false} />
     </div>
   )
 }

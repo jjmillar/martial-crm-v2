@@ -35,7 +35,7 @@ export function Aprobaciones() {
   const admin = ceo || role === 'admin'
   const qc = useQueryClient()
   const att = useQuery({ queryKey: pendingCheckInsKey(activeSchool?.id), queryFn: () => pendingCheckIns(activeSchool!.id), enabled: Boolean(activeSchool) })
-  const pays = useQuery({ queryKey: reviewsKey, queryFn: listReviews, enabled: ceo })
+  const pays = useQuery({ queryKey: reviewsKey, queryFn: listReviews, enabled: admin })
   const reqs = useQuery({ queryKey: pendingKey, queryFn: listPending, enabled: ceo })
   const kids = useQuery({ queryKey: pendingChildrenKey, queryFn: pendingChildren, enabled: admin })
   const logros = useQuery({ queryKey: pendingAchievementsKey(activeSchool?.id), queryFn: () => pendingAchievements(activeSchool!.id), enabled: Boolean(activeSchool) })
@@ -56,13 +56,13 @@ export function Aprobaciones() {
 
   const items: Item[] = [
     ...(att.data ?? []).map((a) => ({ kind: 'asistencia' as const, at: a.created_at, a })),
-    ...(ceo ? (pays.data ?? []).map((p) => ({ kind: 'pago' as const, at: p.created_at, p })) : []),
+    ...(admin ? (pays.data ?? []).map((p) => ({ kind: 'pago' as const, at: p.created_at, p })) : []),
     ...(ceo ? (reqs.data ?? []).map((r) => ({ kind: 'cuenta' as const, at: r.created_at, r })) : []),
     ...(admin ? (kids.data ?? []).map((h) => ({ kind: 'hijo' as const, at: h.created_at, h })) : []),
     ...(logros.data ?? []).map((l) => ({ kind: 'logro' as const, at: l.created_at, l })),
   ].sort((a, b) => a.at.localeCompare(b.at))
   const attendance = (att.data ?? [])
-  const loading = att.isLoading || logros.isLoading || (ceo && (pays.isLoading || reqs.isLoading)) || (admin && kids.isLoading)
+  const loading = att.isLoading || logros.isLoading || (ceo && reqs.isLoading) || (admin && (kids.isLoading || pays.isLoading))
 
   const done = (text: string) => { setMsg({ ok: true, text }); setRejecting(null); setReason('') }
   const fail = (e: Error) => setMsg({ ok: false, text: e.message })
@@ -84,7 +84,7 @@ export function Aprobaciones() {
     onSuccess: async (v) => {
       await refresh([...reviewsKey], ['payments'], ['payment-submissions'])
       const who = v.p.student?.full_name ?? 'el alumno'
-      done(v.approve ? `Pago de ${who} aprobado: ya figura como pagado.` : `Pago de ${who} rechazado. Le mostramos el motivo.`)
+      done(v.approve ? `Pago de ${who} aprobado: ya figura como pagado ✓✓.` : `Pago de ${who} rechazado. Le mostramos el motivo.`)
     },
     onError: fail,
   })
@@ -134,7 +134,7 @@ export function Aprobaciones() {
       <div className="tareas__section-head appr-head">
         <div>
           <h2 id="aprob-h">Aprobaciones {items.length > 0 && <span className="nav-badge">{items.length}</span>}</h2>
-          <p className="hint">{ceo ? 'Asistencias y torneos que registraron los alumnos, pagos por transferencia, cuentas nuevas e hijos de apoderados.' : admin ? 'Asistencias y torneos que registraron los alumnos e hijos que agregaron los apoderados.' : 'Asistencias y torneos que registraron los alumnos desde su cuenta.'}</p>
+          <p className="hint">{ceo ? 'Asistencias, torneos y pagos que avisaron los alumnos, cuentas nuevas e hijos de apoderados.' : admin ? 'Asistencias, torneos y pagos que avisaron los alumnos e hijos que agregaron los apoderados.' : 'Asistencias y torneos que registraron los alumnos desde su cuenta.'}</p>
         </div>
         {attendance.length > 1 && (
           <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => reviewAtt.mutate({ rows: attendance, approve: true })}>
@@ -170,7 +170,7 @@ export function Aprobaciones() {
                 <li key={`p-${p.id}`} className="appr appr--pay">
                   <span className="appr__main">
                     <span className="appr__title"><span className="tag appr__kind">Pago</span><strong>{p.student?.full_name ?? 'Alumno'}</strong><b className="appr__amount">{formatCLP(p.amount)}</b></span>
-                    <span className="hint">{p.payment?.concept ?? 'Pago'} · Transferencia{p.reference ? ` · Op.: ${p.reference}` : ''} · {formatDate(santiagoDate(p.created_at))}{multiSchool ? ` · ${schoolName(p.school_id)}` : ''}</span>
+                    <span className="hint">{p.payment?.concept ?? 'Pago'} · {p.method === 'efectivo' ? 'Efectivo' : 'Transferencia'}{p.reference ? ` · ${p.method === 'efectivo' ? '' : 'Op.: '}${p.reference}` : ''} · {formatDate(santiagoDate(p.created_at))}{multiSchool ? ` · ${schoolName(p.school_id)}` : ''}</span>
                   </span>
                   {rejecting === p.id ? (
                     <span className="appr__actions appr__actions--wide">

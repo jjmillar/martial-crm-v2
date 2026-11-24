@@ -34,7 +34,7 @@ aunque la funcionalidad esté lista.
      - límite por IP en las Edge Functions;
      - límites propios de Supabase Auth.
 6. **Dinero y datos bancarios.**
-   - Solo el CEO cambia los datos bancarios y aprueba pagos.
+   - Solo el CEO cambia los datos bancarios. Los pagos los aprueban los administradores de la escuela (y el dueño).
    - Cada cambio queda en `audit_log` (A09 Logging), que no se puede editar ni borrar desde la app.
 7. **Secretos (A04 Cryptographic Failures).**
    - Nunca en el repo ni en el cliente: solo la clave `anon` es pública.
@@ -103,3 +103,8 @@ aunque la funcionalidad esté lista.
 
 ## Classes without attendance (2026-11-24)
 - `class_sessions.not_held` ("no se realizó") is written only through `set_session_not_held()`. Any member of the school can call it, but not students, other schools or anon. It refuses future sessions, and every change is recorded in `audit_log`.
+
+## Payment confirmation (2026-11-24)
+- Students and guardians report a pending payment as paid ("Ya pagué") only through `submit_payment()`: transfer or cash. It checks that the payment is theirs and still pending, allows one open report per payment, and caps the reference at 120 characters. Transfer reports need the school's transfer data.
+- `decide_payment_submission()` is open to the school's admins and owner, the same roles that can already mark payments paid under `payments_update`. "Usuario" members and students can't approve.
+- When a payment becomes paid, `payments_close_submission()` (an internal trigger, with no grants) closes the student's pending report as approved. Status changes are already recorded in `audit_log` by `payments_audit`.

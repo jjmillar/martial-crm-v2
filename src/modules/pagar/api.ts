@@ -3,8 +3,10 @@ import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import type { School } from '../../lib/database.types'
 
-// Payment gateway: one checkout (/app/pagar/<payment id>) for every "Pagar" in the app. Only bank transfer is
-// enabled: the student transfers, presses "Pagar", and the school's CEO approves it (payment → pagado).
+// Paying, like attendance, has a confirmation: the student (or guardian) reports a transfer or a cash payment ("Ya
+// pagué") and the school's admins approve it → paid with a double check (✓✓: the student reported it and the school
+// confirmed it). An admin can also mark it paid directly (✓: confirmed by the school). Online gateways come later.
+export type PayMethod = 'transferencia' | 'efectivo'
 
 export type Transfer = { bank: string | null; type: string | null; number: string; holder: string | null; rut: string | null; email: string | null }
 
@@ -43,8 +45,8 @@ export async function listMySubmissions(studentId: string): Promise<(Submission 
   return (data as unknown as (Submission & { payment: { concept: string } | null })[]).map((s) => ({ ...s, concept: s.payment?.concept ?? 'Pago' }))
 }
 
-export async function submitPayment(paymentId: string, reference: string): Promise<void> {
-  const { error } = await supabase.rpc('submit_payment', { p_payment_id: paymentId, p_method: 'transferencia', p_reference: reference })
+export async function submitPayment(paymentId: string, method: PayMethod, reference: string): Promise<void> {
+  const { error } = await supabase.rpc('submit_payment', { p_payment_id: paymentId, p_method: method, p_reference: reference.trim().slice(0, 120) })
   if (!error) return
   if (error.message.includes('already submitted')) throw new Error('Este pago ya está en revisión.')
   if (error.message.includes('not pending')) throw new Error('Este pago ya no está pendiente.')
@@ -52,7 +54,7 @@ export async function submitPayment(paymentId: string, reference: string): Promi
   throw new Error('No se pudo enviar el pago. Intenta de nuevo.')
 }
 
-// CEO review queue ------------------------------------------------------------------------------------------
+// Admins' review queue ------------------------------------------------------------------------------------------
 export type Review = Submission & { payment: { concept: string; due_date: string | null } | null; student: { full_name: string | null } | null }
 export const reviewsKey = ['payment-reviews'] as const
 export async function listReviews(): Promise<Review[]> {
@@ -64,9 +66,14 @@ export async function listReviews(): Promise<Review[]> {
 }
 export function useReviewsCount() {
   const { role } = useSchool()
-  const q = useQuery({ queryKey: reviewsKey, queryFn: listReviews, enabled: role === 'ceo', refetchInterval: 60_000 })
-  return role === 'ceo' ? q.data?.length ?? 0 : 0
+  const admin = role === 'ceo' || role === 'admin'
+  const q = useQuery({ queryKey: reviewsKey, queryFn: listReviews, enabled: admin, refetchInterval: 60_000 })
+  return admin ? q.data?.length ?? 0 : 0
 }
+
+/** Ids of paid payments with a double check (the student reported them and the school approved). */
+export const doubleChecked = (subs: Map<string, Submission> | undefined) =>
+  new Set([...(subs?.values() ?? [])].filter((s) => s.status === 'aprobada').map((s) => s.payment_id))
 export async function decideSubmission(id: string, approve: boolean, reason?: string): Promise<void> {
   const { error } = await supabase.rpc('decide_payment_submission', { p_id: id, p_approve: approve, p_reason: reason ?? '' })
   if (error) throw new Error(error.message.includes('already decided') ? 'Este pago ya fue revisado.' : 'No se pudo guardar la revisión.')

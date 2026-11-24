@@ -8,7 +8,8 @@ import { addDays, formatDate, longDate, todayIso } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
-import { payHref } from '../pagar/api'
+import { latestSubmissions, submissionsKey } from '../pagar/api'
+import { PayDialog } from '../pagar/Checkout'
 import { ShowMore } from '../../ui/ShowMore'
 import { useShowMore } from '../../ui/useShowMore'
 import { classStarted } from '../asistencia/api'
@@ -148,6 +149,9 @@ export function StudentHome() {
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
   const enr = useQuery({ queryKey: ['my-enrollments', studentId], queryFn: () => myEnrollments(studentId!), enabled: Boolean(studentId) })
   const pay = useQuery({ queryKey: ['my-payments', studentId], queryFn: () => myPendingPayments(studentId!), enabled: Boolean(studentId) })
+  const subs = useQuery({ queryKey: submissionsKey(studentId), queryFn: () => latestSubmissions({ studentId }), enabled: Boolean(studentId) })
+  const [paying, setPaying] = useState<string | null>(null)
+  const [payOpen, setPayOpen] = useState(false)
   // Freshly approved accounts: nudge to complete contact and emergency data.
   const incomplete = useQuery({
     queryKey: ['my-student-incomplete', studentId],
@@ -247,7 +251,14 @@ export function StudentHome() {
         <div className="tile__head"><span className="eyebrow">Pagos pendientes</span><Link className="link-btn" to="/app/pagos">{child ? 'Sus pagos' : 'Mis pagos'}</Link></div>
         {(pay.data ?? []).length === 0 ? <p className="hint">Estás al día.</p> : (
           <ul className="mini-list">
-            {pay.data!.map((x) => <li key={x.id}><span>{x.concept}</span><b>{formatCLP(x.amount)}</b><Link className="link-btn" to={payHref(x.id)}>Pagar</Link></li>)}
+            {pay.data!.map((x) => (
+              <li key={x.id}>
+                <span>{x.concept}</span><b>{formatCLP(x.amount)}</b>
+                {subs.data?.get(x.id)?.status === 'pendiente'
+                  ? <span className="tag tag--review">Por confirmar</span>
+                  : <button type="button" className="link-btn" onClick={() => { setPaying(x.id); setPayOpen(true) }}>Pagar</button>}
+              </li>
+            ))}
           </ul>
         )}
       </section>
@@ -256,6 +267,7 @@ export function StudentHome() {
         <div className="tile__head"><span className="eyebrow">Últimas clases</span><Link className="link-btn" to="/app/asistencia">Ver todas</Link></div>
         <AttendanceHistory rows={(att.data ?? []).slice(0, 3)} child={child} />
       </section>
+      <PayDialog paymentId={paying} open={payOpen} onClose={() => setPayOpen(false)} />
     </div>
   )
 }

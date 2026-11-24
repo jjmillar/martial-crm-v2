@@ -5,6 +5,7 @@ import { formatCLP } from '../../lib/money'
 import { formatDate, santiagoDate } from '../../lib/dates'
 import type { Submission } from '../pagar/api'
 import { methodLabel, type PaymentRow } from './api'
+import { PaidTag } from '../pagar/PaidTag'
 
 // History at the end of "Pagos y planes": a short summary (last 3 transactions), "Mostrar más" shows the last 10,
 // then each "Cargar más transacciones" adds 10 more. Staff see who paid and open the payment; students also see
@@ -16,7 +17,7 @@ type Entry =
   | { kind: 'payment'; at: string; p: PaymentRow }
   | { kind: 'report'; at: string; s: Submission; concept: string }
 
-export function PaymentHistory({ payments, reports = [], staff = false }: { payments: PaymentRow[]; reports?: (Submission & { concept: string })[]; staff?: boolean }) {
+export function PaymentHistory({ payments, reports = [], staff = false, doubleIds }: { payments: PaymentRow[]; reports?: (Submission & { concept: string })[]; staff?: boolean; doubleIds?: Set<string> }) {
   const [shown, setShown] = usePersisted(staff ? 'pagos.historial' : 'mispagos.historial', FIRST, 'session')
   const entries = useMemo<Entry[]>(() => [
     ...payments.filter((p) => p.status === 'pagado' || p.status === 'reembolsado')
@@ -46,7 +47,7 @@ export function PaymentHistory({ payments, reports = [], staff = false }: { paym
                   title={staff ? e.p.student?.full_name ?? 'Alumno' : e.p.concept}
                   detail={[staff ? e.p.concept : null, methodLabel[e.p.method], formatDate(santiagoDate(e.at))].filter(Boolean).join(' · ')}
                   amount={e.p.amount}
-                  tag={e.p.status === 'pagado' ? <span className="tag tag--pay-pagado">Pagado</span> : <span className="tag tag--pay-reembolsado">Reembolsado</span>}
+                  tag={e.p.status === 'pagado' ? <PaidTag double={Boolean(doubleIds?.has(e.p.id))} /> : <span className="tag tag--pay-reembolsado">Reembolsado</span>}
                 />
               </li>
             ) : (
@@ -54,9 +55,9 @@ export function PaymentHistory({ payments, reports = [], staff = false }: { paym
                 <Row
                   to={null}
                   title={e.concept}
-                  detail={[`Transferencia informada el ${formatDate(santiagoDate(e.s.created_at))}`, e.s.status === 'rechazada' && e.s.reject_reason ? `Motivo: ${e.s.reject_reason}` : null].filter(Boolean).join(' · ')}
+                  detail={[`${e.s.method === 'efectivo' ? 'Pago en efectivo' : 'Transferencia'} informado el ${formatDate(santiagoDate(e.s.created_at))}`, e.s.status === 'rechazada' && e.s.reject_reason ? `Motivo: ${e.s.reject_reason}` : null].filter(Boolean).join(' · ')}
                   amount={e.s.amount}
-                  tag={e.s.status === 'pendiente' ? <span className="tag tag--review">En revisión</span> : <span className="tag tag--pay-fallido">Rechazado</span>}
+                  tag={e.s.status === 'pendiente' ? <span className="tag tag--review">Por confirmar</span> : <span className="tag tag--pay-fallido">Rechazado</span>}
                 />
               </li>
             ))}

@@ -9,8 +9,9 @@ import { formatCLP } from '../../lib/money'
 import type { PaymentStatus } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { listPayments, methodLabel, paymentsKey, statusLabel } from './api'
+import { PaidTag } from '../pagar/PaidTag'
 import { SchoolFilter } from '../../ui/SchoolFilter'
-import { latestSubmissions, submissionsKey } from '../pagar/api'
+import { doubleChecked, latestSubmissions, submissionsKey } from '../pagar/api'
 import { MisPagos } from '../pagar/MisPagos'
 import { PlanesList } from '../planes/PlanesList'
 import { DescuentosSection } from '../descuentos/DescuentosSection'
@@ -130,7 +131,8 @@ function StaffPagos() {
               {p.kind === 'matricula' && <span className="tag">Matrícula</span>}
               <span className="pay-amount">{formatCLP(p.amount)}</span>
               {p.status === 'pendiente' && subs.data?.get(p.id)?.status === 'pendiente'
-                ? <span className="tag tag--review">En revisión</span>
+                ? <span className="tag tag--review">Por confirmar</span>
+                : p.status === 'pagado' ? <PaidTag double={subs.data?.get(p.id)?.status === 'aprobada'} />
                 : <span className={`tag tag--pay-${p.status}`}>{statusLabel[p.status]}</span>}
             </Link>
           </li>
@@ -139,7 +141,7 @@ function StaffPagos() {
 
       <PlanesList />
       <DescuentosSection />
-      {q.isSuccess && <PaymentHistory payments={q.data} staff />}
+      {q.isSuccess && <PaymentHistory payments={q.data} staff doubleIds={doubleChecked(subs.data)} />}
     </div>
   )
 }
