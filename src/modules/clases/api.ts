@@ -73,6 +73,13 @@ export async function saveClass(schoolId: string, id: string | null, input: Clas
   return data
 }
 
+/** Only the description (pop-up in Asistencia). RLS: admins of the school; the table limits it to 300 characters. */
+export async function saveClassDescription(id: string, description: string | null): Promise<void> {
+  const { data, error } = await supabase.from('classes').update({ description }).eq('id', id).select('id')
+  if (error) throw new Error(friendly(error.message))
+  if (!data?.length) throw new Error('Solo los administradores pueden editar la clase.')
+}
+
 export async function deleteClass(id: string): Promise<void> {
   const { error, count } = await supabase.from('classes').delete({ count: 'exact' }).eq('id', id)
   if (error) throw new Error(friendly(error.message))

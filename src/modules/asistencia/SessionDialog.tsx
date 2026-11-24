@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { usePersisted } from '../../lib/persist'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
@@ -11,7 +11,7 @@ import { MoreLink, type More } from '../../ui/MoreLink'
 import { flash } from '../../ui/flashEvent'
 import { Toggle } from '../../ui/Toggle'
 import { listStudents, studentsKey } from '../alumnos/api'
-import { listTags, type ClassFull } from '../clases/api'
+import { classesKey, listTags, saveClassDescription, type ClassFull } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { CatalogoDialog } from '../ajustes/CatalogoDialog'
 import { attendanceKey, classStarted, incompleteKey, reviewAttendance, listAttendance, saveSession, setNotHeld, view, type Mark, type Session, type TrialBooking } from './api'
@@ -80,7 +80,7 @@ function SessionBody({ session, trials, onClose }: { session: Session; trials: T
         {canMark && session.row && <NotHeld session={session} />}
       </section>
 
-      <SessionInfo session={session} onSaved={onClose} />
+      <SessionInfo session={session} />
     </>
   )
 }
@@ -214,9 +214,9 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
   )
 }
 
-// Skills and description of this session (this class on this date). Saved to its record only: other dates and the
-// class itself don't change (edit the class in Clases for that). Admins edit; the rest of the team reads.
-function SessionInfo({ session, onSaved }: { session: Session; onSaved: () => void }) {
+// Skills of this session (this class on this date, saved to its record only) and the class's description, edited in a
+// pop-up right here (the same text as in Clases and the landing). Admins edit; the rest of the team reads.
+function SessionInfo({ session }: { session: Session }) {
   const { activeSchool, role } = useSchool()
   const schoolId = activeSchool!.id
   const canEdit = role === 'admin' || role === 'ceo'
@@ -224,23 +224,33 @@ function SessionInfo({ session, onSaved }: { session: Session; onSaved: () => vo
   const v = view(session)
   const tags = useQuery({ queryKey: ['tags', schoolId], queryFn: () => listTags(schoolId) })
   const [picked, setPicked] = useState<string[]>(v.skillIds)
-  const [desc, setDesc] = useState(v.description ?? '')
-  const [savedDesc, setSavedDesc] = useState(v.description ?? '')
+  // The class's general description (the landing's); this session shows it too.
+  const [desc, setDesc] = useState(session.cls.description ?? v.description ?? '')
+  const [editDesc, setEditDesc] = useState(false)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const refresh = () => qc.invalidateQueries({ queryKey: ['class-sessions', schoolId] })
 
   const setSkill = useMutation({
-    mutationFn: (next: string[]) => saveSession(session, savedDesc.trim() || null, next),
+    mutationFn: (next: string[]) => saveSession(session, desc.trim() || null, next),
     onMutate: (next) => { setMsg(null); const prev = picked; setPicked(next); return { prev } },
     onError: (_e, _n, ctx) => { if (ctx) setPicked(ctx.prev); setMsg({ ok: false, text: 'No se pudo guardar la skill.' }) },
     onSettled: refresh,
   })
   const saveDesc = useMutation({
-    mutationFn: () => saveSession(session, desc.trim() || null, picked),
+    mutationFn: async (next: string) => {
+      const text = next.trim()
+      if (text.length > 300) throw new Error('La descripción puede tener hasta 300 caracteres.')
+      await saveClassDescription(session.cls.id, text || null)
+      // A session already stored keeps its own copy: update it too so this class shows the same text.
+      if (session.row) await saveSession(session, text || null, picked)
+      return text
+    },
     onMutate: () => setMsg(null),
-    // Like saving any form: back to the list of classes with a confirmation.
-    onSuccess: async () => { setSavedDesc(desc); await refresh(); onSaved(); flash(`Descripción de "${v.name}" guardada.`) },
-    onError: () => setMsg({ ok: false, text: 'No se pudo guardar la descripción.' }),
+    onSuccess: async (text) => {
+      setDesc(text)
+      await Promise.all([refresh(), qc.invalidateQueries({ queryKey: classesKey(schoolId) }), qc.invalidateQueries({ queryKey: ['class', session.cls.id] })])
+      flash(`Descripción de "${v.name}" guardada.`)
+    },
   })
 
   const shown = (tags.data ?? []).filter((t) => t.active || picked.includes(t.id))
@@ -278,18 +288,14 @@ function SessionInfo({ session, onSaved }: { session: Session; onSaved: () => vo
       </section>
 
       <section className="sess-section" aria-labelledby="sess-desc-h">
-        <h3 id="sess-desc-h">Descripción</h3>
-        {canEdit ? (
-          <>
-            <textarea className="input" rows={3} maxLength={300} value={desc} onChange={(e) => { setDesc(e.target.value); setMsg(null) }} aria-labelledby="sess-desc-h" placeholder="Ej: Técnica base de jiu-jitsu para quienes recién empiezan." />
-            <p className="hint">Solo para esta clase del {longDate(session.date).toLowerCase()}. La descripción general (la de la landing) se edita en Clases.</p>
-            <div className="form-actions">
-              <button type="button" className="btn" disabled={saveDesc.isPending || desc.trim() === savedDesc.trim()} onClick={() => saveDesc.mutate()}>{saveDesc.isPending ? 'Guardando…' : 'Guardar descripción'}</button>
-            </div>
-          </>
-        ) : <p>{v.description || 'Sin descripción.'}</p>}
+        <div className="sess-section__head">
+          <h3 id="sess-desc-h">Descripción</h3>
+          {canEdit && <button type="button" className="link-btn" onClick={() => setEditDesc(true)}>Editar descripción</button>}
+        </div>
+        <p className={desc ? undefined : 'hint'}>{desc || 'Sin descripción.'}</p>
         {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}
       </section>
+      {canEdit && <DescDialog open={editDesc} onClose={() => setEditDesc(false)} name={v.name} value={desc} onSave={(d) => saveDesc.mutateAsync(d)} />}
     </>
   )
 }
@@ -314,5 +320,40 @@ function NotHeld({ session }: { session: Session }) {
       <Toggle checked={value} disabled={save.isPending} onChange={(v) => save.mutate(v)} label="La clase no se realizó" hint="Feriado o clase suspendida: deja de aparecer en Tareas como clase sin asistencia." />
       {error && <p className="alert" role="alert">{error}</p>}
     </>
+  )
+}
+
+// Edit the class's description in place (docs/ui-standards.md §6): no trip to Clases.
+function DescDialog({ open, onClose, name, value, onSave }: { open: boolean; onClose: () => void; name: string; value: string; onSave: (d: string) => Promise<unknown> }) {
+  return (
+    <Modal open={open} onClose={onClose} isolate label={`Descripción de ${name}`}>
+      {open && <DescForm name={name} value={value} onClose={onClose} onSave={onSave} />}
+    </Modal>
+  )
+}
+
+function DescForm({ name, value, onClose, onSave }: { name: string; value: string; onClose: () => void; onSave: (d: string) => Promise<unknown> }) {
+  const [text, setText] = useState(value)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    setBusy(true); setError(null)
+    try { await onSave(text); onClose() } catch (err) { setError(err instanceof Error && err.message.startsWith('La descripción') ? err.message : 'No se pudo guardar la descripción. Revisa tu conexión e intenta de nuevo.') } finally { setBusy(false) }
+  }
+  return (
+    <form onSubmit={submit} noValidate>
+      <div className="modal__head">
+        <h2 id="desc-dlg-h">Descripción de {name}</h2>
+        <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
+      </div>
+      <textarea className="input" style={{ marginTop: 12 }} rows={4} maxLength={300} value={text} onChange={(e) => { setText(e.target.value); setError(null) }} aria-labelledby="desc-dlg-h" placeholder="Ej: Técnica base de jiu-jitsu para quienes recién empiezan." />
+      <p className="hint">Se muestra en la clase, en Clases y en tu landing page. Puede quedar vacía.</p>
+      {error && <p className="alert" role="alert">{error}</p>}
+      <div className="form-actions">
+        <button type="submit" className="btn" disabled={busy || text.trim() === value.trim()}>{busy ? 'Guardando…' : 'Guardar'}</button>
+        <button type="button" className="btn btn--ghost" onClick={onClose}>Cancelar</button>
+      </div>
+    </form>
   )
 }
