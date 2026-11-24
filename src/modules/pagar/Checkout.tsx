@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from '../../lib/nav'
 import { supabase } from '../../lib/supabase'
@@ -173,13 +173,9 @@ function PayPanel({ p, last, onClose }: { p: Pay; last: Submission | null; onClo
           {method === 'transferencia' && (
             transfer ? (
               <section className="card form-section" aria-labelledby="ck-transfer">
-                <h2 id="ck-transfer">Datos de transferencia</h2>
-                <p className="hint">Transfiere <b>{formatCLP(p.amount)}</b> a esta cuenta y después presiona <b>Ya pagué</b>.</p>
-                <TransferData t={transfer} amount={p.amount} concept={p.concept} />
-                <div className="field">
-                  <label htmlFor="ck-ref">N° de operación o comentario (opcional)</label>
-                  <input id="ck-ref" className="input" maxLength={120} value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Ej: 123456789" />
-                </div>
+                <TransferData t={transfer} amount={p.amount} concept={p.concept}>
+                  <p className="hint">Transfiere <b>{formatCLP(p.amount)}</b> a esta cuenta y después presiona <b>Ya pagué</b>.</p>
+                </TransferData>
               </section>
             ) : (
               <p className="alert" role="alert">Tu escuela aún no configura sus datos de transferencia. Escríbeles o paga en efectivo.</p>
@@ -210,7 +206,7 @@ function PayPanel({ p, last, onClose }: { p: Pay; last: Submission | null; onClo
   )
 }
 
-function TransferData({ t, amount, concept }: { t: Transfer; amount: number; concept: string }) {
+function TransferData({ t, amount, concept, children }: { t: Transfer; amount: number; concept: string; children?: ReactNode }) {
   const rows: [string, string | null][] = [
     ['Banco', t.bank], ['Tipo de cuenta', t.type], ['N° de cuenta', t.number], ['Titular', t.holder], ['RUT', t.rut], ['Correo', t.email],
     ['Monto', formatCLP(amount)], ['Comentario', concept],
@@ -222,6 +218,13 @@ function TransferData({ t, amount, concept }: { t: Transfer; amount: number; con
   const all = rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join('\n')
   return (
     <>
+      <div className="transfer__head">
+        <h2 id="ck-transfer">Datos de transferencia</h2>
+        <button type="button" className="btn btn--ghost transfer__all" onClick={() => copy('Todo', all)} aria-live="polite">
+          <Icon name={copied === 'Todo' ? 'check' : 'copy'} size={16} /> {copied === 'Todo' ? 'Copiados' : 'Copiar todos los datos'}
+        </button>
+      </div>
+      {children}
       <dl className="transfer">
         {rows.filter(([, v]) => v).map(([k, v]) => (
           <div key={k} className="transfer__row">
@@ -233,7 +236,6 @@ function TransferData({ t, amount, concept }: { t: Transfer; amount: number; con
           </div>
         ))}
       </dl>
-      <button type="button" className="btn btn--ghost" onClick={() => copy('Todo', all)}><Icon name={copied === 'Todo' ? 'check' : 'copy'} size={16} /> {copied === 'Todo' ? 'Datos copiados' : 'Copiar todos los datos'}</button>
     </>
   )
 }
