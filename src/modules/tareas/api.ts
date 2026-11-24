@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import { useReviewsCount } from '../pagar/api'
 import { pendingCheckIns, pendingCheckInsKey } from '../asistencia/api'
+import { pendingAchievements, pendingAchievementsKey } from '../artes/api'
 
 // Account requests from the open sign-up (/registro). Only the CEO sees and decides them.
 export type Req = {
@@ -55,8 +56,9 @@ export function usePendingCount() {
   const approvals = (role === 'ceo' ? reqs.data?.length ?? 0 : 0) + (role === 'ceo' || role === 'admin' ? kids.data?.length ?? 0 : 0)
   const reviews = useReviewsCount()
   const checkIns = useQuery({ queryKey: pendingCheckInsKey(activeSchool?.id), queryFn: () => pendingCheckIns(activeSchool!.id), enabled: staff && Boolean(activeSchool), refetchInterval: 60_000 })
+  const logros = useQuery({ queryKey: pendingAchievementsKey(activeSchool?.id), queryFn: () => pendingAchievements(activeSchool!.id), enabled: staff && Boolean(activeSchool), refetchInterval: 60_000 })
   const fresh = staff ? (tasks.data ?? []).filter((t) => t.status === 'por_hacer' && t.kind !== 'manual').length : 0
-  return approvals + reviews + (staff ? checkIns.data?.length ?? 0 : 0) + fresh
+  return approvals + reviews + (staff ? (checkIns.data?.length ?? 0) + (logros.data?.length ?? 0) : 0) + fresh
 }
 
 /** Only the account requests (for the dashboard tile). */

@@ -8,12 +8,14 @@ import type { Student } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { createStudent, deleteStudent, getStudent, studentsKey, updateStudent } from './api'
-import { beltSuggestions } from '../../lib/belts'
 import { emptyForm, formFromStudent, parseStudent, type StudentForm } from './schema'
 import { Family } from './Family'
 import { StudentEnrollments } from './StudentEnrollments'
 import { StudentPayments } from './StudentPayments'
 import { StudentLinks } from '../vinculos/Vinculos'
+import { artsKey, listArts, listStudentArts, rowFrom, saveStudentArts, schoolStudentArtsKey, studentArtsKey, type ArtRow, type StudentArt } from '../artes/api'
+import { StudentArtsEditor } from '../artes/StudentArtsEditor'
+import { StudentLogros } from '../artes/Logros'
 
 type Errors = Partial<Record<keyof StudentForm, string>>
 
@@ -22,13 +24,15 @@ export function AlumnoEditor() {
   const { id } = useParams()
   const isNew = !id || id === 'nuevo'
   const student = useQuery({ queryKey: ['student', id], queryFn: () => getStudent(id!), enabled: !isNew })
+  // The student's arts are loaded before the form, so its rows start with them.
+  const arts = useQuery({ queryKey: studentArtsKey(id), queryFn: () => listStudentArts(id!), enabled: !isNew })
   if (isNew) return <AlumnoForm key="new" />
-  if (student.isLoading) return <p className="hint">Cargando…</p>
+  if (student.isLoading || arts.isLoading) return <p className="hint">Cargando…</p>
   if (!student.data) return <p className="alert">No encontramos ese alumno. <Link to="..">Volver al listado</Link></p>
-  return <AlumnoForm key={student.data.id} student={student.data} />
+  return <AlumnoForm key={student.data.id} student={student.data} studentArts={arts.data ?? []} />
 }
 
-function AlumnoForm({ student }: { student?: Student }) {
+function AlumnoForm({ student, studentArts = [] }: { student?: Student; studentArts?: StudentArt[] }) {
   const { activeSchool, role } = useSchool()
   const navigate = useNavigate()
   const qc = useQueryClient()
@@ -36,6 +40,9 @@ function AlumnoForm({ student }: { student?: Student }) {
   const [errors, setErrors] = useState<Errors>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const schoolArts = useQuery({ queryKey: artsKey(activeSchool?.id), queryFn: () => listArts(activeSchool!.id), enabled: Boolean(activeSchool) })
+  const [artRows, setArtRows] = useState<ArtRow[]>(() => studentArts.map(rowFrom))
+  const [artsError, setArtsError] = useState<string | null>(null)
 
   const set = <K extends keyof StudentForm>(k: K, v: StudentForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }))
@@ -43,11 +50,24 @@ function AlumnoForm({ student }: { student?: Student }) {
   }
 
   const save = useMutation({
-    mutationFn: (payload: Parameters<typeof updateStudent>[1]) =>
-      student ? updateStudent(student.id, payload) : createStudent({ ...payload, school_id: activeSchool!.id, first_name: payload.first_name!, first_last_name: payload.first_last_name! }),
-    onSuccess: (s) => {
+    mutationFn: async (payload: Parameters<typeof updateStudent>[1]) => {
+      const s = student ? await updateStudent(student.id, payload) : await createStudent({ ...payload, school_id: activeSchool!.id, first_name: payload.first_name!, first_last_name: payload.first_last_name! })
+      let artsFailed: string | null = null
+      try { await saveStudentArts(s.school_id, s.id, artRows, studentArts) } catch (e) { artsFailed = (e as Error).message }
+      return { s, artsFailed }
+    },
+    onSuccess: ({ s, artsFailed }) => {
       qc.invalidateQueries({ queryKey: studentsKey(activeSchool?.id) })
+      qc.invalidateQueries({ queryKey: studentArtsKey(s.id) })
+      qc.invalidateQueries({ queryKey: schoolStudentArtsKey(activeSchool?.id) })
+      qc.invalidateQueries({ queryKey: ['achievements', s.id] })
       qc.setQueryData(['student', s.id], s)
+      if (artsFailed) {
+        // The student is saved; stay (or move to the new student's page) so the arts can be fixed and saved again.
+        setArtsError(`Datos guardados, pero no las artes marciales: ${artsFailed}`)
+        if (!student) navigate(`../${s.id}`, { replace: true })
+        return
+      }
       navigate('..', { replace: true, state: { flash: student ? `Cambios de ${s.full_name ?? 'alumno'} guardados.` : `Alumno ${s.full_name ?? ''} creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
@@ -68,6 +88,7 @@ function AlumnoForm({ student }: { student?: Student }) {
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setServerError(null)
+    setArtsError(null)
     const r = parseStudent(form)
     if (!r.ok) {
       setErrors(r.errors)
@@ -138,14 +159,10 @@ function AlumnoForm({ student }: { student?: Student }) {
 
       <section className="card form-section">
         <h2>Artes marciales</h2>
+        {schoolArts.isLoading ? <p className="hint">Cargando…</p> : (
+          <StudentArtsEditor arts={schoolArts.data ?? []} rows={artRows} onChange={setArtRows} canConfigure={role === 'ceo' || role === 'admin'} error={artsError} />
+        )}
         <div className="form-grid">
-          {field('belt', 'Cinturón', (
-            <>
-              <input {...inputProps('belt')} list="belt-options" placeholder="Ej: Azul" />
-              <datalist id="belt-options">{beltSuggestions.map((b) => <option key={b} value={b} />)}</datalist>
-            </>
-          ))}
-          {field('belt_degree', 'Grado / franjas', <input {...inputProps('belt_degree')} inputMode="numeric" placeholder="0–12" />)}
           {field('weight_kg', 'Peso (kg)', <input {...inputProps('weight_kg')} inputMode="decimal" placeholder="Ej: 72,5" />)}
         </div>
       </section>
@@ -173,6 +190,7 @@ function AlumnoForm({ student }: { student?: Student }) {
         <Toggle checked={form.active} onChange={(v) => set('active', v)} label="Alumno activo" hint="Los inactivos se ocultan del listado principal, pero conservan su historial." />
       </section>
 
+      {student && <StudentLogros studentId={student.id} schoolId={student.school_id} />}
       {student && <StudentEnrollments studentId={student.id} />}
       {student && <StudentPayments studentId={student.id} />}
       {student && <StudentLinks student={student} />}

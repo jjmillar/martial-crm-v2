@@ -12,6 +12,7 @@ import { listPending, pendingKey, type Req } from './api'
 import { byGuardian, pendingCheckIns, pendingCheckInsKey, reviewAttendance, type PendingCheckIn } from '../asistencia/api'
 import { decideSubmission, listReviews, reviewsKey, type Review } from '../pagar/api'
 import { decideChild, pendingChildren, pendingChildrenKey, type PendingChild } from '../portal/guardian'
+import { decideAchievement, medalOf, pendingAchievements, pendingAchievementsKey, type PendingAchievement } from '../artes/api'
 
 type Free = { id: string; school_id: string; full_name: string | null; rut: string | null; email: string | null }
 type Item =
@@ -19,6 +20,7 @@ type Item =
   | { kind: 'pago'; at: string; p: Review }
   | { kind: 'cuenta'; at: string; r: Req }
   | { kind: 'hijo'; at: string; h: PendingChild }
+  | { kind: 'logro'; at: string; l: PendingAchievement }
 
 const rutKey = (r: string | null | undefined) => (r ? r.replace(/[^0-9kK]/g, '').toUpperCase() : '')
 const timeFmt = new Intl.DateTimeFormat('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Santiago' })
@@ -36,6 +38,7 @@ export function Aprobaciones() {
   const pays = useQuery({ queryKey: reviewsKey, queryFn: listReviews, enabled: ceo })
   const reqs = useQuery({ queryKey: pendingKey, queryFn: listPending, enabled: ceo })
   const kids = useQuery({ queryKey: pendingChildrenKey, queryFn: pendingChildren, enabled: admin })
+  const logros = useQuery({ queryKey: pendingAchievementsKey(activeSchool?.id), queryFn: () => pendingAchievements(activeSchool!.id), enabled: Boolean(activeSchool) })
   const studentSchools = [...new Set((reqs.data ?? []).filter((r) => r.kind === 'alumno').map((r) => r.school_id))]
   const free = useQuery({
     queryKey: ['free-students', studentSchools.join()],
@@ -56,9 +59,10 @@ export function Aprobaciones() {
     ...(ceo ? (pays.data ?? []).map((p) => ({ kind: 'pago' as const, at: p.created_at, p })) : []),
     ...(ceo ? (reqs.data ?? []).map((r) => ({ kind: 'cuenta' as const, at: r.created_at, r })) : []),
     ...(admin ? (kids.data ?? []).map((h) => ({ kind: 'hijo' as const, at: h.created_at, h })) : []),
+    ...(logros.data ?? []).map((l) => ({ kind: 'logro' as const, at: l.created_at, l })),
   ].sort((a, b) => a.at.localeCompare(b.at))
   const attendance = (att.data ?? [])
-  const loading = att.isLoading || (ceo && (pays.isLoading || reqs.isLoading)) || (admin && kids.isLoading)
+  const loading = att.isLoading || logros.isLoading || (ceo && (pays.isLoading || reqs.isLoading)) || (admin && kids.isLoading)
 
   const done = (text: string) => { setMsg({ ok: true, text }); setRejecting(null); setReason('') }
   const fail = (e: Error) => setMsg({ ok: false, text: e.message })
@@ -111,7 +115,17 @@ export function Aprobaciones() {
     },
     onError: fail,
   })
-  const busy = reviewAtt.isPending || decidePay.isPending || decideAcc.isPending || decideKid.isPending
+  const decideLogro = useMutation({
+    mutationFn: async (v: { l: PendingAchievement; approve: boolean; reason?: string }) => { await decideAchievement(v.l.id, v.approve, v.reason); return v },
+    onMutate: () => setMsg(null),
+    onSuccess: async (v) => {
+      await refresh([...pendingAchievementsKey(activeSchool?.id)], ['achievements', v.l.student_id])
+      const who = v.l.student?.full_name ?? 'el alumno'
+      done(v.approve ? `Logro de ${who} aprobado: ya aparece en su perfil.` : `Logro de ${who} rechazado. Verá el motivo.`)
+    },
+    onError: fail,
+  })
+  const busy = reviewAtt.isPending || decidePay.isPending || decideAcc.isPending || decideKid.isPending || decideLogro.isPending
   const schoolName = (id: string) => schools.find((s) => s.id === id)?.name ?? 'Escuela'
   const multiSchool = schools.length > 1
 
@@ -120,7 +134,7 @@ export function Aprobaciones() {
       <div className="tareas__section-head appr-head">
         <div>
           <h2 id="aprob-h">Aprobaciones {items.length > 0 && <span className="nav-badge">{items.length}</span>}</h2>
-          <p className="hint">{ceo ? 'Asistencias que marcaron los alumnos, pagos por transferencia, cuentas nuevas e hijos de apoderados.' : admin ? 'Asistencias que marcaron los alumnos e hijos que agregaron los apoderados.' : 'Asistencias que marcaron los alumnos desde su cuenta.'}</p>
+          <p className="hint">{ceo ? 'Asistencias y torneos que registraron los alumnos, pagos por transferencia, cuentas nuevas e hijos de apoderados.' : admin ? 'Asistencias y torneos que registraron los alumnos e hijos que agregaron los apoderados.' : 'Asistencias y torneos que registraron los alumnos desde su cuenta.'}</p>
         </div>
         {attendance.length > 1 && (
           <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => reviewAtt.mutate({ rows: attendance, approve: true })}>
@@ -168,6 +182,30 @@ export function Aprobaciones() {
                     <span className="appr__actions">
                       <button type="button" className="btn" disabled={busy} onClick={() => decidePay.mutate({ p, approve: true })}>Aprobar</button>
                       <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => setRejecting(p.id)}>Rechazar</button>
+                    </span>
+                  )}
+                </li>
+              )
+            }
+            if (it.kind === 'logro') {
+              const l = it.l
+              const m = medalOf(l.medal)
+              return (
+                <li key={`l-${l.id}`} className="appr appr--account">
+                  <span className="appr__main">
+                    <span className="appr__title"><span className="tag appr__kind">Torneo</span><strong>{l.student?.full_name ?? 'Alumno'}</strong></span>
+                    <span className="hint">{[`${m ? `${m.icon} ${m.label} · ` : ''}${l.title}`, l.category, l.art?.name, formatDate(l.date), l.detail].filter(Boolean).join(' · ')}</span>
+                  </span>
+                  {rejecting === l.id ? (
+                    <span className="appr__actions appr__actions--wide">
+                      <input className="input" autoFocus maxLength={200} aria-label="Motivo del rechazo" placeholder="Motivo (ej: no fue ese resultado)" value={reason} onChange={(e) => setReason(e.target.value)} />
+                      <button type="button" className="btn btn--danger" disabled={busy} onClick={() => decideLogro.mutate({ l, approve: false, reason })}>Rechazar</button>
+                      <button type="button" className="btn btn--ghost" onClick={() => { setRejecting(null); setReason('') }}>Cancelar</button>
+                    </span>
+                  ) : (
+                    <span className="appr__actions">
+                      <button type="button" className="btn" disabled={busy} onClick={() => decideLogro.mutate({ l, approve: true })}>Aprobar</button>
+                      <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => setRejecting(l.id)}>Rechazar</button>
                     </span>
                   )}
                 </li>

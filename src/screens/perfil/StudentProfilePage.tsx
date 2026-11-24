@@ -4,13 +4,15 @@ import type { StudentProfile } from '../../lib/landing-server'
 import { brandStyle } from '../escuela/api'
 import { Icon } from '../../ui/Icon'
 import { Link } from '../../lib/nav'
+import { BeltChip } from '../../modules/artes/Belt'
+import { fromAchievement, fromMilestone, LogrosList, LogrosSummary } from '../../modules/artes/Logros'
 
 const XP_PER_LEVEL = 100
 const levelOf = (xp: number) => Math.floor(xp / XP_PER_LEVEL) + 1
 const sinceFmt = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
 // A student's public page (/e/<school>/a/<handle>): who they are, their belt, level and skills, in their school's
-// colors. Achievements will be added here over time. Only what the student chose to publish reaches this page.
+// colors, and their achievements. Only what the student chose to publish reaches this page.
 export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
   if (!p) {
     return (
@@ -41,11 +43,25 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
             <h1>{p.name}</h1>
             {p.headline && <p className="sprof__headline">{p.headline}</p>}
             <div className="sprof__chips">
-              {p.belt && <span className="sp-chip">Cinturón {p.belt.toLowerCase()}{p.belt_degree ? ` · ${p.belt_degree}° grado` : ''}</span>}
+              {p.belt && !p.arts?.length && <span className="sp-chip">Cinturón {p.belt.toLowerCase()}{p.belt_degree ? ` · ${p.belt_degree}° grado` : ''}</span>}
               <span className="sp-chip">Desde {sinceFmt.format(new Date(p.since))}</span>
             </div>
           </div>
         </section>
+
+        {Boolean(p.arts?.some((a) => a.belt)) && (
+          <section className="sprof__card rise" style={{ animationDelay: '20ms' }} aria-label="Cinturones">
+            <h2 className="sprof__title">{p.arts!.length > 1 ? 'Cinturones' : 'Cinturón'}</h2>
+            <ul className="my-belts">
+              {p.arts!.filter((a) => a.belt && a.color).map((a) => (
+                <li key={a.art}>
+                  <BeltChip size="lg" art={a.art} name={a.belt!} color={a.color!} stripe={a.stripe} degree={a.degree} degreeText={a.degree_text} />
+                  {a.rank && <span className="sp-muted">{a.rank}</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {p.stats && (
           <section className="sprof__card sprof__level rise" style={{ animationDelay: '40ms' }} aria-label="Nivel">
@@ -85,10 +101,19 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
           </section>
         )}
 
-        <section className="sprof__card sprof__soon rise" style={{ animationDelay: '160ms' }}>
-          <h2 className="sprof__title">Logros</h2>
-          <p className="sp-muted">Pronto: medallas, graduaciones y torneos.</p>
-        </section>
+        {p.achievements && (
+          <section className="sprof__card rise" style={{ animationDelay: '160ms' }} aria-label="Logros">
+            <h2 className="sprof__title">Logros</h2>
+            <LogrosSummary medals={p.achievements.filter((a) => a.kind === 'torneo').map((a) => a.medal)} graduations={p.achievements.filter((a) => a.kind === 'graduacion').length} milestones={p.milestones?.length ?? 0} />
+            <LogrosList
+              empty="Los logros aparecen a medida que entrena: graduaciones, torneos e hitos."
+              items={[
+                ...p.achievements.map((a, i) => fromAchievement({ id: `a${i}`, kind: a.kind, title: a.title, detail: a.detail, date: a.date, medal: a.medal as never, category: a.category, status: 'aprobado', reject_reason: null, artName: a.art, color: a.color, stripe: a.stripe, badgeIcon: a.icon })),
+                ...(p.milestones ?? []).map(fromMilestone),
+              ]}
+            />
+          </section>
+        )}
       </main>
 
       <footer className="sp-footer">

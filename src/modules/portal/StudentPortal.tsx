@@ -13,6 +13,7 @@ import { ShowMore } from '../../ui/ShowMore'
 import { useShowMore } from '../../ui/useShowMore'
 import { classStarted } from '../asistencia/api'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
+import { MisCinturones, MisLogros } from '../artes/Logros'
 import {
   checkIn, levelOf, myAttendance, myAttendanceKey, myEnrollments, myPendingPayments, progressKey, studentProgress, undoCheckIn,
   XP_PER_CLASS, XP_PER_LEVEL, type MyAttendance,
@@ -221,6 +222,15 @@ export function StudentHome() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="tile tile--wide rise" style={{ animationDelay: '130ms' }} aria-label="Cinturones">
+        <div className="tile__head"><span className="eyebrow">{child ? 'Sus cinturones' : 'Mis cinturones'}</span></div>
+        {studentId && <MisCinturones studentId={studentId} child={child} />}
+      </section>
+
+      <section className="tile tile--wide rise" style={{ animationDelay: '140ms' }} aria-label="Logros" id="logros">
+        {studentId && school && <MisLogros studentId={studentId} schoolId={school.id} child={child} />}
       </section>
 
       <section className="tile rise" style={{ animationDelay: '160ms' }}>

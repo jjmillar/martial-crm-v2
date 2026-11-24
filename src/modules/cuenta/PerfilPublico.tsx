@@ -10,7 +10,7 @@ import { Toggle } from '../../ui/Toggle'
 // what to show. Private data (RUT, contact, birth date, address) is never part of it.
 type Row = {
   handle: string; published: boolean; headline: string | null; bio: string | null
-  show_belt: boolean; show_skills: boolean; show_stats: boolean
+  show_belt: boolean; show_skills: boolean; show_stats: boolean; show_achievements: boolean
 }
 const key = (id: string | undefined) => ['my-public-profile', id] as const
 
@@ -20,7 +20,7 @@ export function PerfilPublico() {
   const q = useQuery({
     queryKey: key(id),
     queryFn: async () => {
-      const { data, error } = await supabase.from('student_profiles').select('handle, published, headline, bio, show_belt, show_skills, show_stats').eq('student_id', id!).maybeSingle()
+      const { data, error } = await supabase.from('student_profiles').select('handle, published, headline, bio, show_belt, show_skills, show_stats, show_achievements').eq('student_id', id!).maybeSingle()
       if (error) throw error
       return data as Row | null
     },
@@ -46,6 +46,7 @@ function Form({ studentId, row, suggested }: { studentId: string; row: Row | nul
   const [f, setF] = useState({
     handle: row?.handle ?? suggested, published: row?.published ?? false, headline: row?.headline ?? '', bio: row?.bio ?? '',
     show_belt: row?.show_belt ?? true, show_skills: row?.show_skills ?? true, show_stats: row?.show_stats ?? true,
+    show_achievements: row?.show_achievements ?? true,
   })
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [copied, setCopied] = useState(false)
@@ -61,7 +62,7 @@ function Form({ studentId, row, suggested }: { studentId: string; row: Row | nul
       if (!/^[a-z0-9-]{3,40}$/.test(handle)) throw new Error('La dirección usa de 3 a 40 letras minúsculas, números o guiones (sin tildes ni espacios).')
       const { error } = await supabase.rpc('save_my_public_profile', {
         p_student_id: studentId, p_handle: handle, p_published: f.published, p_headline: f.headline, p_bio: f.bio,
-        p_show_belt: f.show_belt, p_show_skills: f.show_skills, p_show_stats: f.show_stats,
+        p_show_belt: f.show_belt, p_show_skills: f.show_skills, p_show_stats: f.show_stats, p_show_achievements: f.show_achievements,
       })
       if (error?.message.includes('handle taken')) throw new Error('Esa dirección ya la usa otro alumno de tu escuela. Prueba con otra.')
       if (error) throw new Error('No se pudo guardar tu perfil público.')
@@ -78,7 +79,7 @@ function Form({ studentId, row, suggested }: { studentId: string; row: Row | nul
   return (
     <form className="card form-section" onSubmit={(e) => { e.preventDefault(); setMsg(null); save.mutate() }} noValidate id="perfil-publico-form">
       <h2>Mi perfil público</h2>
-      <p className="hint">Tu página personal, con tu cinturón, nivel y skills. Ahí iremos sumando tus logros. Nunca muestra tu RUT, contacto, dirección ni fecha de nacimiento.</p>
+      <p className="hint">Tu página personal, con tus cinturones, nivel, skills y logros. Nunca muestra tu RUT, contacto, dirección ni fecha de nacimiento.</p>
 
       <Toggle checked={f.published} onChange={(v) => set('published', v)} label="Publicar mi perfil" hint="Si está apagado, nadie puede verlo." />
 
@@ -103,9 +104,10 @@ function Form({ studentId, row, suggested }: { studentId: string; row: Row | nul
 
       <h3 className="ajustes__sub">Qué mostrar</h3>
       <div className="pp-toggles">
-        <Toggle checked={f.show_belt} onChange={(v) => set('show_belt', v)} label="Cinturón y grado" />
+        <Toggle checked={f.show_belt} onChange={(v) => set('show_belt', v)} label="Cinturones y grados" />
         <Toggle checked={f.show_stats} onChange={(v) => set('show_stats', v)} label="Nivel, XP y clases" />
         <Toggle checked={f.show_skills} onChange={(v) => set('show_skills', v)} label="Skills" />
+        <Toggle checked={f.show_achievements} onChange={(v) => set('show_achievements', v)} label="Logros" hint="Graduaciones, torneos, insignias de la escuela e hitos." />
       </div>
 
       {msg && <p className={`alert${msg.ok ? ' alert--ok' : ''}`} role={msg.ok ? 'status' : 'alert'}>{msg.text}</p>}

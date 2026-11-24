@@ -1,0 +1,262 @@
+/* Martial arts, belts and achievements ("Logros"). */
+
+/* Belt drawn in CSS: main color with an optional band along the middle; degree marks at the end. */
+.beltbar {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 34px;
+  height: 9px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, var(--belt) 0 34%, var(--stripe) 34% 66%, var(--belt) 66%);
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
+}
+.beltbar--sm { width: 26px; height: 7px; }
+.beltbar--lg { width: 46px; height: 12px; }
+.beltbar--empty {
+  background: repeating-linear-gradient(135deg, var(--surface-2) 0 4px, transparent 4px 8px);
+}
+.beltbar__deg {
+  position: absolute;
+  inset: 1px 3px 1px auto;
+  display: flex;
+  gap: 2px;
+}
+.beltbar__deg i {
+  width: 2px;
+  background: var(--tick);
+  border-radius: 1px;
+}
+.beltbar--sm .beltbar__deg i { width: 1px; }
+
+.beltchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 14px;
+}
+.beltchip--sm { gap: 6px; font-size: 13px; color: var(--muted); }
+.beltchip__text {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+.beltchip__art {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Student list: one belt per art */
+.student-row__belts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: flex-end;
+}
+@media (max-width: 640px) {
+  .student-row__belts { justify-content: flex-start; }
+}
+
+/* Ajustes → Artes marciales */
+.artes {
+  display: grid;
+  gap: 14px;
+}
+.artes__add {
+  display: grid;
+  gap: 8px;
+}
+.art-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.art-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+.art-card.is-off { opacity: 0.7; }
+.art-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.art-card__head h3 { font-size: 17px; }
+.art-card__tools { display: flex; gap: 4px; }
+.belt-track {
+  display: grid;
+  gap: 8px;
+}
+.belt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.belt-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.belt-pick .hint { font-size: 12px; }
+.belt-pick:hover { border-color: var(--muted); }
+.belt-pick--add {
+  border-style: dashed;
+  color: var(--muted);
+}
+.belt-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0 4px;
+}
+.belt-form {
+  display: grid;
+  gap: 14px;
+}
+.belt-form__stripe {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+.input--color.input {
+  width: 64px;
+  height: 40px;
+  padding: 4px;
+  cursor: pointer;
+}
+.belt-form__more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.belt-form__more .hint { margin-right: auto; }
+.belt-form__confirm { display: inline-flex; gap: 6px; }
+
+/* Student form: arts editor */
+.sarts {
+  display: grid;
+  gap: 12px;
+}
+.sarts__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sarts__row {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+.sarts__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sarts__head strong { flex: 1; }
+
+/* Achievements list (team, portal and public profile) */
+.logros__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.logros__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.logros__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+.logros {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.logro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.logro:last-child { border-bottom: 0; }
+.logro--pendiente .logro__main strong,
+.logro--rechazado .logro__main strong { color: var(--muted); }
+.logro__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+}
+.logro__emoji {
+  font-size: 24px;
+  line-height: 1;
+}
+.logro__main {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+.logro__main .hint { overflow-wrap: anywhere; }
+.logro__confirm { display: inline-flex; gap: 6px; }
+
+/* Portal and public profile: the student's belts */
+.my-belts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.my-belts li {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+.artes .catalog__form .btn { white-space: nowrap; }
+.logro .tag { flex: none; }

@@ -93,6 +93,121 @@ export type Database = {
           },
         ];
       };
+      achievements: {
+        Row: {
+          art_id: string | null;
+          badge_id: string | null;
+          belt_id: string | null;
+          category: string | null;
+          created_at: string;
+          created_by: string | null;
+          date: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          degree: number | null;
+          detail: string | null;
+          id: string;
+          kind: string;
+          medal: string | null;
+          reject_reason: string | null;
+          school_id: string;
+          status: string;
+          student_id: string;
+          title: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          art_id?: string | null;
+          badge_id?: string | null;
+          belt_id?: string | null;
+          category?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          date?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          degree?: number | null;
+          detail?: string | null;
+          id?: string;
+          kind: string;
+          medal?: string | null;
+          reject_reason?: string | null;
+          school_id: string;
+          status?: string;
+          student_id: string;
+          title: string;
+        };
+        Update: {
+          art_id?: string | null;
+          badge_id?: string | null;
+          belt_id?: string | null;
+          category?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          date?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          degree?: number | null;
+          detail?: string | null;
+          id?: string;
+          kind?: string;
+          medal?: string | null;
+          reject_reason?: string | null;
+          school_id?: string;
+          status?: string;
+          student_id?: string;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "achievements_art_id_school_id_fkey";
+            columns: ["art_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "school_arts";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "achievements_badge_id_school_id_fkey";
+            columns: ["badge_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "school_badges";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "achievements_belt_id_art_id_fkey";
+            columns: ["belt_id", "art_id"];
+            isOneToOne: false;
+            referencedRelation: "school_belts";
+            referencedColumns: ["id", "art_id"];
+          },
+          {
+            foreignKeyName: "achievements_student_id_school_id_fkey";
+            columns: ["student_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
+      art_templates: {
+        Row: {
+          key: string;
+          name: string;
+          position: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          key: string;
+          name: string;
+          position?: number;
+        };
+        Update: {
+          key?: string;
+          name?: string;
+          position?: number;
+        };
+        Relationships: [];
+      };
       attendance: {
         Row: {
           class_id: string;
@@ -197,6 +312,54 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "schools";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      belt_templates: {
+        Row: {
+          art_key: string;
+          color: string;
+          degree_name: string;
+          id: number;
+          max_degree: number;
+          name: string;
+          position: number;
+          rank_label: string | null;
+          stripe: string | null;
+          track: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          art_key: string;
+          color: string;
+          degree_name?: string;
+          id?: number;
+          max_degree?: number;
+          name: string;
+          position: number;
+          rank_label?: string | null;
+          stripe?: string | null;
+          track: string;
+        };
+        Update: {
+          art_key?: string;
+          color?: string;
+          degree_name?: string;
+          id?: number;
+          max_degree?: number;
+          name?: string;
+          position?: number;
+          rank_label?: string | null;
+          stripe?: string | null;
+          track?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "belt_templates_art_key_fkey";
+            columns: ["art_key"];
+            isOneToOne: false;
+            referencedRelation: "art_templates";
+            referencedColumns: ["key"];
           },
         ];
       };
@@ -1189,6 +1352,142 @@ export type Database = {
         };
         Relationships: [];
       };
+      school_arts: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          name: string;
+          position: number;
+          school_id: string;
+          template_key: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name: string;
+          position?: number;
+          school_id: string;
+          template_key?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          position?: number;
+          school_id?: string;
+          template_key?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "school_arts_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "school_arts_template_key_fkey";
+            columns: ["template_key"];
+            isOneToOne: false;
+            referencedRelation: "art_templates";
+            referencedColumns: ["key"];
+          },
+        ];
+      };
+      school_badges: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          icon: string | null;
+          id: string;
+          name: string;
+          school_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          icon?: string | null;
+          id?: string;
+          name: string;
+          school_id: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          icon?: string | null;
+          id?: string;
+          name?: string;
+          school_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "school_badges_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      school_belts: {
+        Row: {
+          art_id: string;
+          color: string;
+          created_at: string;
+          degree_name: string;
+          id: string;
+          max_degree: number;
+          name: string;
+          position: number;
+          rank_label: string | null;
+          school_id: string;
+          stripe: string | null;
+          track: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          art_id: string;
+          color: string;
+          created_at?: string;
+          degree_name?: string;
+          id?: string;
+          max_degree?: number;
+          name: string;
+          position?: number;
+          rank_label?: string | null;
+          school_id: string;
+          stripe?: string | null;
+          track: string;
+        };
+        Update: {
+          art_id?: string;
+          color?: string;
+          created_at?: string;
+          degree_name?: string;
+          id?: string;
+          max_degree?: number;
+          name?: string;
+          position?: number;
+          rank_label?: string | null;
+          school_id?: string;
+          stripe?: string | null;
+          track?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "school_belts_art_id_school_id_fkey";
+            columns: ["art_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "school_arts";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       school_members: {
         Row: {
           created_at: string;
@@ -1406,6 +1705,65 @@ export type Database = {
           },
         ];
       };
+      student_arts: {
+        Row: {
+          art_id: string;
+          belt_id: string | null;
+          created_at: string;
+          degree: number;
+          id: string;
+          school_id: string;
+          since: string | null;
+          student_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          art_id: string;
+          belt_id?: string | null;
+          created_at?: string;
+          degree?: number;
+          id?: string;
+          school_id: string;
+          since?: string | null;
+          student_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          art_id?: string;
+          belt_id?: string | null;
+          created_at?: string;
+          degree?: number;
+          id?: string;
+          school_id?: string;
+          since?: string | null;
+          student_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_arts_art_id_school_id_fkey";
+            columns: ["art_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "school_arts";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "student_arts_belt_id_art_id_fkey";
+            columns: ["belt_id", "art_id"];
+            isOneToOne: false;
+            referencedRelation: "school_belts";
+            referencedColumns: ["id", "art_id"];
+          },
+          {
+            foreignKeyName: "student_arts_student_id_school_id_fkey";
+            columns: ["student_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       student_claims: {
         Row: {
           code_hash: string;
@@ -1500,6 +1858,7 @@ export type Database = {
           headline: string | null;
           published: boolean;
           school_id: string;
+          show_achievements: boolean;
           show_belt: boolean;
           show_skills: boolean;
           show_stats: boolean;
@@ -1514,6 +1873,7 @@ export type Database = {
           headline?: string | null;
           published?: boolean;
           school_id: string;
+          show_achievements?: boolean;
           show_belt?: boolean;
           show_skills?: boolean;
           show_stats?: boolean;
@@ -1527,6 +1887,7 @@ export type Database = {
           headline?: string | null;
           published?: boolean;
           school_id?: string;
+          show_achievements?: boolean;
           show_belt?: boolean;
           show_skills?: boolean;
           show_stats?: boolean;
@@ -2018,6 +2379,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      add_school_art: {
+        Args: { p_school_id: string; p_template_key: string };
+        Returns: string;
+      };
       attach_payment_receipt: {
         Args: { p_path: string; p_payment_id: string };
         Returns: undefined;
@@ -2189,6 +2554,10 @@ export type Database = {
         Args: { p_approve: boolean; p_id: string; p_reason?: string };
         Returns: undefined;
       };
+      degree_text: {
+        Args: { p_degree: number; p_name: string };
+        Returns: string;
+      };
       discount_code_uses: {
         Args: { p_school_id: string };
         Returns: {
@@ -2358,37 +2727,72 @@ export type Database = {
         };
         Returns: string;
       };
-      save_my_public_profile: {
-        Args: {
-          p_bio: string;
-          p_handle: string;
-          p_headline: string;
-          p_published: boolean;
-          p_show_belt: boolean;
-          p_show_skills: boolean;
-          p_show_stats: boolean;
-          p_student_id: string;
-        };
-        Returns: {
-          bio: string | null;
-          created_at: string;
-          handle: string;
-          headline: string | null;
-          published: boolean;
-          school_id: string;
-          show_belt: boolean;
-          show_skills: boolean;
-          show_stats: boolean;
-          student_id: string;
-          updated_at: string;
-        };
-        SetofOptions: {
-          from: "*";
-          to: "student_profiles";
-          isOneToOne: true;
-          isSetofReturn: false;
-        };
-      };
+      save_my_public_profile:
+        | {
+            Args: {
+              p_bio: string;
+              p_handle: string;
+              p_headline: string;
+              p_published: boolean;
+              p_show_belt: boolean;
+              p_show_skills: boolean;
+              p_show_stats: boolean;
+              p_student_id: string;
+            };
+            Returns: {
+              bio: string | null;
+              created_at: string;
+              handle: string;
+              headline: string | null;
+              published: boolean;
+              school_id: string;
+              show_achievements: boolean;
+              show_belt: boolean;
+              show_skills: boolean;
+              show_stats: boolean;
+              student_id: string;
+              updated_at: string;
+            };
+            SetofOptions: {
+              from: "*";
+              to: "student_profiles";
+              isOneToOne: true;
+              isSetofReturn: false;
+            };
+          }
+        | {
+            Args: {
+              p_bio: string;
+              p_handle: string;
+              p_headline: string;
+              p_published: boolean;
+              p_show_achievements: boolean;
+              p_show_belt: boolean;
+              p_show_skills: boolean;
+              p_show_stats: boolean;
+              p_student_id: string;
+            };
+            Returns: {
+              bio: string | null;
+              created_at: string;
+              handle: string;
+              headline: string | null;
+              published: boolean;
+              school_id: string;
+              show_achievements: boolean;
+              show_belt: boolean;
+              show_skills: boolean;
+              show_stats: boolean;
+              student_id: string;
+              updated_at: string;
+            };
+            SetofOptions: {
+              from: "*";
+              to: "student_profiles";
+              isOneToOne: true;
+              isSetofReturn: false;
+            };
+          };
       school_blocked: { Args: { p_school_id: string }; Returns: boolean };
       school_landing: { Args: { p_slug: string }; Returns: Json };
       school_owner: {
@@ -2419,11 +2823,25 @@ export type Database = {
         Returns: undefined;
       };
       storage_school_id: { Args: { p_name: string }; Returns: string };
+      student_achievements: { Args: { p_student_id: string }; Returns: Json };
       student_claim_info: { Args: { p_code: string }; Returns: Json };
+      student_milestones: { Args: { p_student_id: string }; Returns: Json };
       student_progress: { Args: { p_student_id: string }; Returns: Json };
       student_public_profile: {
         Args: { p_handle: string; p_slug: string };
         Returns: Json;
+      };
+      submit_achievement: {
+        Args: {
+          p_art_id: string;
+          p_category: string;
+          p_date: string;
+          p_detail: string;
+          p_medal: string;
+          p_student_id: string;
+          p_title: string;
+        };
+        Returns: string;
       };
       submit_payment: {
         Args: {
@@ -2460,6 +2878,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      withdraw_achievement: { Args: { p_id: string }; Returns: undefined };
     };
     Enums: {
       billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";

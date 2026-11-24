@@ -9,6 +9,8 @@ import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from './api'
 import { beltSwatch } from '../../lib/belts'
 import { SchoolFilter } from '../../ui/SchoolFilter'
+import { degreeText, listSchoolStudentArts, schoolStudentArtsKey } from '../artes/api'
+import { BeltChip } from '../artes/Belt'
 
 type Filter = 'activos' | 'inactivos' | 'todos'
 
@@ -19,6 +21,7 @@ export function AlumnosList() {
   const { activeSchool } = useSchool()
   const schoolId = activeSchool?.id
   const students = useQuery({ queryKey: studentsKey(schoolId), queryFn: () => listStudents(schoolId!), enabled: Boolean(schoolId) })
+  const arts = useQuery({ queryKey: schoolStudentArtsKey(schoolId), queryFn: () => listSchoolStudentArts(schoolId!), enabled: Boolean(schoolId) })
   const [q, setQ] = usePersisted('alumnos.q', '', 'session')
   const [filter, setFilter] = usePersisted<Filter>('alumnos.filtro', 'activos')
 
@@ -87,6 +90,7 @@ export function AlumnosList() {
         {rows.map((s) => {
           const age = yearsSince(s.birth_date)
           const swatch = beltSwatch(s.belt)
+          const mine = (arts.data?.get(s.id) ?? []).filter((a) => a.belt)
           return (
             <li key={s.id}>
               <Link className="student-row card" to={s.id}>
@@ -95,7 +99,14 @@ export function AlumnosList() {
                   <strong>{s.full_name}</strong>
                   <span className="hint">{[s.rut && formatRut(s.rut), age !== null && `${age} años`, s.phone].filter(Boolean).join(' · ') || 'Sin datos de contacto'}</span>
                 </span>
-                {s.belt && (
+                {mine.length > 0 ? (
+                  <span className="student-row__belts">
+                    {mine.map((a) => (
+                      <BeltChip key={a.id} size="sm" name={a.belt!.name} color={a.belt!.color} stripe={a.belt!.stripe} degree={a.degree}
+                        degreeText={degreeText(a.degree, a.belt!.degree_name)} art={mine.length > 1 ? a.art?.name : null} />
+                    ))}
+                  </span>
+                ) : s.belt && (
                   <span className="belt">
                     {swatch && <i style={{ background: swatch }} aria-hidden="true" />}
                     {s.belt}{s.belt_degree ? ` · ${s.belt_degree}°` : ''}
