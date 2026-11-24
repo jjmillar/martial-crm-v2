@@ -101,6 +101,46 @@ a.plan-card:focus-visible {
   margin-top: auto;
 }
 
+/* Student actions on a card: Contratar / Pagar · Anular / Renovar, pinned to the bottom */
+.plan-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.plan-card__desc + .plan-card__actions {
+  margin-top: 0;
+}
+.plan-card__actions .alert {
+  flex-basis: 100%;
+  margin: 0;
+}
+.plan-card__until {
+  font-size: 12px;
+}
+
+/* Contract pop-up */
+.contract {
+  display: grid;
+  gap: 12px;
+}
+.contract h2 {
+  margin: 0;
+}
+.contract .plan-card__price {
+  margin: 0;
+}
+.contract__how {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 /* Editor: form + sticky live preview */
 .plan-editor {
   display: grid;

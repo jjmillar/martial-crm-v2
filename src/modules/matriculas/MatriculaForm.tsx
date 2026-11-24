@@ -255,7 +255,7 @@ function MatriculaDetalle({ e }: { e: EnrollmentRow }) {
           {e.status === 'activa' && (
             <button type="button" className="btn btn--ghost" disabled={patch.isPending} onClick={() => patch.mutate({ status: 'pausada', label: 'Inscripción pausada.' })}>Pausar</button>
           )}
-          {e.status !== 'activa' && (
+          {e.status !== 'activa' && e.status !== 'pendiente' && (
             <button type="button" className="btn" disabled={patch.isPending} onClick={() => patch.mutate({ status: 'activa', label: 'Inscripción reactivada.' })}>Reactivar</button>
           )}
           {e.status !== 'cancelada' && (confirm === 'cancelar' ? (
@@ -268,7 +268,9 @@ function MatriculaDetalle({ e }: { e: EnrollmentRow }) {
             <button type="button" className="btn btn--ghost" onClick={() => setConfirm('cancelar')}>Cancelar inscripción</button>
           ))}
         </div>
-        <p className="hint">Pausar conserva la inscripción sin contarla como vigente. Para registrar el pago, ve a Pagos.</p>
+        {e.status === 'pendiente'
+          ? <p className="hint">El alumno contrató este plan desde la app. Se activa sola desde el día en que su pago quede pagado: apruébalo en Tareas o márcalo pagado en Pagos.</p>
+          : <p className="hint">Pausar conserva la inscripción sin contarla como vigente. Para registrar el pago, ve a Pagos.</p>}
       </section>
 
       {(e.discount_code || e.status !== 'cancelada') && (

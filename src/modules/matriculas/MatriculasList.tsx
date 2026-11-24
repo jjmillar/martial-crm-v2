@@ -9,11 +9,12 @@ import { Icon } from '../../ui/Icon'
 import { enrollmentsKey, listEnrollments, phaseLabel, phaseOf, type Phase } from './api'
 import { SchoolFilter } from '../../ui/SchoolFilter'
 
-type Filter = 'vigentes' | 'por_vencer' | 'vencida' | 'pausada' | 'cancelada' | 'todas'
+type Filter = 'vigentes' | 'por_vencer' | 'vencida' | 'pendiente' | 'pausada' | 'cancelada' | 'todas'
 const filters: { id: Filter; label: string }[] = [
   { id: 'vigentes', label: 'Vigentes' },
   { id: 'por_vencer', label: 'Por vencer' },
   { id: 'vencida', label: 'Vencidas' },
+  { id: 'pendiente', label: 'Por pagar' },
   { id: 'pausada', label: 'Pausadas' },
   { id: 'cancelada', label: 'Canceladas' },
   { id: 'todas', label: 'Todas' },

@@ -9,7 +9,8 @@ import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, specialtiesKey } from '../profesores/api'
 import { listPlans, plansKey } from './api'
 import { cycleInfo, planFeatures } from './cycles'
-import { myEnrollments } from '../portal/api'
+import { myEnrollments, type MyEnrollment } from '../portal/api'
+import { PlanActions, PlanStatus } from './ContratarPlan'
 import { todayIso } from '../../lib/dates'
 
 /** The plans, as a section of the "Pagos y planes" page (staff edit them, students only read). */
@@ -18,7 +19,16 @@ export function PlanesList() {
   const schoolId = activeSchool?.id
   const student = role === 'alumno'
   const mine = useQuery({ queryKey: ['my-enrollments', myStudent?.id], queryFn: () => myEnrollments(myStudent!.id), enabled: student && Boolean(myStudent) })
-  const myPlans = useMemo(() => new Set((mine.data ?? []).filter((e) => e.status === 'activa' && (!e.ends_at || e.ends_at >= todayIso())).map((e) => e.plan_id)), [mine.data])
+  // The student's enrollment per plan: the active one wins over one waiting for payment.
+  const myByPlan = useMemo(() => {
+    const m = new Map<string, MyEnrollment>()
+    for (const e of mine.data ?? []) {
+      if (e.status !== 'activa' && e.status !== 'pendiente') continue
+      if (!m.has(e.plan_id) || e.status === 'activa') m.set(e.plan_id, e)
+    }
+    return m
+  }, [mine.data])
+  const myPlans = useMemo(() => new Set([...myByPlan.values()].filter((e) => e.status === 'activa' && (!e.ends_at || e.ends_at >= todayIso())).map((e) => e.plan_id)), [myByPlan])
   const canEdit = role === 'admin' || role === 'ceo'
   const plans = useQuery({ queryKey: plansKey(schoolId), queryFn: () => listPlans(schoolId!), enabled: Boolean(schoolId) })
   const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
@@ -35,7 +45,7 @@ export function PlanesList() {
       <div className="pp-section__head">
         <div>
           <h2 id="planes-h">Planes</h2>
-          {Boolean(plans.data?.length) && <p className="hint">{student ? 'Los planes de tu escuela. Para cambiarte de plan, habla con tu escuela.' : 'Lo que ofrece tu escuela. El plan predeterminado se sugiere primero al matricular.'}</p>}
+          {Boolean(plans.data?.length) && <p className="hint">{student ? 'Elige un plan y contrátalo aquí: lo pagas por transferencia o en efectivo y queda activo cuando tu escuela confirme el pago.' : 'Lo que ofrece tu escuela. El plan predeterminado se sugiere primero al matricular.'}</p>}
         </div>
         {canEdit && Boolean(plans.data?.length) && (
           <Link className="btn btn--ghost" to="/app/planes/nuevo"><Icon name="plus" size={16} /> Nuevo plan</Link>
@@ -70,7 +80,7 @@ export function PlanesList() {
               <PlanCard student={student} className={`card plan-card${p.is_default && !student ? ' is-default' : ''}${myPlans.has(p.id) ? ' is-mine' : ''}${p.active ? '' : ' is-off'}`} to={`/app/planes/${p.id}`}>
                 <div className="plan-card__tags">
                   <span className="eyebrow">{p.specialty_id ? spName.get(p.specialty_id) ?? 'Disciplina' : 'Todas las disciplinas'}</span>
-                  {myPlans.has(p.id) && <span className="tag tag--ok">Tu plan</span>}
+                  {student ? <PlanStatus mine={myByPlan.get(p.id)} /> : myPlans.has(p.id) && <span className="tag tag--ok">Tu plan</span>}
                   {p.is_default && !student && <span className="tag tag--accent">Predeterminado</span>}
                   {p.is_trial && <span className="tag">Prueba</span>}
                   {!p.active && <span className="tag">Inactivo</span>}
@@ -84,6 +94,7 @@ export function PlanesList() {
                   {planFeatures(p).map((f) => <li key={f}>{f}</li>)}
                 </ul>
                 {p.description && <p className="hint plan-card__desc">{p.description}</p>}
+                {student && myStudent && <PlanActions plan={p} mine={myByPlan.get(p.id)} studentId={myStudent.id} schoolId={activeSchool.id} />}
               </PlanCard>
             </li>
           )

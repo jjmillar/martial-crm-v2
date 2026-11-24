@@ -1079,6 +1079,7 @@ export type Database = {
           notes: string | null;
           paid_at: string | null;
           receipt_path: string | null;
+          renews_enrollment: boolean;
           school_id: string;
           status: Database["public"]["Enums"]["payment_status"];
           student_id: string;
@@ -1102,6 +1103,7 @@ export type Database = {
           notes?: string | null;
           paid_at?: string | null;
           receipt_path?: string | null;
+          renews_enrollment?: boolean;
           school_id: string;
           status?: Database["public"]["Enums"]["payment_status"];
           student_id: string;
@@ -1124,6 +1126,7 @@ export type Database = {
           notes?: string | null;
           paid_at?: string | null;
           receipt_path?: string | null;
+          renews_enrollment?: boolean;
           school_id?: string;
           status?: Database["public"]["Enums"]["payment_status"];
           student_id?: string;
@@ -2522,6 +2525,10 @@ export type Database = {
         Args: { p_class_id: string; p_date: string };
         Returns: boolean;
       };
+      contract_plan: {
+        Args: { p_plan_id: string; p_student_id: string };
+        Returns: Json;
+      };
       create_school: {
         Args: { p_name: string; p_slug: string };
         Returns: {
@@ -2919,6 +2926,10 @@ export type Database = {
         Returns: undefined;
       };
       withdraw_achievement: { Args: { p_id: string }; Returns: undefined };
+      withdraw_plan_contract: {
+        Args: { p_enrollment_id: string; p_student_id: string };
+        Returns: Json;
+      };
     };
     Enums: {
       billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";
@@ -2930,7 +2941,7 @@ export type Database = {
         | "ninos"
         | "competicion";
       discount_scope: "pago" | "plan";
-      enrollment_status: "activa" | "pausada" | "cancelada";
+      enrollment_status: "activa" | "pausada" | "cancelada" | "pendiente";
       gender: "masculino" | "femenino" | "otro";
       payment_kind: "plan" | "matricula" | "otro";
       payment_method: "transferencia" | "efectivo" | "tarjeta" | "otro";
@@ -3079,7 +3090,7 @@ export const Constants = {
         "competicion",
       ],
       discount_scope: ["pago", "plan"],
-      enrollment_status: ["activa", "pausada", "cancelada"],
+      enrollment_status: ["activa", "pausada", "cancelada", "pendiente"],
       gender: ["masculino", "femenino", "otro"],
       payment_kind: ["plan", "matricula", "otro"],
       payment_method: ["transferencia", "efectivo", "tarjeta", "otro"],

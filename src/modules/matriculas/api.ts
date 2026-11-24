@@ -30,6 +30,7 @@ export async function getEnrollment(id: string): Promise<EnrollmentRow | null> {
 }
 
 function friendly(message: string): string {
+  if (message.includes('enrollments_one_pending')) return 'Este alumno ya tiene ese plan por pagar.'
   if (message.includes('enrollments_one_active')) return 'Este alumno ya tiene una inscripción activa en ese plan.'
   if (message.includes('enrollments_dates')) return 'El vencimiento no puede ser anterior al inicio.'
   if (message.includes('row-level security')) return 'No tienes permiso para esta acción.'
@@ -66,7 +67,7 @@ export async function deleteEnrollment(id: string): Promise<void> {
 }
 
 /** What the UI shows: the stored status plus "por vencer" / "vencida" derived from ends_at. */
-export type Phase = 'activa' | 'por_vencer' | 'vencida' | 'pausada' | 'cancelada'
+export type Phase = 'activa' | 'por_vencer' | 'vencida' | 'pausada' | 'cancelada' | 'pendiente'
 export const SOON_DAYS = 7
 
 export function phaseOf(e: Pick<Enrollment, 'status' | 'ends_at'>, today?: string): Phase {
@@ -79,5 +80,5 @@ export function phaseOf(e: Pick<Enrollment, 'status' | 'ends_at'>, today?: strin
 }
 
 export const phaseLabel: Record<Phase, string> = {
-  activa: 'Activa', por_vencer: 'Por vencer', vencida: 'Vencida', pausada: 'Pausada', cancelada: 'Cancelada',
+  activa: 'Activa', por_vencer: 'Por vencer', vencida: 'Vencida', pausada: 'Pausada', cancelada: 'Cancelada', pendiente: 'Por pagar',
 }
