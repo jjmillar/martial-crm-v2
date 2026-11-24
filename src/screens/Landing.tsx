@@ -124,6 +124,7 @@ export function Landing() {
 
       <footer className="landing__footer">
         <span>© {year} Martial CRM</span>
+        <nav className="landing__legal"><Link to="/terminos">Términos y condiciones</Link> · <Link to="/privacidad">Política de privacidad</Link></nav>
       </footer>
     </div>
   )

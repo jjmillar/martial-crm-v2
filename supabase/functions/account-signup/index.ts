@@ -10,10 +10,25 @@
  */
 
 import { clientIp, serveWithCors } from '../_shared/cors.ts'
-import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
+// Must match public.current_terms_version() and src/legal/legal.tsx (TERMS_VERSION).
+const TERMS_VERSION = '2026-11-24'
+const TERMS_ERROR = 'Para crear la cuenta debes aceptar los términos y la política de privacidad vigentes. Recarga la página e intenta de nuevo.'
+const termsOk = (body: Record<string, unknown>) => body.accept_terms === true && body.terms_version === TERMS_VERSION
+const yearsOld = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  const now = new Date()
+  return now.getUTCFullYear() - y - (now.getUTCMonth() + 1 < m || (now.getUTCMonth() + 1 === m && now.getUTCDate() < d) ? 1 : 0)
+}
+// Evidence of the acceptance (Ley 21.719): who, which version, when; guardian consent for children under 14.
+async function recordTerms(admin: SupabaseClient, userId: string, context: string, guardian = false) {
+  const { error } = await admin.from('terms_acceptances').insert({ user_id: userId, version: TERMS_VERSION, context, guardian_consent: guardian })
+  if (error) console.error('Terms acceptance error:', error)
+  return !error
+}
 const str = (v: unknown, max = 120) => (typeof v === 'string' ? v.trim().slice(0, max) : '')
 
 serveWithCors(async (req: Request) => {
@@ -41,6 +56,7 @@ serveWithCors(async (req: Request) => {
     const address = str(body.address, 200)
 
     if (!kind) return json({ error: 'Tipo de cuenta inválido.' }, 400)
+    if (!termsOk(body)) return json({ error: TERMS_ERROR }, 400)
     if (kind === 'alumno' && !slug) return json({ error: 'Falta la escuela.' }, 400)
     if (!first || !last) return json({ error: 'Completa nombre y apellido.' }, 400)
     if (!/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Correo inválido.' }, 400)
@@ -51,7 +67,9 @@ serveWithCors(async (req: Request) => {
       const today = new Date().toISOString().slice(0, 10)
       if (!/^\d{4}-\d{2}-\d{2}$/.test(birth) || birth < '1900-01-01' || birth > today) return json({ error: 'Fecha de nacimiento inválida.' }, 400)
       if (!address) return json({ error: 'Escribe tu dirección.' }, 400)
+      if (yearsOld(birth) < 14 && body.guardian_consent !== true) return json({ error: 'Para menores de 14 años, su padre, madre o representante legal debe dar el consentimiento.' }, 400)
     }
+    const guardianConsent = kind === 'alumno' && yearsOld(birth) < 14
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
     const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -86,6 +104,10 @@ serveWithCors(async (req: Request) => {
       return json({ error: weak ? 'La contraseña es muy débil: usa más caracteres, letras y números.' : 'No se pudo crear la cuenta.' }, 400)
     }
     const userId = created.user.id
+    if (!(await recordTerms(admin, userId, kind, guardianConsent))) {
+      await admin.auth.admin.deleteUser(userId)
+      return json({ error: 'No se pudo completar el registro.' }, 500)
+    }
 
     const { error: regError } = kind === 'ceo'
       ? await admin.rpc('register_owner', { p_user_id: userId })
@@ -116,6 +138,7 @@ async function claim(req: Request, body: Record<string, unknown>) {
   if (!/^[0-9A-F]{12}$/.test(code)) return json({ error: 'El código tiene 12 caracteres, por ejemplo 1A2B-3C4D-5E6F.' }, 400)
   if (!/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Correo inválido.' }, 400)
   if (password.length < 8) return json({ error: 'La contraseña debe tener al menos 8 caracteres.' }, 400)
+  if (!termsOk(body)) return json({ error: TERMS_ERROR }, 400)
 
   const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
   const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -138,6 +161,10 @@ async function claim(req: Request, body: Record<string, unknown>) {
   if (createError || !created?.user) {
     const weak = createError?.message?.toLowerCase().includes('password')
     return json({ error: weak ? 'La contraseña es muy débil: usa más caracteres, letras y números.' : 'No se pudo crear la cuenta.' }, 400)
+  }
+  if (!(await recordTerms(admin, created.user.id, 'claim'))) {
+    await admin.auth.admin.deleteUser(created.user.id)
+    return json({ error: 'No se pudo crear la cuenta.' }, 500)
   }
   const { error: claimError } = await admin.rpc('claim_student_as', { p_code: code, p_user: created.user.id, p_email: email })
   if (claimError) {

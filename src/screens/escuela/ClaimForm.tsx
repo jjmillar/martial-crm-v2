@@ -7,6 +7,8 @@ import { Icon } from '../../ui/Icon'
 const ACTIVE_SCHOOL_KEY = 'mcrm.activeSchool'
 
 import { formatClaimCode } from '../../lib/claimCode'
+import { TermsConsent } from '../../legal/TermsConsent'
+import { TERMS_VERSION } from '../../legal/legal'
 
 // A child whose guardian handed over the account: their own login with the code. The student record (attendance,
 // level, payments) is already there, so there is nothing to approve.
@@ -18,6 +20,7 @@ export function ClaimForm({ school, initialCode, onCancel }: { school: { id: str
   const [pw, setPw] = useState('')
   const [pw2, setPw2] = useState('')
   const [show, setShow] = useState(false)
+  const [terms, setTerms] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,8 +31,9 @@ export function ClaimForm({ school, initialCode, onCancel }: { school: { id: str
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError('Correo inválido.')
     if (pw.length < 8) return setError('La contraseña debe tener al menos 8 caracteres.')
     if (pw !== pw2) return setError('Las contraseñas no coinciden.')
+    if (!terms) return setError('Para activar la cuenta debes aceptar los términos y la política de privacidad.')
     setBusy(true)
-    const { error: fnError } = await supabase.functions.invoke('account-signup', { body: { kind: 'claim', school_slug: school.slug, code, email, password: pw } })
+    const { error: fnError } = await supabase.functions.invoke('account-signup', { body: { kind: 'claim', school_slug: school.slug, code, email, password: pw, accept_terms: true, terms_version: TERMS_VERSION } })
     if (fnError) {
       const ctx = (fnError as { context?: Response }).context
       const res = ctx ? await ctx.json().catch(() => null) : null
@@ -63,6 +67,7 @@ export function ClaimForm({ school, initialCode, onCancel }: { school: { id: str
         </div>
       </div>
       <div className="field"><label htmlFor="cl-pw2">Repite la contraseña</label><input id="cl-pw2" className="input" type={show ? 'text' : 'password'} autoComplete="new-password" value={pw2} onChange={(e) => { setPw2(e.target.value); setError(null) }} /></div>
+      <TermsConsent accepted={terms} onAccepted={(v) => { setTerms(v); setError(null) }} />
       {error && <p className="alert" role="alert">{error}</p>}
       <button className="btn" type="submit" disabled={busy}>{busy ? 'Activando…' : 'Activar mi cuenta'}</button>
       <p className="hint">¿No tienes código? <button type="button" className="link-btn" onClick={onCancel}>Crear cuenta de alumno</button> · <Link to={`/e/${school.slug}/ingresar`}>Iniciar sesión</Link></p>

@@ -295,6 +295,10 @@
 }
 
 .landing__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
   padding: 32px 0;
   font-size: 13px;
   color: var(--faint);
@@ -335,4 +339,8 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+}
+
+.landing__legal a {
+  color: var(--muted);
 }

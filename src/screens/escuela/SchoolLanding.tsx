@@ -102,6 +102,7 @@ function Page({ s }: { s: Landing }) {
 
       <footer className="sp-footer">
         <span>© {new Date().getFullYear()} {s.name}</span>
+        <Link to="/privacidad">Privacidad</Link>
         <Link to="/">Hecho con Martial CRM</Link>
       </footer>
     </div>

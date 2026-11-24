@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase'
 import { formatRut, normalizeRut } from '../lib/rut'
 import { Icon } from '../ui/Icon'
 import { todayIso, yearsSince } from '../lib/dates'
+import { TermsConsent } from '../legal/TermsConsent'
+import { TERMS_VERSION } from '../legal/legal'
 
 const ACTIVE_SCHOOL_KEY = 'mcrm.activeSchool'
 
@@ -23,11 +25,14 @@ export function SignupForm({ kind, school, head, loginTo, onClaim }: Props) {
   const navigate = useNavigate()
   const [f, setF] = useState({ first_name: '', middle_name: '', first_last_name: '', second_last_name: '', rut: '', email: '', phone: '', birth_date: '', address: '', password: '', password2: '' })
   const [show, setShow] = useState(false)
+  const [terms, setTerms] = useState(false)
+  const [guardian, setGuardian] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const set = (k: keyof typeof f, v: string) => { setF((x) => ({ ...x, [k]: v })); setError(null) }
   const student = kind === 'alumno'
   const age = yearsSince(f.birth_date || null)
+  const minor = student && age !== null && age >= 0 && age < 14
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -41,10 +46,13 @@ export function SignupForm({ kind, school, head, loginTo, onClaim }: Props) {
     if (student && !f.address.trim()) return setError('Escribe tu dirección.')
     if (f.password.length < 8) return setError('La contraseña debe tener al menos 8 caracteres.')
     if (f.password !== f.password2) return setError('Las contraseñas no coinciden.')
+    if (!terms) return setError('Para crear la cuenta debes aceptar los términos y la política de privacidad.')
+    if (minor && !guardian) return setError('Para menores de 14 años, su padre, madre o representante legal debe dar el consentimiento.')
     setBusy(true)
     const { error: fnError } = await supabase.functions.invoke('account-signup', {
       body: { kind, school_slug: school?.slug, first_name: f.first_name, first_last_name: f.first_last_name, rut,
-        ...(student ? { middle_name: f.middle_name, second_last_name: f.second_last_name, birth_date: f.birth_date, address: f.address } : {}), email: f.email, phone: f.phone, password: f.password },
+        ...(student ? { middle_name: f.middle_name, second_last_name: f.second_last_name, birth_date: f.birth_date, address: f.address } : {}), email: f.email, phone: f.phone, password: f.password,
+        accept_terms: true, terms_version: TERMS_VERSION, guardian_consent: minor && guardian },
     })
     if (fnError) {
       const ctx = (fnError as { context?: Response }).context
@@ -102,6 +110,7 @@ export function SignupForm({ kind, school, head, loginTo, onClaim }: Props) {
         </div>
       </div>
       <div className="field"><label htmlFor="r-pw2">Repite la contraseña</label><input id="r-pw2" className="input" type={show ? 'text' : 'password'} autoComplete="new-password" value={f.password2} onChange={(e) => set('password2', e.target.value)} /></div>
+      <TermsConsent accepted={terms} onAccepted={(v) => { setTerms(v); setError(null) }} minor={minor} guardian={guardian} onGuardian={(v) => { setGuardian(v); setError(null) }} />
       {error && <p className="alert" role="alert">{error}</p>}
       <button className="btn" type="submit" disabled={busy}>{busy ? 'Creando cuenta…' : 'Crear cuenta'}</button>
       <p className="hint">¿Ya tienes cuenta? <Link to={loginTo}>Inicia sesión</Link></p>

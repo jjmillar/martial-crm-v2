@@ -2303,6 +2303,34 @@ export type Database = {
           },
         ];
       };
+      terms_acceptances: {
+        Row: {
+          accepted_at: string;
+          context: string;
+          guardian_consent: boolean;
+          id: string;
+          user_id: string;
+          version: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          accepted_at?: string;
+          context: string;
+          guardian_consent?: boolean;
+          id?: string;
+          user_id: string;
+          version: string;
+        };
+        Update: {
+          accepted_at?: string;
+          context?: string;
+          guardian_consent?: boolean;
+          id?: string;
+          user_id?: string;
+          version?: string;
+        };
+        Relationships: [];
+      };
       trial_bookings: {
         Row: {
           class_id: string | null;
@@ -2382,6 +2410,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      accept_terms: { Args: { p_version: string }; Returns: undefined };
       add_school_art: {
         Args: { p_school_id: string; p_template_key: string };
         Returns: string;
@@ -2540,6 +2569,10 @@ export type Database = {
         };
       };
       create_student_claim: { Args: { p_student_id: string }; Returns: Json };
+      current_terms_version: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
       decide_account_request: {
         Args: {
           p_approve: boolean;

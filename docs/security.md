@@ -63,6 +63,7 @@ aunque la funcionalidad esté lista.
 | Encabezados | CSP (sin `unsafe-eval`, `frame-ancestors 'none'`), HSTS, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, COOP | `next.config.ts` |
 | CORS | Lista de orígenes permitidos en vez de `*` | `supabase/functions/_shared/cors.ts` |
 | Archivos | Logos sin SVG; comprobantes en un bucket privado por escuela | migraciones `*_storage.sql` |
+| Términos y privacidad (Ley 21.719) | Toda cuenta nueva acepta la versión vigente; queda `terms_acceptances` (usuario, versión, fecha, contexto y consentimiento del apoderado para menores de 14). Sin IP ni navegador. Solo lectura de la propia fila; se borra con la cuenta. La Edge Function rechaza registros sin aceptación | `20261124000005_terms_acceptance.sql`, `account-signup`, `src/legal` |
 | Dependencias | `zod` ≥ 4.6.7 (GHSA-mrhx-c7xc-m3w5) | `package.json` |
 
 ## Pendiente (decisión o plan del dueño)
