@@ -1,21 +1,19 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from '../../lib/nav'
 import { addDays, longDate, todayIso } from '../../lib/dates'
 import { hhmm } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
-import { incompleteKey, incompleteSessions, INCOMPLETE_DAYS, sessionKey, setNotHeld, type IncompleteSession } from '../asistencia/api'
+import { incompleteKey, incompleteSessions, INCOMPLETE_DAYS, setNotHeld, type IncompleteSession } from '../asistencia/api'
+import { useSessionPopup } from '../asistencia/SessionPopup'
+import { classesKey, listClasses } from '../clases/api'
 
 const when = (date: string, today: string) =>
   date === today ? 'Hoy' : date === addDays(today, -1) ? 'Ayer' : longDate(date)
 
-/** Asistencia link that opens that class's card directly. */
-export const takeAttendanceHref = (s: Pick<IncompleteSession, 'class_id' | 'date' | 'start_time'>) =>
-  `/app/asistencia?vista=day&fecha=${s.date}&clase=${encodeURIComponent(sessionKey(s.class_id, s.date, s.start_time))}`
-
 /**
  * Tareas → Clases sin asistencia: classes that already ended (last 7 days) without a single confirmed attendee. A class
- * is complete once it has at least one; if it did not take place, "No se hizo" takes it off the list.
+ * is complete once it has at least one; if it did not take place, "No se hizo" takes it off the list. "Tomar asistencia"
+ * opens the same class pop-up as Asistencia, right here (docs/ui-standards.md §6).
  */
 export function ClasesSinAsistencia({ schoolId }: { schoolId: string }) {
   const qc = useQueryClient()
@@ -36,6 +34,12 @@ export function ClasesSinAsistencia({ schoolId }: { schoolId: string }) {
     onError: (e: Error) => setMsg({ ok: false, text: e.message }),
   })
   const list = q.data ?? []
+  const classes = useQuery({ queryKey: classesKey(schoolId), queryFn: () => listClasses(schoolId) })
+  const popup = useSessionPopup(schoolId)
+  const openSession = (s: IncompleteSession) => {
+    const cls = classes.data?.find((c) => c.id === s.class_id)
+    if (cls) popup.openSession({ cls, date: s.date, start_time: s.start_time, end_time: s.end_time, scheduleId: s.schedule_id })
+  }
   const undoRow = (id: string) => ({ id } as IncompleteSession)
 
   if (q.isLoading) return null
@@ -66,13 +70,14 @@ export function ClasesSinAsistencia({ schoolId }: { schoolId: string }) {
                 {s.pending > 0 && <span className="hint"><span className="tag tag--wait">{s.pending} por aprobar</span> Apruébalas arriba para completarla.</span>}
               </span>
               <span className="appr__actions">
-                <Link className="btn" to={takeAttendanceHref(s)}><Icon name="check" size={16} /> Tomar asistencia</Link>
+                <button type="button" className="btn" disabled={!classes.isSuccess} onClick={() => openSession(s)}><Icon name="check" size={16} /> Tomar asistencia</button>
                 <button type="button" className="btn btn--ghost" disabled={notHeld.isPending} onClick={() => notHeld.mutate({ s, value: true })}>No se hizo</button>
               </span>
             </li>
           ))}
         </ul>
       )}
+      {popup.dialog}
     </section>
   )
 }

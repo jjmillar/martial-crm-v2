@@ -81,3 +81,12 @@ Every screen that moves through days, weeks or months uses `<DateNav view date o
 - a small "Hoy" button appears only when you moved to another period.
 
 The app is minimalist: controls stay compact and never take more space than they need.
+
+## 6. Actions open a pop-up in place (never jump to another menu)
+
+The user's decision of 2026-11-24: "que no se vaya a otro menú esa opción. Recuerda esta lógica para cada menú."
+
+- An action on an item (take attendance, approve, edit, add) opens a `<Modal>` **in the menu you are in**, with the editable information. Reuse the module's own dialog: for example, Tareas opens Asistencia's `SessionDialog`.
+- Going to another menu is optional, secondary, and always said explicitly. The pop-up ends with `<MoreLink text menu to />` (`src/ui/MoreLink.tsx`), which shows: "Para más información, ver todas las clases de ese día en Asistencia →".
+- Plain navigation is fine for menu entries, "Ver todas"/"Historial" headers, and opening a record from its own list (Alumnos → ficha).
+- After the pop-up closes, refresh the list it came from, so a finished item leaves it.

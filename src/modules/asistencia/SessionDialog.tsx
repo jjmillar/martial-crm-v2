@@ -7,6 +7,7 @@ import { longDate, todayIso } from '../../lib/dates'
 import { hhmm } from '../../lib/weekdays'
 import { Icon } from '../../ui/Icon'
 import { Modal } from '../../ui/Modal'
+import { MoreLink, type More } from '../../ui/MoreLink'
 import { flash } from '../../ui/flashEvent'
 import { Toggle } from '../../ui/Toggle'
 import { listStudents, studentsKey } from '../alumnos/api'
@@ -17,16 +18,21 @@ import { attendanceKey, classStarted, incompleteKey, reviewAttendance, listAtten
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
-type Props = { session: Session | null; open: boolean; onClose: () => void; trials: TrialBooking[] }
+type Props = {
+  session: Session | null; open: boolean; onClose: () => void; trials: TrialBooking[]
+  /** Opened from another menu: a secondary "Para más información…" link at the bottom (docs/ui-standards.md §6). */
+  more?: More
+}
 
 /**
  * One class on one date, opened from its card in Asistencia: trial classes booked for it (with the visitor's
  * details), the attendance list (marking attendees happens only here), and the class's skills and description.
  */
-export function SessionDialog({ session, open, onClose, trials }: Props) {
+export function SessionDialog({ session, open, onClose, trials, more }: Props) {
   return (
     <Modal open={open} onClose={onClose} wide label={session ? `${view(session).name}, ${longDate(session.date)}` : 'Clase'}>
       {session && <SessionBody key={session.key} session={session} trials={trials} onClose={onClose} />}
+      {session && more && <MoreLink {...more} />}
     </Modal>
   )
 }

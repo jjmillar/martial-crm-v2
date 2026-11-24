@@ -348,6 +348,23 @@ textarea.input {
   gap: 12px;
 }
 
+/* Optional way out of a pop-up opened from another menu (docs/ui-standards.md §6) */
+.modal__more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin: 20px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+.modal__more .link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .modal::backdrop {
   background: rgb(0 0 0 / 0.55);
   backdrop-filter: blur(4px);

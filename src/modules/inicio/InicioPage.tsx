@@ -15,6 +15,7 @@ import { listPayments, paymentsKey } from '../pagos/api'
 import { StudentHome } from '../portal/StudentPortal'
 import { useApprovalsCount } from '../tareas/api'
 import { SchoolFilter } from '../../ui/SchoolFilter'
+import { useSessionPopup } from '../asistencia/SessionPopup'
 
 async function weekAttendance(schoolId: string, from: string): Promise<number> {
   const { count, error } = await supabase.from('attendance').select('id', { count: 'exact', head: true }).eq('school_id', schoolId).gte('date', from)
@@ -38,6 +39,8 @@ function StaffHome() {
   const today = todayIso()
   const weekStart = startOfWeek(today)
   const on = Boolean(schoolId)
+  // "Asistencia" on today's classes opens the class pop-up here (docs/ui-standards.md §6).
+  const popup = useSessionPopup(schoolId)
 
   const students = useQuery({ queryKey: studentsKey(schoolId), queryFn: () => listStudents(schoolId!), enabled: on })
   const enrollments = useQuery({ queryKey: enrollmentsKey(schoolId), queryFn: () => listEnrollments(schoolId!), enabled: on })
@@ -131,7 +134,7 @@ function StaffHome() {
                   <li key={s.id} style={{ ['--class-color' as string]: c.color }}>
                     <span className="today-list__time">{hhmm(s.start_time)}</span>
                     <span className="today-list__name"><strong>{c.name}</strong><span className="hint">{c.teacher?.full_name ?? 'Sin profesor'}</span></span>
-                    <Link className="btn btn--ghost" to={`/app/asistencia?clase=${c.id}&fecha=${today}`}>Asistencia</Link>
+                    <button type="button" className="btn btn--ghost" onClick={() => popup.openSession({ cls: c, date: today, start_time: s.start_time, end_time: s.end_time, scheduleId: s.id })}>Asistencia</button>
                   </li>
                 ))}
               </ul>
@@ -162,6 +165,7 @@ function StaffHome() {
           </section>
         </>
       )}
+      {popup.dialog}
     </div>
   )
 }

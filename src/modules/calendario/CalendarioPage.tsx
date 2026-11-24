@@ -8,6 +8,7 @@ import { hhmm, isoWeekday, weekdayShort } from '../../lib/weekdays'
 import { DateNav } from '../../ui/DateNav'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
 import { SchoolFilter } from '../../ui/SchoolFilter'
+import { useSessionPopup, type SessionTarget } from '../asistencia/SessionPopup'
 
 type View = 'day' | 'week' | 'month'
 type Slot = { id: string; cls: ClassFull; start: string; end: string; weekday: number }
@@ -19,6 +20,8 @@ export function CalendarioPage() {
   const schoolId = activeSchool?.id
   const [params, setParams] = useSearchParams()
   const classes = useQuery({ queryKey: classesKey(schoolId), queryFn: () => listClasses(schoolId!), enabled: Boolean(schoolId) })
+  // "Asistencia" on a class opens its pop-up here, without leaving Calendario.
+  const popup = useSessionPopup(schoolId)
 
   // View and date live in the URL so the back button and shared links work.
   // The URL wins; otherwise the last view chosen on this device (else the school's default) and this session's date.
@@ -69,7 +72,7 @@ export function CalendarioPage() {
         </div>
       )}
 
-      {slotsByDay.size > 0 && view === 'day' && <DayList date={date} slots={slotsOn(date)} />}
+      {slotsByDay.size > 0 && view === 'day' && <DayList date={date} slots={slotsOn(date)} onOpen={popup.openSession} />}
 
       {slotsByDay.size > 0 && view === 'week' && (
         <>
@@ -78,7 +81,7 @@ export function CalendarioPage() {
             {Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)).map((d) => (
               <section key={d} className={`cal-agenda__day${d === today ? ' is-today' : ''}`}>
                 <h3>{longDate(d)}</h3>
-                {slotsOn(d).length ? <SlotList date={d} slots={slotsOn(d)} /> : <p className="hint">Sin clases</p>}
+                {slotsOn(d).length ? <SlotList date={d} slots={slotsOn(d)} onOpen={popup.openSession} /> : <p className="hint">Sin clases</p>}
               </section>
             ))}
           </div>
@@ -112,12 +115,13 @@ export function CalendarioPage() {
           })}
         </div>
       )}
+      {popup.dialog}
     </div>
   )
 }
 
 
-function SlotList({ date, slots }: { date: string; slots: Slot[] }) {
+function SlotList({ date, slots, onOpen }: { date: string; slots: Slot[]; onOpen: (t: SessionTarget) => void }) {
   return (
     <ul className="cal-slots">
       {slots.map((s) => (
@@ -128,7 +132,7 @@ function SlotList({ date, slots }: { date: string; slots: Slot[] }) {
             <span className="hint">{[s.cls.teacher?.full_name, s.cls.room].filter(Boolean).join(' · ') || 'Sin profesor'}</span>
           </span>
           <span className="cal-slots__actions">
-            <Link className="btn btn--ghost" to={`/app/asistencia?clase=${s.cls.id}&fecha=${date}`}>Asistencia</Link>
+            <button type="button" className="btn btn--ghost" onClick={() => onOpen({ cls: s.cls, date, start_time: s.start, end_time: s.end, scheduleId: s.id })}>Asistencia</button>
           </span>
         </li>
       ))}
@@ -136,9 +140,9 @@ function SlotList({ date, slots }: { date: string; slots: Slot[] }) {
   )
 }
 
-function DayList({ date, slots }: { date: string; slots: Slot[] }) {
+function DayList({ date, slots, onOpen }: { date: string; slots: Slot[]; onOpen: (t: SessionTarget) => void }) {
   if (!slots.length) return <p className="card hint">Sin clases este día.</p>
-  return <SlotList date={date} slots={slots} />
+  return <SlotList date={date} slots={slots} onOpen={onOpen} />
 }
 
 /** Desktop week: hour grid with absolutely positioned blocks. Hidden on phones (agenda is shown instead). */
