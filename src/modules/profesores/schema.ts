@@ -10,6 +10,7 @@ export type TeacherForm = {
   email: string
   phone: string
   belt: string
+  belt_id: string
   belt_degree: string
   bio: string
   user_id: string
@@ -18,12 +19,12 @@ export type TeacherForm = {
 
 export const emptyTeacher: TeacherForm = {
   first_name: '', first_last_name: '', second_last_name: '', rut: '', email: '', phone: '',
-  belt: '', belt_degree: '', bio: '', user_id: '', active: true,
+  belt: '', belt_id: '', belt_degree: '', bio: '', user_id: '', active: true,
 }
 
 export const formFromTeacher = (t: TeacherWithSpecialties): TeacherForm => ({
   first_name: t.first_name, first_last_name: t.first_last_name, second_last_name: t.second_last_name ?? '',
-  rut: formatRut(t.rut), email: t.email ?? '', phone: t.phone ?? '', belt: t.belt ?? '',
+  rut: formatRut(t.rut), email: t.email ?? '', phone: t.phone ?? '', belt: t.belt ?? '', belt_id: t.belt_id ?? '',
   belt_degree: t.belt_degree?.toString() ?? '', bio: t.bio ?? '', user_id: t.user_id ?? '', active: t.active,
 })
 
@@ -46,6 +47,7 @@ const schema = z.object({
   email: text.refine((v) => v === '' || /^\S+@\S+\.\S+$/.test(v), 'Correo inválido.').transform((v) => (v === '' ? null : v.toLowerCase())),
   phone: optional,
   belt: optional,
+  belt_id: optional,
   belt_degree: text.transform((v, ctx) => {
     if (v === '') return null
     const n = Number(v)

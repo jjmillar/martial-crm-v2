@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Icon } from '../../ui/Icon'
 import { Modal } from '../../ui/Modal'
 import { Toggle } from '../../ui/Toggle'
-import { BeltBar } from './Belt'
+import { BeltBar, BeltEmote } from './Belt'
 import {
   addFromTemplate, artsKey, createArt, DEGREE_NAMES, deleteArt, deleteBelt, degreeText, listArts, listTemplates, moveBelt, saveBelt,
   templatesKey, TRACKS, updateArt, type Art, type Belt, type BeltDraft, type Track,
@@ -75,6 +75,12 @@ export function ArtesMarciales({ schoolId }: { schoolId: string }) {
   )
 }
 
+const BELT_COLORS = [
+  { name: 'Blanco', hex: '#f4f4f7' }, { name: 'Gris', hex: '#8a8a92' }, { name: 'Amarillo', hex: '#e8c547' },
+  { name: 'Naranja', hex: '#e8873a' }, { name: 'Verde', hex: '#3fb27f' }, { name: 'Azul', hex: '#3d7be0' },
+  { name: 'Morado', hex: '#8a5cd6' }, { name: 'Café', hex: '#7a5134' }, { name: 'Rojo', hex: '#e0492c' }, { name: 'Negro', hex: '#0b0b0d' },
+]
+
 type BeltEdit = { belt?: Belt; draft: BeltDraft }
 
 function ArtCard({ art, templateName, onChange }: { art: Art; templateName: string | null; onChange: () => unknown }) {
@@ -97,8 +103,8 @@ function ArtCard({ art, templateName, onChange }: { art: Art; templateName: stri
     setEdit({
       belt,
       draft: belt
-        ? { name: belt.name, color: belt.color, stripe: belt.stripe, max_degree: belt.max_degree, degree_name: belt.degree_name, rank_label: belt.rank_label, track: belt.track }
-        : { name: '', color: '#f4f4f7', stripe: null, max_degree: 0, degree_name: last?.degree_name ?? 'grado', rank_label: null, track },
+        ? { name: belt.name, color: belt.color, stripe: belt.stripe, bar: belt.bar, pattern: belt.pattern, max_degree: belt.max_degree, degree_name: belt.degree_name, rank_label: belt.rank_label, track: belt.track }
+        : { name: '', color: '#f4f4f7', stripe: null, bar: null, pattern: 'banda', max_degree: 0, degree_name: last?.degree_name ?? 'grado', rank_label: null, track },
     })
     setOpen(true)
   }
@@ -143,7 +149,7 @@ function ArtCard({ art, templateName, onChange }: { art: Art; templateName: stri
               {belts.map((b) => (
                 <li key={b.id}>
                   <button type="button" className="belt-pick" onClick={() => openBelt(t.id, b)} aria-label={`Editar cinturón ${b.name} (${t.label})`}>
-                    <BeltBar color={b.color} stripe={b.stripe} />
+                    <BeltBar color={b.color} stripe={b.stripe} bar={b.bar} pattern={b.pattern} />
                     <span>{b.name}</span>
                     {(b.rank_label || b.max_degree > 0) && <span className="hint">{[b.rank_label, b.max_degree > 0 && `hasta ${degreeText(b.max_degree, b.degree_name)}`].filter(Boolean).join(' · ')}</span>}
                   </button>
@@ -171,6 +177,11 @@ function BeltForm({ art, edit, onDone, onClose }: { art: Art; edit: BeltEdit; on
   const [error, setError] = useState<string | null>(null)
   const [confirm, setConfirm] = useState(false)
   const set = <K extends keyof BeltDraft>(k: K, v: BeltDraft[K]) => setD((x) => ({ ...x, [k]: v }))
+  // Generic colors; a new black belt comes ready for dans.
+  const pickColor = (c: { name: string; hex: string }) => setD((x) => ({
+    ...x, color: c.hex, name: x.name || c.name,
+    ...(c.hex === '#0b0b0d' && x.max_degree === 0 ? { max_degree: 10, degree_name: 'dan' as const } : {}),
+  }))
   const siblings = art.belts.filter((b) => b.track === d.track)
   const idx = edit.belt ? siblings.findIndex((b) => b.id === edit.belt!.id) : -1
 
@@ -190,7 +201,11 @@ function BeltForm({ art, edit, onDone, onClose }: { art: Art; edit: BeltEdit; on
         <span className="eyebrow">{art.name} · {TRACKS.find((t) => t.id === d.track)?.label}</span>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
       </div>
-      <div className="belt-preview"><BeltBar color={d.color} stripe={d.stripe} degree={d.max_degree} size="lg" /><b>{d.name || 'Nuevo cinturón'}</b></div>
+      <div className="belt-preview">
+        <BeltEmote color={d.color} stripe={d.stripe} bar={d.bar} pattern={d.pattern} degree={d.max_degree} size={64} />
+        <BeltBar color={d.color} stripe={d.stripe} bar={d.bar} pattern={d.pattern} degree={d.max_degree} size="lg" />
+        <b>{d.name || 'Nuevo cinturón'}</b>
+      </div>
       <form className="belt-form" onSubmit={(e) => { e.preventDefault(); save.mutate() }} noValidate>
         <div className="form-grid">
           <div className="field">
@@ -201,16 +216,40 @@ function BeltForm({ art, edit, onDone, onClose }: { art: Art; edit: BeltEdit; on
             <label htmlFor="bf-rank">Grado oficial (opcional)</label>
             <input id="bf-rank" className="input" maxLength={30} value={d.rank_label ?? ''} onChange={(e) => set('rank_label', e.target.value)} placeholder="Ej: 5º kyu" />
           </div>
-          <div className="field">
-            <label htmlFor="bf-color">Color</label>
-            <input id="bf-color" className="input input--color" type="color" value={d.color} onChange={(e) => set('color', e.target.value.toLowerCase())} />
+          <div className="field field--wide">
+            <span className="field__label" id="bf-color-l">Color</span>
+            <div className="belt-swatches" role="group" aria-labelledby="bf-color-l">
+              {BELT_COLORS.map((c) => (
+                <button key={c.hex} type="button" className="belt-swatch" style={{ background: c.hex }} aria-pressed={d.color === c.hex} title={c.name} aria-label={c.name}
+                  onClick={() => pickColor(c)} />
+              ))}
+              <input id="bf-color" className="input input--color" type="color" value={d.color} onChange={(e) => set('color', e.target.value.toLowerCase())} aria-label="Otro color" title="Otro color" />
+            </div>
           </div>
           <div className="field">
-            <label htmlFor="bf-stripe">Franja al medio</label>
+            <label htmlFor="bf-stripe">Segundo color</label>
             <div className="belt-form__stripe">
               <Toggle inline checked={d.stripe !== null} onChange={(v) => set('stripe', v ? '#f4f4f7' : null)} label={d.stripe ? 'Sí' : 'No'} />
-              {d.stripe !== null && <input id="bf-stripe" className="input input--color" type="color" value={d.stripe} onChange={(e) => set('stripe', e.target.value.toLowerCase())} aria-label="Color de la franja" />}
+              {d.stripe !== null && <input id="bf-stripe" className="input input--color" type="color" value={d.stripe} onChange={(e) => set('stripe', e.target.value.toLowerCase())} aria-label="Segundo color" />}
             </div>
+          </div>
+          {d.stripe !== null && (
+            <div className="field">
+              <label htmlFor="bf-pattern">Cómo va</label>
+              <select id="bf-pattern" className="input" value={d.pattern} onChange={(e) => set('pattern', e.target.value as BeltDraft['pattern'])}>
+                <option value="banda">Franja a lo largo</option>
+                <option value="punta">En la punta</option>
+                <option value="paneles">Por bloques</option>
+              </select>
+            </div>
+          )}
+          <div className="field">
+            <label htmlFor="bf-bar">Barra de grados</label>
+            <div className="belt-form__stripe">
+              <Toggle inline checked={d.bar !== null} onChange={(v) => set('bar', v ? (d.color === '#0b0b0d' ? '#e0492c' : '#0b0b0d') : null)} label={d.bar ? 'Sí' : 'No'} />
+              {d.bar !== null && <input id="bf-bar" className="input input--color" type="color" value={d.bar} onChange={(e) => set('bar', e.target.value.toLowerCase())} aria-label="Color de la barra" />}
+            </div>
+            <span className="hint">{d.bar ? 'Los grados se marcan sobre la barra, como en BJJ.' : 'Sin barra, los grados se marcan dorados en la punta.'}</span>
           </div>
           <div className="field">
             <label htmlFor="bf-max">Grados máximos</label>

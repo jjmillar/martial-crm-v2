@@ -28,9 +28,9 @@ export type StudentProfile = {
   stats: { xp: number; level: number; level_xp: number; attended: number } | null
   skills: { label: string; icon: string | null; xp: number }[] | null
   /** Belt per art (when show_belt). Absent in profiles cached before 2026-11-24. */
-  arts?: { art: string; belt: string | null; color: string | null; stripe: string | null; degree: number; degree_text: string | null; rank: string | null; track: string | null }[] | null
+  arts?: { art: string; belt: string | null; color: string | null; stripe: string | null; bar?: string | null; pattern?: string | null; degree: number; degree_text: string | null; rank: string | null; track: string | null }[] | null
   /** Approved achievements and computed milestones (when show_achievements). */
-  achievements?: { kind: 'graduacion' | 'torneo' | 'escuela'; title: string; detail: string | null; date: string; medal: string | null; category: string | null; art: string | null; color: string | null; stripe: string | null; icon: string | null }[] | null
+  achievements?: { kind: 'graduacion' | 'torneo' | 'escuela'; title: string; detail: string | null; date: string; medal: string | null; category: string | null; art: string | null; color: string | null; stripe: string | null; bar?: string | null; pattern?: string | null; icon: string | null }[] | null
   milestones?: { key: string; kind: string; title: string; icon: string; date: string }[] | null
   school: { slug: string; name: string; logo_url: string | null; city: string | null; theme: string; primary: string | null; accent: string | null; landing: boolean }
 }

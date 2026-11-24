@@ -38,7 +38,16 @@ check('admin edits a belt of the school', r.ok && r.affected === 1, r.err)
 check('the original catalog is unchanged', (await db.query(`select count(*)::int c from public.belt_templates where art_key='judo' and name='Amarillo'`)).rows[0].c === 2)
 const own = await tryAs(db, ADM, `insert into public.school_arts (school_id, name) values ($1,'Kickboxing') returning id`, [sc])
 check('admin creates an own art', own.ok, own.err)
-check('admin adds a belt to it', (await tryAs(db, ADM, `insert into public.school_belts (school_id, art_id, track, position, name, color) values ($1,$2,'adultos',1,'Blanco','#f4f4f7')`, [sc, own.rows[0].id])).ok)
+const gen = (await db.query(`select track, name, max_degree, degree_name from public.school_belts where art_id=$1 order by track, position`, [own.rows[0].id])).rows
+check('an own art starts with generic belts (adults 7 incl. black, kids 6)', gen.filter((x) => x.track === 'adultos').length === 7 && gen.filter((x) => x.track === 'kids').length === 6, gen.length)
+check('its black belt allows up to 10 dan', gen.some((x) => x.track === 'adultos' && x.name === 'Negro' && x.max_degree === 10 && x.degree_name === 'dan'))
+check('admin adds a belt to it', (await tryAs(db, ADM, `insert into public.school_belts (school_id, art_id, track, position, name, color) values ($1,$2,'adultos',8,'Rojo','#e0492c')`, [sc, own.rows[0].id])).ok)
+const bjjBlack = (await db.query(`select color, stripe, bar, pattern from public.belt_templates where art_key='bjj' and track='adultos' and name='Negro'`)).rows[0]
+check('BJJ black belt: black with the red bar', bjjBlack.color === '#0b0b0d' && bjjBlack.stripe === null && bjjBlack.bar === '#e0492c' && bjjBlack.pattern === 'banda', bjjBlack)
+check('BJJ blue belt has the black bar', (await db.query(`select bar from public.belt_templates where art_key='bjj' and track='adultos' and name='Azul'`)).rows[0].bar === '#0b0b0d')
+check('coral and judo red-white are panels, TKD punta is a tip', (await db.query(`select count(*)::int c from public.belt_templates where pattern='paneles'`)).rows[0].c === 3
+  && (await db.query(`select count(*)::int c from public.belt_templates where pattern='punta'`)).rows[0].c === 10)
+check('ITF/Kyokushin franja → bar of the next color', (await db.query(`select bar, stripe from public.belt_templates where art_key='taekwondo_itf' and track='adultos' and name='Verde franja azul'`)).rows[0].bar === '#3d7be0')
 check('a "usuario" member cannot edit belts', (await tryAs(db, USR, `update public.school_belts set name = 'X' where school_id = $1`, [sc])).affected === 0)
 check('bad color rejected', !(await tryAs(db, ADM, `update public.school_belts set color = 'red' where art_id = $1`, [judoId])).ok)
 check('another school sees none', (await as(db, OWNER2, `select count(*)::int c from public.school_belts where school_id = $1`, [sc])).rows[0].c === 0)
@@ -115,4 +124,9 @@ const hidden = (await as(db, null, `select public.student_public_profile('dojo-u
 check('achievements can be hidden', hidden.achievements === null && hidden.milestones === null)
 check('old 8-argument save still works', (await tryAs(db, STU, `select public.save_my_public_profile($1,'camila',true,null,null,true,true,true)`, [st])).ok)
 check('internal milestones function is not exposed', !(await tryAs(db, STU, `select public.student_milestones($1)`, [st])).ok)
+// Teachers pick their belt from the school's arts (same school only).
+const blackBelt = (await db.query(`select id from public.school_belts where art_id=$1 and track='adultos' and name='Negro'`, [own.rows[0].id])).rows[0].id
+const tch = await tryAs(db, OWNER, `insert into public.teachers (school_id, first_name, first_last_name, belt_id, belt_degree) values ($1,'Ana','Soto',$2,3) returning id`, [sc, blackBelt])
+check("a teacher gets a belt of the school's arts", tch.ok, tch.err)
+check("a teacher can't use another school's belt", !(await tryAs(db, OWNER2, `insert into public.teachers (school_id, first_name, first_last_name, belt_id) values ($1,'Luis','Mora',$2)`, [sc2, blackBelt])).ok)
 report()

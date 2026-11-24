@@ -35,7 +35,7 @@ export function StudentArtsEditor({ arts, rows, onChange, canConfigure, error }:
           return (
             <li key={r.art_id} className="sarts__row">
               <div className="sarts__head">
-                {belt ? <BeltBar color={belt.color} stripe={belt.stripe} degree={Number(r.degree || 0)} size="lg" /> : <span className="beltbar beltbar--lg beltbar--empty" aria-hidden="true" />}
+                {belt ? <BeltBar color={belt.color} stripe={belt.stripe} bar={belt.bar} pattern={belt.pattern} degree={Number(r.degree || 0)} size="lg" /> : <span className="beltbar beltbar--lg beltbar--empty" aria-hidden="true" />}
                 <strong>{art?.name ?? 'Arte marcial'}</strong>
                 <button type="button" className="icon-btn" onClick={() => onChange(rows.filter((_, j) => j !== i))} aria-label={`Quitar ${art?.name ?? 'arte marcial'}`} title="Quitar"><Icon name="close" size={16} /></button>
               </div>

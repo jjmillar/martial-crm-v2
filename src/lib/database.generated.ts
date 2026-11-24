@@ -318,11 +318,13 @@ export type Database = {
       belt_templates: {
         Row: {
           art_key: string;
+          bar: string | null;
           color: string;
           degree_name: string;
           id: number;
           max_degree: number;
           name: string;
+          pattern: string;
           position: number;
           rank_label: string | null;
           stripe: string | null;
@@ -331,11 +333,13 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           art_key: string;
+          bar?: string | null;
           color: string;
           degree_name?: string;
           id?: number;
           max_degree?: number;
           name: string;
+          pattern?: string;
           position: number;
           rank_label?: string | null;
           stripe?: string | null;
@@ -343,11 +347,13 @@ export type Database = {
         };
         Update: {
           art_key?: string;
+          bar?: string | null;
           color?: string;
           degree_name?: string;
           id?: number;
           max_degree?: number;
           name?: string;
+          pattern?: string;
           position?: number;
           rank_label?: string | null;
           stripe?: string | null;
@@ -1443,12 +1449,14 @@ export type Database = {
       school_belts: {
         Row: {
           art_id: string;
+          bar: string | null;
           color: string;
           created_at: string;
           degree_name: string;
           id: string;
           max_degree: number;
           name: string;
+          pattern: string;
           position: number;
           rank_label: string | null;
           school_id: string;
@@ -1458,12 +1466,14 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           art_id: string;
+          bar?: string | null;
           color: string;
           created_at?: string;
           degree_name?: string;
           id?: string;
           max_degree?: number;
           name: string;
+          pattern?: string;
           position?: number;
           rank_label?: string | null;
           school_id: string;
@@ -1472,12 +1482,14 @@ export type Database = {
         };
         Update: {
           art_id?: string;
+          bar?: string | null;
           color?: string;
           created_at?: string;
           degree_name?: string;
           id?: string;
           max_degree?: number;
           name?: string;
+          pattern?: string;
           position?: number;
           rank_label?: string | null;
           school_id?: string;
@@ -2235,6 +2247,7 @@ export type Database = {
           active: boolean;
           belt: string | null;
           belt_degree: number | null;
+          belt_id: string | null;
           bio: string | null;
           created_at: string;
           email: string | null;
@@ -2255,6 +2268,7 @@ export type Database = {
           active?: boolean;
           belt?: string | null;
           belt_degree?: number | null;
+          belt_id?: string | null;
           bio?: string | null;
           created_at?: string;
           email?: string | null;
@@ -2274,6 +2288,7 @@ export type Database = {
           active?: boolean;
           belt?: string | null;
           belt_degree?: number | null;
+          belt_id?: string | null;
           bio?: string | null;
           created_at?: string;
           email?: string | null;
@@ -2290,6 +2305,13 @@ export type Database = {
           user_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "teachers_belt_fk";
+            columns: ["belt_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "school_belts";
+            referencedColumns: ["id", "school_id"];
+          },
           {
             foreignKeyName: "teachers_school_id_fkey";
             columns: ["school_id"];
@@ -2836,6 +2858,10 @@ export type Database = {
               isSetofReturn: false;
             };
           };
+      school_belts_generic: {
+        Args: { p_art_id: string; p_school_id: string };
+        Returns: undefined;
+      };
       school_blocked: { Args: { p_school_id: string }; Returns: boolean };
       school_landing: { Args: { p_slug: string }; Returns: Json };
       school_owner: {

@@ -102,7 +102,7 @@ export function AlumnosList() {
                 {mine.length > 0 ? (
                   <span className="student-row__belts">
                     {mine.map((a) => (
-                      <BeltChip key={a.id} size="sm" name={a.belt!.name} color={a.belt!.color} stripe={a.belt!.stripe} degree={a.degree}
+                      <BeltChip key={a.id} size="sm" name={a.belt!.name} color={a.belt!.color} stripe={a.belt!.stripe} bar={a.belt!.bar} pattern={a.belt!.pattern} degree={a.degree}
                         degreeText={degreeText(a.degree, a.belt!.degree_name)} art={mine.length > 1 ? a.art?.name : null} />
                     ))}
                   </span>

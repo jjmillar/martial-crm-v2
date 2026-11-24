@@ -55,7 +55,7 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
             <ul className="my-belts">
               {p.arts!.filter((a) => a.belt && a.color).map((a) => (
                 <li key={a.art}>
-                  <BeltChip size="lg" art={a.art} name={a.belt!} color={a.color!} stripe={a.stripe} degree={a.degree} degreeText={a.degree_text} />
+                  <BeltChip size="lg" art={a.art} name={a.belt!} color={a.color!} stripe={a.stripe} bar={a.bar} pattern={a.pattern} degree={a.degree} degreeText={a.degree_text} />
                   {a.rank && <span className="sp-muted">{a.rank}</span>}
                 </li>
               ))}
@@ -108,7 +108,7 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
             <LogrosList
               empty="Los logros aparecen a medida que entrena: graduaciones, torneos e hitos."
               items={[
-                ...p.achievements.map((a, i) => fromAchievement({ id: `a${i}`, kind: a.kind, title: a.title, detail: a.detail, date: a.date, medal: a.medal as never, category: a.category, status: 'aprobado', reject_reason: null, artName: a.art, color: a.color, stripe: a.stripe, badgeIcon: a.icon })),
+                ...p.achievements.map((a, i) => fromAchievement({ id: `a${i}`, kind: a.kind, title: a.title, detail: a.detail, date: a.date, medal: a.medal as never, category: a.category, status: 'aprobado', reject_reason: null, artName: a.art, color: a.color, stripe: a.stripe, bar: a.bar, pattern: a.pattern, badgeIcon: a.icon })),
                 ...(p.milestones ?? []).map(fromMilestone),
               ]}
             />

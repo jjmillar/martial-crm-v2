@@ -25,9 +25,9 @@ export function medalIcon(medal: string | null | undefined) {
   return <span className="logro__emoji" role="img" aria-label={m ? `Medalla ${m.label}` : 'Torneo'}>{m?.icon ?? '🏆'}</span>
 }
 
-export function fromAchievement(a: Pick<Achievement, 'id' | 'kind' | 'title' | 'detail' | 'date' | 'medal' | 'category' | 'status' | 'reject_reason'> & { artName?: string | null; color?: string | null; stripe?: string | null; badgeIcon?: string | null }, action?: ReactNode): LogroView {
+export function fromAchievement(a: Pick<Achievement, 'id' | 'kind' | 'title' | 'detail' | 'date' | 'medal' | 'category' | 'status' | 'reject_reason'> & { artName?: string | null; color?: string | null; stripe?: string | null; bar?: string | null; pattern?: string | null; badgeIcon?: string | null }, action?: ReactNode): LogroView {
   const icon = a.kind === 'graduacion'
-    ? (a.color ? <BeltBar color={a.color} stripe={a.stripe} size="lg" title="Graduación" /> : <span className="logro__emoji" aria-hidden="true">🥋</span>)
+    ? (a.color ? <BeltBar color={a.color} stripe={a.stripe} bar={a.bar} pattern={a.pattern} size="lg" title="Graduación" /> : <span className="logro__emoji" aria-hidden="true">🥋</span>)
     : a.kind === 'torneo' ? medalIcon(a.medal)
     : <span className="logro__emoji" aria-hidden="true">{a.badgeIcon || '🏵️'}</span>
   const medal = a.kind === 'torneo' ? medalOf(a.medal)?.label : null
@@ -95,7 +95,7 @@ function useLogros(studentId: string | undefined) {
 }
 
 const toView = (a: Achievement, action?: ReactNode) =>
-  fromAchievement({ ...a, artName: a.art?.name, color: a.belt?.color, stripe: a.belt?.stripe, badgeIcon: a.badge?.icon }, action)
+  fromAchievement({ ...a, artName: a.art?.name, color: a.belt?.color, stripe: a.belt?.stripe, bar: a.belt?.bar, pattern: a.belt?.pattern, badgeIcon: a.badge?.icon }, action)
 
 // --- Team: student form section ---------------------------------------------------------------------------------------------
 
@@ -306,7 +306,7 @@ export function MisCinturones({ studentId, child }: { studentId: string; child: 
       {arts.data.map((a) => (
         <li key={a.id}>
           {a.belt ? (
-            <BeltChip size="lg" art={a.art?.name} name={a.belt.name} color={a.belt.color} stripe={a.belt.stripe} degree={a.degree}
+            <BeltChip size="lg" art={a.art?.name} name={a.belt.name} color={a.belt.color} stripe={a.belt.stripe} bar={a.belt.bar} pattern={a.belt.pattern} degree={a.degree}
               degreeText={degreeText(a.degree, a.belt.degree_name)} />
           ) : <span className="beltchip beltchip--lg"><span className="beltbar beltbar--lg beltbar--empty" aria-hidden="true" /><span className="beltchip__text"><span className="beltchip__art">{a.art?.name}</span><span>Sin cinturón</span></span></span>}
           {a.belt?.rank_label && <span className="hint">{a.belt.rank_label}</span>}

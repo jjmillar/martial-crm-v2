@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { formatRut } from '../../lib/rut'
 import { beltSuggestions } from '../../lib/belts'
+import { artsKey, degreeText, listArts } from '../artes/api'
+import { BeltEmote } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { CatalogoDialog } from '../ajustes/CatalogoDialog'
@@ -35,6 +37,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
   const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
   const members = useQuery({ queryKey: ['members', schoolId], queryFn: () => listMembers(schoolId!), enabled: Boolean(schoolId) })
   const teachers = useQuery({ queryKey: teachersKey(schoolId), queryFn: () => listTeachers(schoolId!), enabled: Boolean(schoolId) })
+  const arts = useQuery({ queryKey: artsKey(schoolId), queryFn: () => listArts(schoolId!), enabled: Boolean(schoolId) })
 
   const [form, setForm] = useState<TeacherForm>(() => (teacher ? formFromTeacher(teacher) : emptyTeacher))
   const [picked, setPicked] = useState<string[]>(() => teacher?.specialty_ids ?? [])
@@ -51,6 +54,16 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
   const set = <K extends keyof TeacherForm>(k: K, v: TeacherForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }))
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }))
+  }
+  // Belts come from the school's arts; the free-text belt keeps its name (exports, old screens).
+  const allBelts = (arts.data ?? []).flatMap((a) => a.belts.map((b) => ({ b, a })))
+  const hasBelts = allBelts.length > 0
+  const found = allBelts.find((x) => x.b.id === form.belt_id)
+  const belt = found?.b
+  const beltArt = found?.a
+  const pickBelt = (id: string) => {
+    const b = allBelts.find((x) => x.b.id === id)?.b
+    setForm((f) => ({ ...f, belt_id: id, belt: b?.name ?? '', belt_degree: b && Number(f.belt_degree) <= b.max_degree ? f.belt_degree : '' }))
   }
   const toggleSpecialty = (id: string) => {
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
@@ -132,13 +145,43 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
         <section className="card form-section">
           <h2>Artes marciales</h2>
           <div className="form-grid">
-            {field('belt', 'Cinturón', (
+            {hasBelts ? (
               <>
-                <input {...inputProps('belt')} list="t-belt-options" placeholder="Ej: Negro" />
-                <datalist id="t-belt-options">{beltSuggestions.map((b) => <option key={b} value={b} />)}</datalist>
+                {field('belt_id', 'Cinturón', (
+                  <select {...inputProps('belt_id')} onChange={(e) => pickBelt(e.target.value)}>
+                    <option value="">Sin cinturón</option>
+                    {(arts.data ?? []).filter((a) => a.belts.length).map((a) => (
+                      <optgroup key={a.id} label={a.name}>
+                        {a.belts.filter((b) => b.track === 'adultos').map((b) => <option key={b.id} value={b.id}>{b.name}{b.rank_label ? ` (${b.rank_label})` : ''}</option>)}
+                      </optgroup>
+                    ))}
+                  </select>
+                ))}
+                {belt && belt.max_degree > 0 && field('belt_degree', belt.degree_name === 'franja' ? 'Franjas' : 'Grado', (
+                  <select {...inputProps('belt_degree')}>
+                    <option value="">Sin {belt.degree_name === 'franja' ? 'franjas' : 'grado'}</option>
+                    {Array.from({ length: belt.max_degree }, (_, i) => i + 1).map((n) => <option key={n} value={String(n)}>{degreeText(n, belt.degree_name)}</option>)}
+                  </select>
+                ))}
+                {belt && (
+                  <div className="belt-preview field--wide" aria-hidden="true">
+                    <BeltEmote color={belt.color} stripe={belt.stripe} bar={belt.bar} pattern={belt.pattern} degree={Number(form.belt_degree || 0)} size={64} />
+                    <b>{beltArt?.name} · {belt.name}{Number(form.belt_degree) > 0 ? ` · ${degreeText(Number(form.belt_degree), belt.degree_name)}` : ''}</b>
+                  </div>
+                )}
               </>
-            ))}
-            {field('belt_degree', 'Grado / dan', <input {...inputProps('belt_degree')} inputMode="numeric" placeholder="0–12" />)}
+            ) : (
+              <>
+                {field('belt', 'Cinturón', (
+                  <>
+                    <input {...inputProps('belt')} list="t-belt-options" placeholder="Ej: Negro" />
+                    <datalist id="t-belt-options">{beltSuggestions.map((b) => <option key={b} value={b} />)}</datalist>
+                  </>
+                ))}
+                {field('belt_degree', 'Grado / dan', <input {...inputProps('belt_degree')} inputMode="numeric" placeholder="0–12" />)}
+                <p className="hint field--wide">Agrega las artes marciales de la escuela en Ajustes → Artes marciales para elegir el cinturón con sus colores.</p>
+              </>
+            )}
           </div>
           <div className="field">
             <span className="field__label" id="sp-label">Especialidades</span>

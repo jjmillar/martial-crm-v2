@@ -4,6 +4,8 @@ import { Link } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { beltSwatch } from '../../lib/belts'
+import { artsKey, degreeText, listArts } from '../artes/api'
+import { BeltEmote } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from './api'
@@ -17,6 +19,8 @@ export function ProfesoresList() {
   const canEdit = role === 'admin' || role === 'ceo'
   const teachers = useQuery({ queryKey: teachersKey(schoolId), queryFn: () => listTeachers(schoolId!), enabled: Boolean(schoolId) })
   const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
+  const arts = useQuery({ queryKey: artsKey(schoolId), queryFn: () => listArts(schoolId!), enabled: Boolean(schoolId) })
+  const beltById = useMemo(() => new Map((arts.data ?? []).flatMap((a) => a.belts.map((b) => [b.id, { b, art: a.name }] as const))), [arts.data])
   const [q, setQ] = usePersisted('profesores.q', '', 'session')
   const [specialty, setSpecialty] = usePersisted('profesores.especialidad', '')
   const [showInactive, setShowInactive] = usePersisted('profesores.inactivos', false)
@@ -87,6 +91,7 @@ export function ProfesoresList() {
       <ul className="teacher-grid">
         {rows.map((t) => {
           const swatch = beltSwatch(t.belt)
+          const real = t.belt_id ? beltById.get(t.belt_id) : undefined
           return (
             <li key={t.id}>
               <Link className={`card teacher-card${t.active ? '' : ' is-off'}`} to={t.id}>
@@ -96,7 +101,15 @@ export function ProfesoresList() {
                   {t.user_id && <span className="tag" title="Tiene cuenta en Martial CRM">Con cuenta</span>}
                 </div>
                 <strong className="teacher-card__name">{t.full_name}</strong>
-                {t.belt && (
+                {real ? (
+                  <span className="teacher-belt">
+                    <BeltEmote color={real.b.color} stripe={real.b.stripe} bar={real.b.bar} pattern={real.b.pattern} degree={t.belt_degree ?? 0} size={60} />
+                    <span className="teacher-belt__text">
+                      <span className="teacher-belt__art">{real.art}</span>
+                      <span>{real.b.name}{t.belt_degree ? ` · ${degreeText(t.belt_degree, real.b.degree_name)}` : ''}</span>
+                    </span>
+                  </span>
+                ) : t.belt && (
                   <span className="belt">
                     {swatch && <i style={{ background: swatch }} aria-hidden="true" />}
                     {t.belt}{t.belt_degree ? ` · ${t.belt_degree}°` : ''}

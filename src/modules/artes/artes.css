@@ -8,27 +8,74 @@
   width: 34px;
   height: 9px;
   border-radius: 2px;
-  background: linear-gradient(to bottom, var(--belt) 0 34%, var(--stripe) 34% 66%, var(--belt) 66%);
+  background: var(--belt);
   outline: 1px solid var(--line);
   outline-offset: -1px;
+  overflow: hidden;
 }
 .beltbar--sm { width: 26px; height: 7px; }
 .beltbar--lg { width: 46px; height: 12px; }
+/* Lengthwise band (kids two-color belts) */
+.beltbar--banda {
+  background: linear-gradient(to bottom, var(--belt) 0 34%, var(--stripe) 34% 66%, var(--belt) 66%);
+}
+/* The end of the belt in the next color (TKD "punta") */
+.beltbar--punta {
+  background: linear-gradient(to right, var(--belt) 0 76%, var(--stripe) 76%);
+}
+/* Alternating blocks (BJJ coral, judo red and white) */
+.beltbar--paneles {
+  background: repeating-linear-gradient(to right, var(--belt) 0 5px, var(--stripe) 5px 10px);
+}
 .beltbar--empty {
   background: repeating-linear-gradient(135deg, var(--surface-2) 0 4px, transparent 4px 8px);
 }
-.beltbar__deg {
+/* The rank bar near the end, with the degree marks on it (or gold marks on the belt when there's no bar) */
+.beltbar__rank {
   position: absolute;
-  inset: 1px 3px 1px auto;
+  inset: 0 12% 0 auto;
+  width: 34%;
   display: flex;
+  align-items: stretch;
+  justify-content: center;
   gap: 2px;
+  padding: 0 2px;
+  overflow: hidden;
 }
-.beltbar__deg i {
+.beltbar__rank.has-bar {
+  background: var(--bar);
+}
+.beltbar__rank i {
+  flex: none;
   width: 2px;
   background: var(--tick);
-  border-radius: 1px;
 }
-.beltbar--sm .beltbar__deg i { width: 1px; }
+.beltbar--sm .beltbar__rank,
+.beltbar__rank.is-many { gap: 1px; width: 44%; }
+.beltbar__rank.is-many i { width: 1px; }
+.beltbar--sm .beltbar__rank i { width: 1px; }
+
+/* Tied belt "emote" (teacher cards, belt editor): on a soft tile so black belts read on dark backgrounds */
+.belt-emote {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  padding: 4px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+}
+.belt-emote svg {
+  overflow: visible;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.3));
+}
+.belt-emote__edge {
+  fill: none;
+  stroke: color-mix(in srgb, var(--text) 30%, transparent);
+  stroke-width: 0.8;
+}
+.belt-emote__knot {
+  stroke: color-mix(in srgb, var(--text) 40%, transparent);
+}
 
 .beltchip {
   display: inline-flex;
@@ -130,6 +177,26 @@
   align-items: center;
   gap: 12px;
   padding: 12px 0 4px;
+}
+.belt-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.belt-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.belt-swatch[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+}
+.belt-swatch:hover {
+  transform: scale(1.08);
 }
 .belt-form {
   display: grid;

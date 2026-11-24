@@ -7,8 +7,9 @@ export type Track = 'adultos' | 'kids'
 export type DegreeName = 'franja' | 'grado' | 'dan' | 'poom'
 export type Belt = {
   id: string; art_id: string; school_id: string; track: Track; position: number; name: string; color: string
-  stripe: string | null; max_degree: number; degree_name: DegreeName; rank_label: string | null
+  stripe: string | null; bar: string | null; pattern: BeltPattern; max_degree: number; degree_name: DegreeName; rank_label: string | null
 }
+export type BeltPattern = 'banda' | 'punta' | 'paneles'
 export type Art = { id: string; school_id: string; name: string; template_key: string | null; position: number; active: boolean; belts: Belt[] }
 export type ArtTemplate = { key: string; name: string; position: number }
 
@@ -53,7 +54,7 @@ export async function listTemplates(): Promise<ArtTemplate[]> {
 export const artsKey = (schoolId: string | undefined) => ['school-arts', schoolId] as const
 export async function listArts(schoolId: string): Promise<Art[]> {
   const { data, error } = await supabase.from('school_arts')
-    .select('id, school_id, name, template_key, position, active, belts:school_belts(id, art_id, school_id, track, position, name, color, stripe, max_degree, degree_name, rank_label)')
+    .select('id, school_id, name, template_key, position, active, belts:school_belts(id, art_id, school_id, track, position, name, color, stripe, bar, pattern, max_degree, degree_name, rank_label)')
     .eq('school_id', schoolId).order('position').order('name')
   if (error) throw error
   return (data as unknown as Art[]).map((a) => ({
@@ -83,7 +84,7 @@ export async function deleteArt(id: string) {
   fail(error)
 }
 
-export type BeltDraft = Pick<Belt, 'name' | 'color' | 'stripe' | 'max_degree' | 'degree_name' | 'rank_label' | 'track'>
+export type BeltDraft = Pick<Belt, 'name' | 'color' | 'stripe' | 'bar' | 'pattern' | 'max_degree' | 'degree_name' | 'rank_label' | 'track'>
 export async function saveBelt(art: Art, draft: BeltDraft, id?: string) {
   const row = { ...draft, name: draft.name.trim(), rank_label: draft.rank_label?.trim() || null }
   if (id) {
@@ -112,9 +113,9 @@ export async function moveBelt(a: Belt, b: Belt) {
 export type StudentArt = {
   id: string; art_id: string; belt_id: string | null; degree: number; since: string | null
   art: { name: string; position: number } | null
-  belt: Pick<Belt, 'name' | 'color' | 'stripe' | 'max_degree' | 'degree_name' | 'rank_label' | 'track' | 'position'> | null
+  belt: Pick<Belt, 'name' | 'color' | 'stripe' | 'bar' | 'pattern' | 'max_degree' | 'degree_name' | 'rank_label' | 'track' | 'position'> | null
 }
-const studentArtCols = 'id, art_id, belt_id, degree, since, art:school_arts(name, position), belt:school_belts(name, color, stripe, max_degree, degree_name, rank_label, track, position)'
+const studentArtCols = 'id, art_id, belt_id, degree, since, art:school_arts(name, position), belt:school_belts(name, color, stripe, bar, pattern, max_degree, degree_name, rank_label, track, position)'
 
 export const studentArtsKey = (studentId: string | undefined) => ['student-arts', studentId] as const
 export async function listStudentArts(studentId: string): Promise<StudentArt[]> {
@@ -174,12 +175,12 @@ export type Achievement = {
   medal: Medal | null; category: string | null; status: 'pendiente' | 'aprobado' | 'rechazado'; reject_reason: string | null
   created_at: string
   art: { name: string } | null
-  belt: { color: string; stripe: string | null } | null
+  belt: { color: string; stripe: string | null; bar: string | null; pattern: string } | null
   badge: { icon: string | null } | null
 }
 export type Milestone = { key: string; kind: string; title: string; icon: string; date: string }
 
-const achCols = 'id, student_id, kind, title, detail, date, medal, category, status, reject_reason, created_at, art:school_arts(name), belt:school_belts(color, stripe), badge:school_badges(icon)'
+const achCols = 'id, student_id, kind, title, detail, date, medal, category, status, reject_reason, created_at, art:school_arts(name), belt:school_belts(color, stripe, bar, pattern), badge:school_badges(icon)'
 
 export const achievementsKey = (studentId: string | undefined) => ['achievements', studentId] as const
 export async function listAchievements(studentId: string): Promise<Achievement[]> {
