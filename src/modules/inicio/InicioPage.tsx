@@ -78,7 +78,7 @@ function StaffHome() {
         <p className="tile__lead">
           {activeSchool ? <>{longDate(today)}{schools.length < 2 && <> · {activeSchool.name}</>}</> : 'Todavía no tienes una escuela seleccionada.'}
         </p>
-        {role === 'ceo' && <Link className="btn btn--ghost tile__cta" to="/app/ajustes#escuelas">{schools.length} {schools.length === 1 ? 'escuela' : 'escuelas'} · Gestionar</Link>}
+        {role === 'ceo' && <Link className="btn btn--ghost tile__cta" to="/app/escuelas#escuelas">{schools.length} {schools.length === 1 ? 'escuela' : 'escuelas'} · Gestionar</Link>}
       </section>
 
       {pending > 0 && (
@@ -103,7 +103,7 @@ function StaffHome() {
             <p className="hint">{d.expired ? `${d.expired} vencidas por renovar` : 'Ninguna vencida'}</p>
           </Link>
 
-          <Link className="tile tile--link rise" to="/app/asistencia" style={{ animationDelay: '120ms' }}>
+          <Link className="tile tile--link rise" to="/app/escuelas#asistencia" style={{ animationDelay: '120ms' }}>
             <span className="eyebrow">Asistencias esta semana</span>
             <p className="tile__big">{attendance.data ?? '—'}</p>
             <p className="hint">Desde el lunes {formatDate(weekStart)}</p>

@@ -35,13 +35,6 @@ export function ClasesList() {
 
   return (
     <div className="matriculas">
-      <header className="page-head page-head--row">
-        <div>
-          <h1>Clases</h1>
-        </div>
-        {canEdit && Boolean(classes.data?.length) && <Link className="fab" to="nueva" aria-label="Nueva clase" title="Nueva clase"><Icon name="plus" size={22} /></Link>}
-      </header>
-
       {classes.isLoading && <p className="hint">Cargando…</p>}
       {classes.isError && <p className="alert">No se pudieron cargar las clases.</p>}
       {classes.data?.length === 0 && (
@@ -50,7 +43,7 @@ export function ClasesList() {
           {canEdit ? (
             <>
               <p className="hint">Crea tus clases con profesor, nivel y horarios semanales. Aparecerán en el calendario y en asistencia.</p>
-              <Link className="btn" to="nueva"><Icon name="plus" size={16} /> Crear clase</Link>
+              <Link className="btn" to="/app/clases/nueva"><Icon name="plus" size={16} /> Crear clase</Link>
             </>
           ) : <p className="hint">Un administrador de la escuela puede crearlas.</p>}
         </div>
@@ -67,6 +60,7 @@ export function ClasesList() {
             {inactiveCount > 0 && (
               <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivas (${inactiveCount})`} />
             )}
+            {canEdit && <Link className="btn" to="/app/clases/nueva"><Icon name="plus" size={16} /> Nueva clase</Link>}
           </div>
           <div className="segmented segmented--wrap segmented--scroll" role="group" aria-label="Filtrar por día">
             <button type="button" aria-pressed={day === 0} onClick={() => setDay(0)}>Todos</button>
@@ -81,9 +75,9 @@ export function ClasesList() {
       <ul className="class-grid">
         {rows.map((c) => (
           <li key={c.id}>
-            <Link className={`card class-card${c.active ? '' : ' is-off'}`} to={c.id} style={{ ['--class-color' as string]: c.color }}>
+            <Link className={`card class-card${c.active ? '' : ' is-off'}`} to={`/app/clases/${c.id}`} style={{ ['--class-color' as string]: c.color }}>
               <div className="plan-card__tags">
-                <span className="eyebrow">{c.specialty?.name ?? 'Clase'}</span>
+                {c.specialty && <span className="tag">{c.specialty.name}</span>}
                 <span className="tag">{levelLabel[c.level]}</span>
                 {!c.active && <span className="tag">Inactiva</span>}
               </div>

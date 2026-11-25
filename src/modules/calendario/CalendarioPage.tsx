@@ -137,7 +137,7 @@ export function CalendarioPage() {
         <p className="cal-notice">
           <Icon name="calendar" size={16} />
           <span>Aún no hay clases con horario: el calendario se llena con los horarios semanales de tus clases activas.</span>
-          <Link className="link-btn" to="/app/clases">Crear clases en Clases <Icon name="arrow" size={14} /></Link>
+          <Link className="link-btn" to="/app/escuelas#clases">Crear clases en Clases <Icon name="arrow" size={14} /></Link>
         </p>
       )}
 

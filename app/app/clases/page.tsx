@@ -1,7 +1,7 @@
 'use client'
-import { ModulePage } from '@/shell/ModulePage'
-import { ClasesList } from '@/modules/clases/ClasesList'
+import { redirect } from 'next/navigation'
 
+// Clases moved into Escuelas (accordion "Clases"); old links land there. The forms stay at /app/clases/<id>.
 export default function Page() {
-  return <ModulePage id="clases"><ClasesList /></ModulePage>
+  redirect('/app/escuelas#clases')
 }

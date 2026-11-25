@@ -7,4 +7,6 @@ export const asistencia: ModuleManifest = {
   roles: ['ceo', 'admin', 'user', 'alumno'],
   icon: 'check',
   navGroup: 'principal',
+  /** Staff take attendance in Escuelas → Asistencia; students keep this menu for their own attendance. */
+  navFor: ['alumno'],
 }

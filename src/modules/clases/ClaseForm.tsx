@@ -10,6 +10,9 @@ import { CatalogoDialog } from '../ajustes/CatalogoDialog'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from '../profesores/api'
 import { classColors, classesKey, deleteClass, getClass, levelLabel, listTags, saveClass, type Block, type ClassFull } from './api'
 
+// Classes live in Escuelas → Clases; the forms go back there.
+const BACK = '/app/escuelas#clases'
+
 /** /clases/nueva and /clases/:id */
 export function ClaseEditor() {
   const { id } = useParams()
@@ -17,7 +20,7 @@ export function ClaseEditor() {
   const q = useQuery({ queryKey: ['class', id], queryFn: () => getClass(id!), enabled: !isNew })
   if (isNew) return <ClaseForm key="new" />
   if (q.isLoading) return <p className="hint">Cargando…</p>
-  if (!q.data) return <p className="alert">No encontramos esa clase. <Link to="..">Volver</Link></p>
+  if (!q.data) return <p className="alert">No encontramos esa clase. <Link to={BACK}>Volver</Link></p>
   return <ClaseForm key={q.data.id} c={q.data} />
 }
 
@@ -75,14 +78,14 @@ function ClaseForm({ c }: { c?: ClassFull }) {
     onSuccess: async (saved) => {
       await qc.invalidateQueries({ queryKey: classesKey(schoolId) })
       await qc.invalidateQueries({ queryKey: ['class', saved.id] })
-      navigate('..', { replace: true, state: { flash: c ? `Cambios en "${saved.name}" guardados.` : `Clase "${saved.name}" creada.` } })
+      navigate(BACK, { replace: true, state: { flash: c ? `Cambios en "${saved.name}" guardados.` : `Clase "${saved.name}" creada.` } })
     },
     onError: (e: Error) => setError(e.message),
   })
 
   const remove = useMutation({
     mutationFn: () => deleteClass(c!.id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: classesKey(schoolId) }); navigate('..', { replace: true }) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: classesKey(schoolId) }); navigate(BACK, { replace: true }) },
     onError: (e: Error) => { setConfirmDelete(false); setError(e.message) },
   })
 
@@ -97,7 +100,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
   return (
     <form className="alumno-form" onSubmit={onSubmit} noValidate>
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Clases</Link>
+        <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Clases</Link>
         <h1>{c ? c.name : 'Nueva clase'}</h1>
         {!canEdit && <p className="hint">Solo lectura: los administradores editan las clases.</p>}
       </header>
@@ -212,7 +215,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
       {canEdit && (
         <div className="form-actions">
           <button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : c ? 'Guardar cambios' : 'Crear clase'}</button>
-          <Link className="btn btn--ghost" to="..">Cancelar</Link>
+          <Link className="btn btn--ghost" to={BACK}>Cancelar</Link>
           {c && (
             <span className="form-actions__danger">
               {confirmDelete ? (

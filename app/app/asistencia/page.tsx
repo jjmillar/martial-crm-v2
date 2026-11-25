@@ -1,7 +1,7 @@
 'use client'
 import { ModulePage } from '@/shell/ModulePage'
-import { AsistenciaPage } from '@/modules/asistencia/AsistenciaPage'
+import { AsistenciaRoute } from '@/modules/asistencia/AsistenciaPage'
 
 export default function Page() {
-  return <ModulePage id="asistencia"><AsistenciaPage /></ModulePage>
+  return <ModulePage id="asistencia"><AsistenciaRoute /></ModulePage>
 }

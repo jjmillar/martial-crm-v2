@@ -13,6 +13,8 @@ export type ModuleManifest = {
   navGroup?: 'principal' | 'gestion'
   /** Route only (kept for old links), never shown in the navigation. */
   hidden?: boolean
+  /** Shown in the navigation only for these roles (the route stays open to every role in `roles`). */
+  navFor?: AppRole[]
   /** Other routes that belong to this menu item (it shows as active there too). */
   also?: string[]
 }

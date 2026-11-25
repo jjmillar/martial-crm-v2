@@ -7,4 +7,6 @@ export const clases: ModuleManifest = {
   roles: ['ceo', 'admin', 'user'],
   icon: 'clock',
   navGroup: 'principal',
+  /** Lives in Escuelas → Clases; the route keeps the class forms (/app/clases/nueva, /app/clases/<id>). */
+  hidden: true,
 }

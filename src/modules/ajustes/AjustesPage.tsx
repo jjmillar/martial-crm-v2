@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from '../../lib/nav'
+import { useLocation, useNavigate } from '../../lib/nav'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
@@ -16,7 +16,6 @@ import { Exportar } from './Exportar'
 import { PasarelaPago } from './PasarelaPago'
 import { Actividad } from './Actividad'
 import { ArtesMarciales } from '../artes/ArtesMarciales'
-import { EscuelasSection } from '../escuelas/EscuelasPage'
 import { QrCheckIn } from './QrCheckIn'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
@@ -26,35 +25,23 @@ export function AjustesPage() {
   const { activeSchool, role } = useSchool()
   const location = useLocation()
   const manages = Boolean(activeSchool) && (role === 'ceo' || role === 'admin')
+  const navigate = useNavigate()
   useEffect(() => {
+    // Escuelas moved to its own menu: old "Ajustes → Escuelas" links go there.
+    if (location.hash === '#escuelas') return navigate('/app/escuelas#escuelas', { replace: true })
     const t = setTimeout(() => openFromHash(location.hash), 50)
     return () => clearTimeout(t)
-  }, [location.hash])
+  }, [location.hash, navigate])
 
   return (
     <div className="ajustes">
       <header className="page-head">
         <h1>Ajustes</h1>
-        <p className="hint">{manages || role === 'ceo' ? 'Toca una sección para abrirla.' : 'Tu perfil, contraseña y apariencia.'}</p>
+        <p className="hint">{manages ? 'Toca una sección para abrirla.' : 'Tu perfil, contraseña y apariencia.'}</p>
       </header>
-      {manages ? <SchoolSections /> : role === 'ceo' && (
-        <>
-          <h2 className="acc-group">Escuela</h2>
-          <EscuelasAcc />
-        </>
-      )}
+      {manages && <SchoolSections />}
       <CuentaSections />
     </div>
-  )
-}
-
-/** CEO only: create and edit their schools (it used to be the "Escuelas" menu). */
-function EscuelasAcc() {
-  const { schools } = useSchool()
-  return (
-    <Acc id="escuelas" icon="school" title="Escuelas" hint={schools.length ? `${schools.length} ${schools.length === 1 ? 'escuela' : 'escuelas'} · crear y editar` : 'Crea tu primera escuela'}>
-      <EscuelasSection />
-    </Acc>
   )
 }
 
@@ -64,7 +51,6 @@ function SchoolSections() {
   return (
     <>
       <h2 className="acc-group">Escuela</h2>
-      {role === 'ceo' && <EscuelasAcc />}
       <Acc id="escuela" icon="school" title="Datos de la escuela" hint="Nombre, logo, contacto y matrícula">
         <EscuelaPerfil key={school.id} school={school} embedded />
       </Acc>

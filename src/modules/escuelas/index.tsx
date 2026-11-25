@@ -1,12 +1,12 @@
 import type { ModuleManifest } from '../types'
 
+// The school in one place (accordions, like Miembros): Escuelas (CEO: create and edit), Asistencia and Clases.
 export const escuelas: ModuleManifest = {
   id: 'escuelas',
   label: 'Escuelas',
   path: 'escuelas',
-  roles: ['ceo'],
+  roles: ['ceo', 'admin', 'user'],
   icon: 'school',
-  navGroup: 'gestion',
-  /** Lives in Ajustes → Escuelas now; the route only redirects there. */
-  hidden: true,
+  navGroup: 'principal',
+  also: ['asistencia', 'clases'],
 }

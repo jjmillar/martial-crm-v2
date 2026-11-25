@@ -72,9 +72,17 @@ describe('RequireRole', () => {
 })
 
 describe('modulesFor', () => {
-  it('keeps Escuelas out of the menu (it lives in Ajustes) and the route CEO-only', () => {
-    expect(modulesFor('ceo').map((m) => m.id)).not.toContain('escuelas')
-    expect(modules.find((m) => m.id === 'escuelas')?.roles).toEqual(['ceo'])
+  it('shows Escuelas (with Asistencia and Clases inside) to staff; students keep their own Asistencia', () => {
+    for (const r of ['ceo', 'admin', 'user'] as const) {
+      const ids = modulesFor(r).map((m) => m.id)
+      expect(ids).toContain('escuelas')
+      expect(ids).not.toContain('asistencia')
+      expect(ids).not.toContain('clases')
+    }
+    const alumno = modulesFor('alumno').map((m) => m.id)
+    expect(alumno).toContain('asistencia')
+    expect(alumno).not.toContain('escuelas')
+    expect(modules.find((m) => m.id === 'escuelas')?.also).toEqual(['asistencia', 'clases'])
     expect(modulesFor(null)).toEqual([])
   })
   it('puts Mi cuenta inside Ajustes for every role and shows Tareas to staff only', () => {

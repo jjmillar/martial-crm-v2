@@ -106,7 +106,7 @@ export function Agendamiento({ school }: { school: School }) {
 
       <div className="ajustes__sub-row">
         <h3 className="ajustes__sub">Clases que se pueden agendar</h3>
-        <Link className="link-btn" to="/app/clases">Editar clases</Link>
+        <Link className="link-btn" to="/app/escuelas#clases">Editar clases</Link>
       </div>
       <p className="hint">Salen de tus clases activas: nombre, descripción y horario. Para cambiarlas, edita la clase.</p>
       {blocks.isSuccess && blocks.data.length === 0 && <p className="hint">Todavía no hay clases activas con horario.</p>}

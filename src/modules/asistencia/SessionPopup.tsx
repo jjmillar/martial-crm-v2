@@ -9,7 +9,7 @@ export type SessionTarget = { cls: ClassFull; date: string; start_time: string; 
 
 /** Asistencia link for the "Para más información" footer: that day, with this class's card open. */
 export const asistenciaHref = (t: Pick<SessionTarget, 'date' | 'start_time'> & { classId: string }) =>
-  `/app/asistencia?vista=day&fecha=${t.date}&clase=${encodeURIComponent(sessionKey(t.classId, t.date, t.start_time))}`
+  `/app/escuelas?vista=day&fecha=${t.date}&clase=${encodeURIComponent(sessionKey(t.classId, t.date, t.start_time))}#asistencia`
 
 /**
  * Asistencia's class pop-up, opened from another menu without leaving it (docs/ui-standards.md §6). It loads the stored

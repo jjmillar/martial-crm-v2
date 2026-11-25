@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { readPersisted, writePersisted } from '../../lib/persist'
-import { Link, useSearchParams } from '../../lib/nav'
+import { Link, useNavigate, useSearchParams } from '../../lib/nav'
 import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { addDays, longDate, startOfWeek, todayIso } from '../../lib/dates'
@@ -28,15 +28,25 @@ function datesBetween(from: string, to: string): string[] {
   return out
 }
 
-export function AsistenciaPage() {
+/**
+ * /app/asistencia: a student's own attendance. Staff take attendance in Escuelas → Asistencia, so their old links
+ * (with ?vista, ?fecha, ?clase) are forwarded there as they are.
+ */
+export function AsistenciaRoute() {
   const { role } = useSchool()
-  return role === 'alumno' ? <StudentAttendance /> : <StaffAttendance />
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const staff = role !== null && role !== 'alumno'
+  useEffect(() => {
+    if (staff) navigate(`/app/escuelas${params.size ? `?${params}` : ''}#asistencia`, { replace: true })
+  }, [staff]) // eslint-disable-line react-hooks/exhaustive-deps
+  return role === 'alumno' ? <StudentAttendance /> : null
 }
 
-// Asistencia (staff): a stack of class cards for a day, week or month. Each card is one class on one date, stored as
+// Asistencia (staff, in Escuelas → Asistencia): a stack of class cards for a day, week or month. Each card is one class on one date, stored as
 // a numbered record (class_sessions) and opens it: trial bookings, the attendance list, and that session's skills and
 // description.
-function StaffAttendance() {
+export function StaffAttendance() {
   const { activeSchool } = useSchool()
   const schoolId = activeSchool?.id
   const [params, setParams] = useSearchParams()
@@ -115,10 +125,6 @@ function StaffAttendance() {
 
   return (
     <div className="asistencia">
-      <header className="page-head">
-        <h1>Asistencia</h1>
-      </header>
-
       <DateNav view={view} date={date} onChange={go} />
 
       {classes.isLoading && <p className="hint">Cargando…</p>}
@@ -126,7 +132,7 @@ function StaffAttendance() {
         <div className="card empty">
           <h2>Sin clases</h2>
           <p className="hint">Las tarjetas se arman con los horarios de tus clases activas.</p>
-          <Link className="btn" to="/app/clases">Ir a Clases</Link>
+          <Link className="btn" to="/app/escuelas#clases">Ir a Clases</Link>
         </div>
       )}
 
