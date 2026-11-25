@@ -8,7 +8,8 @@ import { yearsSince } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from './api'
 import { beltSwatch } from '../../lib/belts'
-import { SchoolFilter } from '../../ui/SchoolFilter'
+import { ShowMore } from '../../ui/ShowMore'
+import { useShowMore } from '../../ui/useShowMore'
 import { degreeText, listSchoolStudentArts, schoolStudentArtsKey } from '../artes/api'
 import { BeltChip } from '../artes/Belt'
 
@@ -17,6 +18,7 @@ type Filter = 'activos' | 'inactivos' | 'todos'
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 const initials = (a: string, b: string) => `${a[0] ?? ''}${b[0] ?? ''}`.toUpperCase()
 
+/** Students directory: the "Alumnos" accordion in Miembros. First 10, then "Mostrar más". */
 export function AlumnosList() {
   const { activeSchool } = useSchool()
   const schoolId = activeSchool?.id
@@ -24,6 +26,7 @@ export function AlumnosList() {
   const arts = useQuery({ queryKey: schoolStudentArtsKey(schoolId), queryFn: () => listSchoolStudentArts(schoolId!), enabled: Boolean(schoolId) })
   const [q, setQ] = usePersisted('alumnos.q', '', 'session')
   const [filter, setFilter] = usePersisted<Filter>('alumnos.filtro', 'activos')
+  const { shown, more } = useShowMore('alumnos.mostrar', 10)
 
   const rows = useMemo(() => {
     const needle = normalize(q.trim())
@@ -46,20 +49,10 @@ export function AlumnosList() {
     return { activos: active, inactivos: all.length - active, todos: all.length }
   }, [students.data])
 
-  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus alumnos.</p>
+  if (!activeSchool) return null
 
   return (
     <div className="alumnos">
-      <header className="page-head page-head--row">
-        <div>
-          <SchoolFilter />
-          <h1>Alumnos</h1>
-        </div>
-        {Boolean(students.data?.length) && (
-          <Link className="fab" to="nuevo" aria-label="Nuevo alumno" title="Nuevo alumno"><Icon name="plus" size={22} /></Link>
-        )}
-      </header>
-
       <div className="toolbar">
         <label className="search">
           <Icon name="search" size={16} />
@@ -73,6 +66,9 @@ export function AlumnosList() {
             </button>
           ))}
         </div>
+        {Boolean(students.data?.length) && (
+          <Link className="btn" to="/app/alumnos/nuevo"><Icon name="plus" size={16} /> Nuevo alumno</Link>
+        )}
       </div>
 
       {students.isLoading && <p className="hint">Cargando…</p>}
@@ -81,19 +77,19 @@ export function AlumnosList() {
         <div className="card empty">
           <h2>Aún no hay alumnos</h2>
           <p className="hint">Crea la ficha del primero: nombre, RUT, cinturón y contacto de emergencia.</p>
-          <Link className="btn" to="nuevo"><Icon name="plus" size={16} /> Crear alumno</Link>
+          <Link className="btn" to="/app/alumnos/nuevo"><Icon name="plus" size={16} /> Crear alumno</Link>
         </div>
       )}
       {Boolean(students.data?.length) && rows.length === 0 && <p className="hint">Ningún alumno coincide con la búsqueda.</p>}
 
       <ul className="student-list">
-        {rows.map((s) => {
+        {rows.slice(0, shown).map((s) => {
           const age = yearsSince(s.birth_date)
           const swatch = beltSwatch(s.belt)
           const mine = (arts.data?.get(s.id) ?? []).filter((a) => a.belt)
           return (
             <li key={s.id}>
-              <Link className="student-row card" to={s.id}>
+              <Link className="student-row card" to={`/app/alumnos/${s.id}`}>
                 <span className="avatar" aria-hidden="true">{initials(s.first_name, s.first_last_name)}</span>
                 <span className="student-row__main">
                   <strong>{s.full_name}</strong>
@@ -118,6 +114,7 @@ export function AlumnosList() {
           )
         })}
       </ul>
+      <ShowMore shown={shown} total={rows.length} onMore={more} label="Mostrar más" />
     </div>
   )
 }

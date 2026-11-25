@@ -14,6 +14,9 @@ import { deleteTeacher, getTeacher, listSpecialties, listTeachers, saveTeacher, 
 import { emptyTeacher, formFromTeacher, parseTeacher, type TeacherForm } from './schema'
 import { TeacherLinks } from '../vinculos/Vinculos'
 
+/** The list lives in Miembros → Profesores. */
+const BACK = '/app/miembros#profesores'
+
 type Errors = Partial<Record<keyof TeacherForm, string>>
 
 /** Route element for /profesores/nuevo and /profesores/:id. */
@@ -23,7 +26,7 @@ export function ProfesorEditor() {
   const teacher = useQuery({ queryKey: ['teacher', id], queryFn: () => getTeacher(id!), enabled: !isNew })
   if (isNew) return <ProfesorForm key="new" />
   if (teacher.isLoading) return <p className="hint">Cargando…</p>
-  if (!teacher.data) return <p className="alert">No encontramos ese profesor. <Link to="..">Volver al listado</Link></p>
+  if (!teacher.data) return <p className="alert">No encontramos ese profesor. <Link to={BACK}>Volver al listado</Link></p>
   return <ProfesorForm key={teacher.data.id} teacher={teacher.data} />
 }
 
@@ -74,7 +77,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
     onSuccess: async (t) => {
       await qc.invalidateQueries({ queryKey: teachersKey(schoolId) })
       await qc.invalidateQueries({ queryKey: ['teacher', t.id] })
-      navigate('..', { replace: true, state: { flash: teacher ? `Cambios de ${t.full_name} guardados.` : `Profesor ${t.full_name} creado.` } })
+      navigate(BACK, { replace: true, state: { flash: teacher ? `Cambios de ${t.full_name} guardados.` : `Profesor ${t.full_name} creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })
@@ -83,7 +86,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
     mutationFn: () => deleteTeacher(teacher!.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: teachersKey(schoolId) })
-      navigate('..', { replace: true })
+      navigate(BACK, { replace: true })
     },
     onError: (e: Error) => {
       setConfirmDelete(false)
@@ -124,7 +127,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
   return (
     <form className="alumno-form" onSubmit={onSubmit} noValidate>
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Profesores</Link>
+        <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Profesores</Link>
         <h1>{teacher ? teacher.full_name : 'Nuevo profesor'}</h1>
         {!canEdit && <p className="hint">Solo lectura: los administradores editan los profesores.</p>}
       </header>
@@ -239,7 +242,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
       {canEdit && (
         <div className="form-actions">
           <button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : teacher ? 'Guardar cambios' : 'Crear profesor'}</button>
-          <Link className="btn btn--ghost" to="..">Cancelar</Link>
+          <Link className="btn btn--ghost" to={BACK}>Cancelar</Link>
           {teacher && (
             <span className="form-actions__danger">
               {confirmDelete ? (

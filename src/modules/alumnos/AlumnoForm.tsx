@@ -17,6 +17,9 @@ import { artsKey, listArts, listStudentArts, rowFrom, saveStudentArts, schoolStu
 import { StudentArtsEditor } from '../artes/StudentArtsEditor'
 import { StudentLogros } from '../artes/Logros'
 
+/** The list lives in Miembros → Alumnos. */
+const BACK = '/app/miembros#alumnos'
+
 type Errors = Partial<Record<keyof StudentForm, string>>
 
 /** Route element: loads the student for /alumnos/:id, or renders an empty form for /alumnos/nuevo. */
@@ -28,7 +31,7 @@ export function AlumnoEditor() {
   const arts = useQuery({ queryKey: studentArtsKey(id), queryFn: () => listStudentArts(id!), enabled: !isNew })
   if (isNew) return <AlumnoForm key="new" />
   if (student.isLoading || arts.isLoading) return <p className="hint">Cargando…</p>
-  if (!student.data) return <p className="alert">No encontramos ese alumno. <Link to="..">Volver al listado</Link></p>
+  if (!student.data) return <p className="alert">No encontramos ese alumno. <Link to={BACK}>Volver al listado</Link></p>
   return <AlumnoForm key={student.data.id} student={student.data} studentArts={arts.data ?? []} />
 }
 
@@ -68,7 +71,7 @@ function AlumnoForm({ student, studentArts = [] }: { student?: Student; studentA
         if (!student) navigate(`../${s.id}`, { replace: true })
         return
       }
-      navigate('..', { replace: true, state: { flash: student ? `Cambios de ${s.full_name ?? 'alumno'} guardados.` : `Alumno ${s.full_name ?? ''} creado.` } })
+      navigate(BACK, { replace: true, state: { flash: student ? `Cambios de ${s.full_name ?? 'alumno'} guardados.` : `Alumno ${s.full_name ?? ''} creado.` } })
     },
     onError: (e: Error) => setServerError(e.message),
   })
@@ -77,7 +80,7 @@ function AlumnoForm({ student, studentArts = [] }: { student?: Student; studentA
     mutationFn: () => deleteStudent(student!.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: studentsKey(activeSchool?.id) })
-      navigate('..', { replace: true })
+      navigate(BACK, { replace: true })
     },
     onError: (e: Error) => {
       setConfirmDelete(false)
@@ -124,7 +127,7 @@ function AlumnoForm({ student, studentArts = [] }: { student?: Student; studentA
     <form className="alumno-form" onSubmit={onSubmit} noValidate>
       <header className="page-head page-head--row">
         <div>
-          <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Alumnos</Link>
+          <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Alumnos</Link>
           <h1>{student ? student.full_name : 'Nuevo alumno'}</h1>
           <p className="hint">Los campos con * son obligatorios.</p>
           {student && (
@@ -199,7 +202,7 @@ function AlumnoForm({ student, studentArts = [] }: { student?: Student; studentA
 
       <div className="form-actions">
         <button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : student ? 'Guardar cambios' : 'Crear alumno'}</button>
-        <Link className="btn btn--ghost" to="..">Cancelar</Link>
+        <Link className="btn btn--ghost" to={BACK}>Cancelar</Link>
         {student && (role === 'admin' || role === 'ceo') && (
           <span className="form-actions__danger">
             {confirmDelete ? (

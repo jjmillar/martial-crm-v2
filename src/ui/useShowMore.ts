@@ -5,7 +5,8 @@ import { usePersisted } from '../lib/persist'
 export const FIRST = 3
 export const PAGE = 10
 
-export function useShowMore(key: string) {
-  const [shown, setShown] = usePersisted(key, FIRST, 'session')
+/** `first`: how many show before "Mostrar más" (directories like Miembros start at 10). */
+export function useShowMore(key: string, first = FIRST) {
+  const [shown, setShown] = usePersisted(key, first, 'session')
   return { shown, more: () => setShown((n) => (n < PAGE ? PAGE : n + PAGE)) }
 }

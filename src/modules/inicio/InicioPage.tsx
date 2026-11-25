@@ -95,7 +95,7 @@ function StaffHome() {
 
       {activeSchool && (
         <>
-          <Link className="tile tile--link rise" to="/app/alumnos" style={{ animationDelay: '40ms' }}>
+          <Link className="tile tile--link rise" to="/app/miembros#alumnos" style={{ animationDelay: '40ms' }}>
             <span className="eyebrow">Alumnos activos</span>
             <p className="tile__big">{d.activeStudents}</p>
             <p className="hint">{d.newThisMonth ? `+${d.newThisMonth} inscritos este mes` : 'Sin inscripciones nuevas este mes'}</p>

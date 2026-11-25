@@ -1,7 +1,7 @@
 'use client'
-import { ModulePage } from '@/shell/ModulePage'
-import { AlumnosList } from '@/modules/alumnos/AlumnosList'
+import { redirect } from 'next/navigation'
 
+// The list moved into Miembros (accordion "Alumnos"); old links land there.
 export default function Page() {
-  return <ModulePage id="alumnos"><AlumnosList /></ModulePage>
+  redirect('/app/miembros#alumnos')
 }

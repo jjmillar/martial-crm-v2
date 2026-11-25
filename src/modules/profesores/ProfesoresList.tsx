@@ -9,10 +9,12 @@ import { BeltBar } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from './api'
-import { SchoolFilter } from '../../ui/SchoolFilter'
+import { ShowMore } from '../../ui/ShowMore'
+import { useShowMore } from '../../ui/useShowMore'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
+/** Teachers directory: the "Profesores" accordion in Miembros. First 10, then "Mostrar más". */
 export function ProfesoresList() {
   const { activeSchool, role } = useSchool()
   const schoolId = activeSchool?.id
@@ -24,6 +26,7 @@ export function ProfesoresList() {
   const [q, setQ] = usePersisted('profesores.q', '', 'session')
   const [specialty, setSpecialty] = usePersisted('profesores.especialidad', '')
   const [showInactive, setShowInactive] = usePersisted('profesores.inactivos', false)
+  const { shown, more } = useShowMore('profesores.mostrar', 10)
 
   const spName = useMemo(() => new Map((specialties.data ?? []).map((s) => [s.id, s.name])), [specialties.data])
 
@@ -36,22 +39,12 @@ export function ProfesoresList() {
     )
   }, [teachers.data, q, specialty, showInactive])
 
-  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus profesores.</p>
+  if (!activeSchool) return null
 
   const inactiveCount = (teachers.data ?? []).filter((t) => !t.active).length
 
   return (
     <div className="profesores">
-      <header className="page-head page-head--row">
-        <div>
-          <SchoolFilter />
-          <h1>Profesores</h1>
-        </div>
-        {canEdit && (
-          <Link className="fab" to="nuevo" aria-label="Nuevo profesor" title="Nuevo profesor"><Icon name="plus" size={22} /></Link>
-        )}
-      </header>
-
       {Boolean(teachers.data?.length) && (
         <div className="toolbar">
           <label className="search">
@@ -68,6 +61,7 @@ export function ProfesoresList() {
           {inactiveCount > 0 && (
             <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivos (${inactiveCount})`} />
           )}
+          {canEdit && <Link className="btn" to="/app/profesores/nuevo"><Icon name="plus" size={16} /> Nuevo profesor</Link>}
         </div>
       )}
 
@@ -79,7 +73,7 @@ export function ProfesoresList() {
           {canEdit ? (
             <>
               <p className="hint">Agrega a tu equipo con su cinturón y especialidades. Las especialidades se definen en Ajustes → Catálogos.</p>
-              <Link className="btn" to="nuevo"><Icon name="plus" size={16} /> Crear profesor</Link>
+              <Link className="btn" to="/app/profesores/nuevo"><Icon name="plus" size={16} /> Crear profesor</Link>
             </>
           ) : (
             <p className="hint">Un administrador de la escuela puede agregarlos.</p>
@@ -89,12 +83,12 @@ export function ProfesoresList() {
       {Boolean(teachers.data?.length) && rows.length === 0 && <p className="hint">Ningún profesor coincide con los filtros.</p>}
 
       <ul className="teacher-grid">
-        {rows.map((t) => {
+        {rows.slice(0, shown).map((t) => {
           const swatch = beltSwatch(t.belt)
           const real = t.belt_id ? beltById.get(t.belt_id) : undefined
           return (
             <li key={t.id}>
-              <Link className={`card teacher-card${t.active ? '' : ' is-off'}`} to={t.id}>
+              <Link className={`card teacher-card${t.active ? '' : ' is-off'}`} to={`/app/profesores/${t.id}`}>
                 <div className="teacher-card__top">
                   <span className="avatar avatar--lg" aria-hidden="true">{`${t.first_name[0] ?? ''}${t.first_last_name[0] ?? ''}`.toUpperCase()}</span>
                   {!t.active && <span className="tag">Inactivo</span>}
@@ -126,6 +120,7 @@ export function ProfesoresList() {
           )
         })}
       </ul>
+      <ShowMore shown={shown} total={rows.length} onMore={more} label="Mostrar más" />
     </div>
   )
 }

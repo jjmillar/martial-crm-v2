@@ -7,4 +7,6 @@ export const alumnos: ModuleManifest = {
   roles: ['ceo', 'admin', 'user'],
   icon: 'user',
   navGroup: 'principal',
+  /** Listed inside Miembros (accordion); the route stays for the student's page. */
+  hidden: true,
 }

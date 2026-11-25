@@ -3,20 +3,14 @@
   gap: 24px;
 }
 
-.miembros__grid {
+.miembros__sections {
   display: grid;
-  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-  gap: var(--gap);
-  align-items: start;
+  gap: 12px;
 }
 
 .miembros__form {
   display: grid;
   gap: 16px;
-}
-
-.miembros__form h2 {
-  font-size: 20px;
 }
 
 .miembros__list {
@@ -55,10 +49,4 @@
 .input.member-row__role {
   width: 170px; /* role and "Quitar" side by side */
   min-height: 40px;
-}
-
-@media (max-width: 760px) {
-  .miembros__grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
