@@ -47,6 +47,15 @@ body {
   margin: 0;
 }
 
+/* No scrollbars anywhere (they shifted layouts and looked broken): every area still scrolls with the wheel,
+   touch, trackpad and keyboard. Long lists show "Mostrar más" and sideways rows fade at the edge instead. */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
 /* No blue/grey flash when tapping on a phone: every control already shows its own pressed state. */
 html {
   -webkit-tap-highlight-color: transparent;

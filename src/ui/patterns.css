@@ -330,13 +330,8 @@ input[type='checkbox']:disabled {
   .segmented--scroll {
     flex-wrap: nowrap;
     overflow-x: auto;
-    scrollbar-width: none;
     /* soft fade on the right edge: shows there are more options to swipe to */
     mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
-  }
-
-  .segmented--scroll::-webkit-scrollbar {
-    display: none;
   }
 
   .segmented--scroll button:last-child {
