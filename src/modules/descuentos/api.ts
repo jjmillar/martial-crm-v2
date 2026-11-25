@@ -6,6 +6,8 @@ import type { DiscountCode, DiscountScope } from '../../lib/database.types'
 // Discount codes. Admins manage them here; anyone redeems through the RPCs (students never read the table).
 
 export type CodeRow = DiscountCode & { uses: number; saved: number }
+/** Any discount code with its usage (a school's or the platform's). */
+export type CodeLike = CodeInput & { id: string; uses: number; saved: number }
 export const codesKey = (schoolId: string | undefined) => ['discount-codes', schoolId] as const
 
 export async function listCodes(schoolId: string): Promise<CodeRow[]> {
@@ -95,7 +97,7 @@ export const usesLabel = (c: { uses: number; max_uses: number | null }) =>
   c.max_uses === 1 ? (c.uses ? 'Uso único · usado' : 'Uso único') : c.max_uses ? `${c.uses} de ${c.max_uses} usos` : `${c.uses} ${c.uses === 1 ? 'uso' : 'usos'} · sin límite`
 
 export type CodeState = 'activo' | 'inactivo' | 'vencido' | 'agotado' | 'programado'
-export function codeState(c: CodeRow, today = todayIso()): CodeState {
+export function codeState(c: Pick<CodeLike, 'active' | 'valid_from' | 'valid_until' | 'max_uses' | 'uses'>, today = todayIso()): CodeState {
   if (!c.active) return 'inactivo'
   if (c.valid_until && today > c.valid_until) return 'vencido'
   if (c.max_uses && c.uses >= c.max_uses) return 'agotado'

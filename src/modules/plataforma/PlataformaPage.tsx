@@ -12,6 +12,7 @@ import {
   STATUSES, customersKey, dueInfo, eventsKey, fetchCustomers, fetchEvents, fetchPlans, monthly, plansKey, savePlan,
   statusLabel, updateSubscription, type Customer, type PlanInput, type PlatformEvent, type PlatformPlan, type SubStatus,
 } from './api'
+import { PlatformCodes, PlatformPayments, PlatformTransfer } from './Billing'
 
 // The platform console, one page (no tabs): numbers on top, customers with their subscription, the CRM's plans,
 // and the change history at the end. It never shows school data: only who the customer is, their schools and how
@@ -62,22 +63,22 @@ export function PlataformaPage() {
 
       <div className="kpis">
         <div className="card kpi">
-          <span className="eyebrow">Ingreso mensual</span>
+          <span className="conta-kpi__label">Ingreso mensual</span>
           <strong>{formatCLP(stats.mrr)}</strong>
           <span className="hint">{stats.active} {stats.active === 1 ? 'suscripción activa' : 'suscripciones activas'}</span>
         </div>
         <button type="button" className="card kpi kpi--link" onClick={() => setFilter('prueba')}>
-          <span className="eyebrow">En prueba</span>
+          <span className="conta-kpi__label">En prueba</span>
           <strong>{stats.trial}</strong>
           <span className="hint">{stats.trialSoon ? `${stats.trialSoon} terminan en 7 días o menos` : 'Ninguna por terminar'}</span>
         </button>
         <div className="card kpi">
-          <span className="eyebrow">Clientes</span>
+          <span className="conta-kpi__label">Clientes</span>
           <strong>{all.length}</strong>
           <span className="hint">{stats.schools} {stats.schools === 1 ? 'escuela' : 'escuelas'} · {stats.students} alumnos activos</span>
         </div>
         <button type="button" className="card kpi kpi--link" onClick={() => setFilter('suspendida')}>
-          <span className="eyebrow">Sin acceso</span>
+          <span className="conta-kpi__label">Sin acceso</span>
           <strong>{stats.blocked}</strong>
           <span className="hint">Suspendidas o canceladas</span>
         </button>
@@ -123,7 +124,10 @@ export function PlataformaPage() {
         </ul>
       </section>
 
+      <PlatformPayments />
       <PlansSection plans={plans.data ?? []} loading={plans.isLoading} />
+      <PlatformCodes plans={plans.data ?? []} />
+      <PlatformTransfer />
       <History />
 
       <Modal open={editOpen} onClose={() => setEditOpen(false)} labelledBy="sub-h">
@@ -156,7 +160,7 @@ function SubscriptionForm({ c, plans, onDone }: { c: Customer; plans: PlatformPl
     <form className="sub-form" onSubmit={submit} noValidate>
       <div className="modal__head">
         <div>
-          <span className="eyebrow">Suscripción</span>
+          <span className="hint">Suscripción</span>
           <h2 id="sub-h">{c.full_name || c.email}</h2>
         </div>
         <button type="button" className="icon-btn" onClick={onDone} aria-label="Cerrar"><Icon name="close" /></button>
@@ -302,6 +306,10 @@ function PlanForm({ plan, onDone }: { plan: PlatformPlan | null; onDone: () => v
 const fieldName: Record<string, string> = { plan: 'Plan', status: 'Estado', trial_ends: 'Prueba hasta', period_end: 'Pagado hasta' }
 function describe(d: PlatformEvent['details']): string {
   const parts: string[] = []
+  const pay = d.payment as { amount: number; plan: string; until: string; code: string | null } | undefined
+  if (pay) parts.push(`Pagó ${formatCLP(pay.amount)} (${pay.plan}) hasta el ${formatDate(pay.until)}${pay.code ? ` con código ${pay.code}` : ''}`)
+  const code = d.code as { code: string; discount: number } | undefined
+  if (code && typeof code === 'object') parts.push(`Usó el código ${code.code} (−${formatCLP(code.discount)})`)
   for (const k of ['status', 'plan', 'period_end', 'trial_ends']) {
     const v = d[k] as [string | null, string | null] | undefined
     if (!v) continue

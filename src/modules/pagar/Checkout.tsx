@@ -204,7 +204,7 @@ function PayPanel({ p, last, onClose }: { p: Pay; last: Submission | null; onClo
   )
 }
 
-function TransferData({ t, amount, concept, children }: { t: Transfer; amount: number; concept: string; children?: ReactNode }) {
+export function TransferData({ t, amount, concept, children }: { t: Transfer; amount: number; concept: string; children?: ReactNode }) {
   const rows: [string, string | null][] = [
     ['Banco', t.bank], ['Tipo de cuenta', t.type], ['N° de cuenta', t.number], ['Titular', t.holder], ['RUT', t.rut], ['Correo', t.email],
     ['Monto', formatCLP(amount)], ['Comentario', concept],

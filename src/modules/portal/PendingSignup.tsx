@@ -5,6 +5,8 @@ import { formatClaimCode } from '../../lib/claimCode'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
 import { supabase } from '../../lib/supabase'
+import { MiSuscripcion } from '../suscripcion/MiSuscripcion'
+import { fetchMySubscription, mySubKey } from '../suscripcion/api'
 
 // Signed-in account with no role yet: usually someone who signed up and is waiting for approval.
 export function PendingSignup() {
@@ -29,6 +31,8 @@ export function PendingSignup() {
     },
     enabled: Boolean(user),
   })
+  // The owner of a blocked school can pay right here (my_subscription only answers to customers).
+  const mySub = useQuery({ queryKey: mySubKey, queryFn: fetchMySubscription, enabled: Boolean(user) && Boolean(blocked.data?.length), retry: false })
   const first = (profile?.full_name ?? '').split(' ')[0]
   const closed = blocked.data ?? []
   if (closed.length > 0) {
@@ -42,12 +46,13 @@ export function PendingSignup() {
           <p className="tile__lead">
             El acceso a {names} está pausado porque la suscripción a Martial CRM {cancelled ? 'fue cancelada' : 'está suspendida'}. Tus datos siguen guardados: cuando se reactive, todo vuelve a estar como lo dejaste.
           </p>
-          <p className="hint">Si eres el dueño de la escuela, escríbenos para reactivarla. Si eres alumno o parte del equipo, avisa a tu escuela.</p>
+          <p className="hint">{mySub.isSuccess ? 'Paga tu suscripción aquí abajo: cuando confirmemos la transferencia, todo vuelve a funcionar.' : 'Si eres el dueño de la escuela, escríbenos para reactivarla. Si eres alumno o parte del equipo, avisa a tu escuela.'}</p>
           <div className="form-actions">
             <button type="button" className="btn" onClick={() => { void reload(); void blocked.refetch() }}>Revisar de nuevo</button>
             <button type="button" className="btn btn--ghost" onClick={signOut}>Cerrar sesión</button>
           </div>
         </section>
+        {mySub.isSuccess && <section className="tile tile--full rise"><MiSuscripcion /></section>}
       </div>
     )
   }

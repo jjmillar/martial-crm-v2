@@ -120,3 +120,17 @@ aunque la funcionalidad esté lista.
 - Location (2026-11-25, `20261125000002`): the school's coordinates (`schools.geo_lat/geo_lng/geo_address`) come from its own address, geocoded in the admin's browser through OpenStreetMap Nominatim (only the school's address is sent). They are written under the existing admin-only `schools` update policy, and cleared by a trigger when the address changes. The phone sends its position once per scan. `qr_check_in` confirms only within 150 m (`distance_m`, an internal function with no grants). Farther away, or without a location, the check-in becomes a pending request (`confirmed_at` null) that the team approves in Tareas or Asistencia. Only the rounded distance is stored (`attendance.qr_distance_m`), never the student's coordinates (Ley 21.719, data minimisation; the privacy policy says so). Coordinates can be faked: this stops casual misuse and sends doubtful cases to a human.
 - Headers: `Permissions-Policy` now allows `geolocation=(self)` (still no camera, microphone, payment or usb). `connect-src` adds `https://nominatim.openstreetmap.org`.
 - Manual fix (2026-11-25): when the geocoded point is wrong, the school's CEO/admins can move it on a map (Leaflet + OpenStreetMap tiles, `img-src` adds `https://tile.openstreetmap.org`). The point is saved with the current address under the same admin-only update policy, so the automatic lookup doesn't replace it; changing the address clears it as before.
+
+## Paying the subscription (2026-11-26, `20261126000001`)
+- The CEO pays Martial CRM like students pay their school: bank transfer to the platform's account, "Ya transferí", and the operator confirms it. Each period is a charge in `platform_invoices`. The customer can read only their own (RLS); nobody writes there directly. Every change goes through security-definer functions that check the caller:
+  - **Customer:** `my_subscription`, `subscription_checkout`, `subscription_apply_code`, `subscription_report_transfer`. The caller must be an owner (`billing_owner_ok`: `owners` row plus `mfa_ok`). A suspended customer still passes, so they can pay to get back in.
+  - **Operator:** `platform_invoices_list`, `platform_decide_invoice`, `platform_discount_uses`. They require `is_platform_operator()`, that is aal2.
+- The plan, price and period come from `platform_plans`, never from the client. The amount is computed in the database. Only active paid plans can be bought.
+- Approving a charge (`platform_finalize_invoice`, an internal function with no grants) sets the subscription active on that plan until the charge's period end and logs it in `subscription_events`. Rejecting it sends the charge back to "por pagar" with a reason.
+- The platform's transfer data (`platform_settings`, one row) is readable and editable only by the operator under aal2. Customers see it only inside `my_subscription()`.
+- The operator's discount codes (`platform_discount_codes`) work like the schools' codes:
+  - Customers can't read the table, so codes can't be enumerated. They only try a code through `subscription_apply_code`, rate limited to 10 tries per hour per customer.
+  - Each code can be used once per customer, with optional uses, dates and plan.
+  - A "permanent" code is snapshotted on the subscription.
+  - Redemptions (`platform_redemptions`) are visible only to the operator.
+- New grants are explicit. `revoke … from public, anon` applies to every new function; the internal ones have no grants at all.

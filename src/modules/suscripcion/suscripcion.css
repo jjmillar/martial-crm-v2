@@ -1,0 +1,162 @@
+/* Ajustes → Mi cuenta → Mi suscripción (the CEO's Martial CRM plan) */
+.mysub {
+  display: grid;
+  gap: 16px;
+  padding-top: 12px;
+}
+.mysub h3 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+.mysub__plan {
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+}
+.mysub__plan.is-warn {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+}
+.mysub__plan-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mysub__plan-head h3 {
+  font-size: 22px;
+}
+.mysub__price {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+.mysub__price span {
+  margin-left: 2px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.mysub__when {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+}
+.mysub__when svg,
+.mysub__usage svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--muted);
+}
+.mysub__usage {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  color: var(--muted);
+  font-size: 14px;
+}
+.mysub__usage li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.mysub__pay {
+  display: grid;
+  gap: 14px;
+}
+.mysub__plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 10px;
+}
+.mysub__opt {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.mysub__opt:hover {
+  border-color: var(--faint);
+}
+.mysub__opt.is-on {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.mysub__opt:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.mysub__opt-price {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.mysub__opt-price small {
+  margin-left: 2px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.mysub__pay > .btn {
+  justify-self: start;
+}
+.mysub__history {
+  display: grid;
+  gap: 10px;
+}
+.tag.tag--inv-pagada {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+}
+
+/* Platform console: a customer's charge with confirm / reject */
+.inv-row {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+}
+.inv-row__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.inv-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.inv-row__actions .input {
+  flex: 1 1 220px;
+  min-height: 36px;
+}
+@media (max-width: 560px) {
+  .inv-row__top {
+    flex-wrap: wrap;
+  }
+  .inv-row__top .student-row__main {
+    flex: 1 1 100%;
+  }
+}
+
+/* Discount code cards (school and platform): the scope as plain text, no dot */
+.code-card__scope {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}

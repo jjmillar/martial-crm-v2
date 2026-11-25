@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation } from '../../lib/nav'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
@@ -11,6 +11,8 @@ import { MiFicha } from './MiFicha'
 import { Seguridad } from './Seguridad'
 import { PerfilPublico } from './PerfilPublico'
 import { MisHijos } from '../portal/MisHijos'
+import { MiSuscripcion } from '../suscripcion/MiSuscripcion'
+import { fetchMySubscription, mySubKey, subSummary } from '../suscripcion/api'
 
 // "Mi cuenta" now lives inside Ajustes; old links (/app/cuenta#ficha) keep working.
 export function CuentaPage() {
@@ -88,6 +90,8 @@ export function CuentaSections() {
       {role === 'alumno' && <Acc id="perfil-publico" icon="globe" title={kid ? `Perfil público de ${kid}` : 'Mi perfil público'} hint={kid ? 'Parte privado: tú decides si se publica' : 'Tu página personal: cinturón, nivel y skills'}><PerfilPublico /></Acc>}
       {role === 'alumno' && <Acc id="hijos" icon="users" title="Mis hijos" hint={wards.length ? `Apoderado de ${wards.length} ${wards.length === 1 ? 'alumno' : 'alumnos'}` : 'Agrega a tus hijos si entrenan en la escuela'}><MisHijos /></Acc>}
 
+      {role === 'ceo' && <SubscriptionAcc />}
+
       <Acc id="seguridad" icon="lock" title="Verificación en dos pasos" hint="Código de una app además de tu contraseña"><Seguridad /></Acc>
 
       <Acc id="contrasena" icon="eye" title="Contraseña" hint="Cambia la contraseña con que ingresas">
@@ -136,5 +140,15 @@ export function CuentaSections() {
         </Acc>
       )}
     </>
+  )
+}
+
+/** The CEO's Martial CRM subscription (plan, state, paying by transfer). */
+function SubscriptionAcc() {
+  const q = useQuery({ queryKey: mySubKey, queryFn: fetchMySubscription })
+  return (
+    <Acc id="suscripcion" icon="wallet" title="Mi suscripción" hint={q.data ? subSummary(q.data) : 'Tu plan de Martial CRM y sus pagos'}>
+      <MiSuscripcion />
+    </Acc>
   )
 }
