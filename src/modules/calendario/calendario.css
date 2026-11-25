@@ -176,7 +176,88 @@
   background-color: color-mix(in srgb, var(--accent) 5%, transparent);
 }
 
-/* A class: placed by time, side by side with others at the same time (lanes) */
+/* ---------- Class cards ----------
+   One look for every class in the calendar (the phone week list set it): a neutral card with a thin border, the
+   class color as a bar on the left, the start time in bold over the end time, then the name and the teacher.
+   Under way: "Ahora" and a ring in the class color. Already over: faded (still opens attendance). */
+.cal-block,
+.cal-chip,
+.cal-slot {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--class-color, var(--accent));
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+.cal-block:hover,
+.cal-chip:hover,
+.cal-slot:hover {
+  background: color-mix(in srgb, var(--class-color, var(--accent)) 9%, var(--surface));
+}
+.cal-block:focus-visible,
+.cal-chip:focus-visible,
+.cal-slot:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.cal-block.is-live,
+.cal-chip.is-live,
+.cal-slot.is-live {
+  border-color: color-mix(in srgb, var(--class-color) 55%, var(--line));
+  border-left-color: var(--class-color);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--class-color) 45%, transparent), 0 6px 18px -8px color-mix(in srgb, var(--class-color) 70%, transparent);
+}
+.cal-block.is-past,
+.cal-chip.is-past,
+.cal-slot.is-past {
+  opacity: 0.62;
+}
+.cal-block.is-past:hover,
+.cal-chip.is-past:hover,
+.cal-slot.is-past:hover,
+.cal-block.is-past:focus-visible,
+.cal-slot.is-past:focus-visible {
+  opacity: 1;
+}
+.cal-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--class-color, var(--accent)) 22%, transparent);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  vertical-align: 2px;
+  white-space: nowrap;
+}
+.cal-live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--class-color, var(--accent));
+  animation: cal-pulse 1.6s var(--ease) infinite;
+}
+@keyframes cal-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cal-live::before {
+    animation: none;
+  }
+}
+
+/* In the hour grid: placed by time, side by side with others at the same time (lanes) */
 .cal-block {
   --gap: 3px;
   position: absolute;
@@ -185,27 +266,50 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
-  padding: 5px 8px;
+  padding: 6px 8px;
   overflow: hidden;
-  border: 0;
-  border-left: 3px solid var(--class-color);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--class-color) 20%, var(--surface));
-  color: var(--text);
-  font: inherit;
+  border-radius: 10px;
   font-size: 12px;
   line-height: 1.25;
-  text-align: left;
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
 }
 .cal-block:hover,
-.cal-block:focus-visible {
+.cal-block:focus-visible,
+.cal-block.is-live {
   z-index: 2;
-  background: color-mix(in srgb, var(--class-color) 32%, var(--surface));
-  box-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+}
+.cal-block__time {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 5px;
+  max-width: 100%;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cal-block__time b {
+  font-size: 13px;
+  font-weight: 700;
+}
+.cal-block__time small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.cal-block__time small::before {
+  content: '– ';
+}
+/* Week columns are narrow: the pulsing dot alone, next to the time */
+.cal-live--dot {
+  align-self: center;
+  margin-left: 2px;
+  padding: 0;
+  background: none;
+}
+.cal-block__main {
+  display: grid;
+  min-width: 0;
+  max-width: 100%;
 }
 .cal-block strong {
   display: -webkit-box;
@@ -217,16 +321,14 @@
   hyphens: auto;
   overflow-wrap: break-word;
 }
-.cal-block__time,
 .cal-block__meta {
   max-width: 100%;
   overflow: hidden;
   color: var(--muted);
-  font-variant-numeric: tabular-nums;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Short classes (< ~45 min): one line, name then time */
+/* Short classes (< ~45 min): one line, time then name */
 .cal-block--short {
   flex-direction: row;
   align-items: center;
@@ -234,12 +336,33 @@
   padding-block: 0;
 }
 .cal-block--short strong {
-  flex: 0 1 auto;
   -webkit-line-clamp: 1;
 }
-.cal-grid--day .cal-block {
+/* Día: the full phone-card layout, time column on the left */
+.cal-grid--day .cal-block:not(.cal-block--short) {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+.cal-grid--day .cal-block__time {
+  display: grid;
+  flex: none;
+  min-width: 44px;
+  gap: 0;
+}
+.cal-grid--day .cal-block__time b {
+  font-size: 15px;
+}
+.cal-grid--day .cal-block__time small {
+  font-size: 12px;
+}
+.cal-grid--day .cal-block__time small::before {
+  content: none;
+}
+.cal-grid--day .cal-block__meta {
   font-size: 13px;
-  padding: 6px 10px;
 }
 
 /* Now */
@@ -277,18 +400,7 @@
   gap: 14px;
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--class-color, var(--accent));
   border-radius: var(--radius-card);
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
-}
-.cal-slot:hover {
-  background: color-mix(in srgb, var(--class-color) 8%, var(--surface));
 }
 .cal-slots__time {
   display: grid;
@@ -453,7 +565,7 @@
   color: #fff;
 }
 
-/* A class in a month cell: time + name in the class color */
+/* A class in a month cell: a mini card (bold time + name) */
 .cal-chip {
   display: flex;
   align-items: center;
@@ -461,24 +573,15 @@
   width: 100%;
   min-width: 0;
   padding: 2px 6px;
-  border: 0;
-  border-left: 3px solid var(--class-color);
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--class-color) 18%, var(--surface));
-  color: var(--text);
-  font: inherit;
+  border-left-width: 3px;
+  border-radius: 6px;
   font-size: 12px;
   line-height: 1.35;
-  text-align: left;
-  cursor: pointer;
-}
-.cal-chip:hover {
-  background: color-mix(in srgb, var(--class-color) 30%, var(--surface));
 }
 .cal-chip__time {
   flex: none;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--muted);
 }
 .cal-chip__name {
   min-width: 0;
@@ -542,7 +645,9 @@
   /* Narrow cells: the class name (cut) in its color; time and details are in the list below */
   .cal-chip {
     padding: 1px 3px;
-    border-left-width: 2px;
+    border-width: 0 0 0 3px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--class-color) 14%, var(--surface));
     font-size: 10px;
     line-height: 1.3;
   }

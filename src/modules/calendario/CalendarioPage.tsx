@@ -17,6 +17,11 @@ type Open = (t: SessionTarget) => void
 const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
 const target = (s: Slot, date: string): SessionTarget => ({ cls: s.cls, date, start_time: s.start, end_time: s.end, scheduleId: s.id })
 const who = (s: Slot) => [s.cls.teacher?.full_name, s.cls.room].filter(Boolean).join(' · ')
+type When = (s: Slot, date: string) => 'live' | 'past' | null
+/** Classes under way get "Ahora"; those already over fade a little (still tappable to take attendance). */
+const whenAt = (today: string, now: number): When => (s, d) =>
+  d < today || (d === today && toMin(s.end) <= now) ? 'past' : d === today && toMin(s.start) <= now ? 'live' : null
+const stateCls = (w: ReturnType<When>) => (w ? ` is-${w}` : '')
 
 // The grid starts up to 3 h before the first class (never before 06:00 unless a class does) and ends with the last one.
 // Empty stretches of 2 h or more between classes collapse into a thin band, so the day isn't mostly blank.
@@ -113,6 +118,7 @@ export function CalendarioPage() {
 
   const weekStart = startOfWeek(date)
   const today = todayIso()
+  const when = whenAt(today, useNowMinutes())
   const week = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   // An empty day offers a jump to the next day that has classes (the schedule repeats weekly).
   const nextDay = slotsByDay.size ? Array.from({ length: 7 }, (_, i) => addDays(date, i + 1)).find((d) => slotsOn(d).length) : undefined
@@ -137,16 +143,16 @@ export function CalendarioPage() {
 
       {classes.isLoading ? <p className="hint">Cargando…</p> : (
         <>
-          {view === 'day' && <TimeGrid days={[date]} slotsOn={slotsOn} today={today} onOpen={popup.openSession} onNext={nextDay ? () => go({ fecha: nextDay }) : undefined} detailed />}
+          {view === 'day' && <TimeGrid days={[date]} slotsOn={slotsOn} today={today} when={when} onOpen={popup.openSession} onNext={nextDay ? () => go({ fecha: nextDay }) : undefined} detailed />}
 
           {view === 'week' && (
             <>
-              <div className="cal-wide"><TimeGrid days={week} slotsOn={slotsOn} today={today} onOpen={popup.openSession} /></div>
-              <Agenda days={week} slotsOn={slotsOn} today={today} onOpen={popup.openSession} />
+              <div className="cal-wide"><TimeGrid days={week} slotsOn={slotsOn} today={today} when={when} onOpen={popup.openSession} /></div>
+              <Agenda days={week} slotsOn={slotsOn} today={today} when={when} onOpen={popup.openSession} />
             </>
           )}
 
-          {view === 'month' && <Month date={date} slotsOn={slotsOn} today={today} onPick={(d) => go({ fecha: d })} onDay={(d) => go({ vista: 'day', fecha: d })} onOpen={popup.openSession} />}
+          {view === 'month' && <Month date={date} slotsOn={slotsOn} today={today} when={when} onPick={(d) => go({ fecha: d })} onDay={(d) => go({ vista: 'day', fecha: d })} onOpen={popup.openSession} />}
         </>
       )}
       {popup.dialog}
@@ -182,7 +188,7 @@ function lanes(slots: Slot[]) {
  * Hour grid for one day (Día) or seven (Semana, desktop). It starts up to 3 h before the first class, ends with the
  * last one and collapses empty stretches of 2 h or more; with no classes it says so. Each class opens its pop-up.
  */
-function TimeGrid({ days, slotsOn, today, onOpen, onNext, detailed = false }: { days: string[]; slotsOn: (d: string) => Slot[]; today: string; onOpen: Open; onNext?: () => void; detailed?: boolean }) {
+function TimeGrid({ days, slotsOn, today, when, onOpen, onNext, detailed = false }: { days: string[]; slotsOn: (d: string) => Slot[]; today: string; when: When; onOpen: Open; onNext?: () => void; detailed?: boolean }) {
   const now = useNowMinutes()
   const all = days.flatMap(slotsOn)
   const head = (
@@ -240,18 +246,21 @@ function TimeGrid({ days, slotsOn, today, onOpen, onNext, detailed = false }: { 
                 const { lane, of } = lay.get(s.id) ?? { lane: 0, of: 1 }
                 const short = height < 40
                 const meta = who(s)
+                const w = when(s, d)
                 return (
                   <button
                     key={s.id}
                     type="button"
-                    className={`cal-block${short ? ' cal-block--short' : ''}`}
+                    className={`cal-block${short ? ' cal-block--short' : ''}${stateCls(w)}`}
                     style={{ top, height, ['--lane' as string]: lane, ['--lanes' as string]: of, ['--clamp' as string]: height >= 60 ? 2 : 1, ['--class-color' as string]: s.cls.color }}
                     onClick={() => onOpen(target(s, d))}
-                    aria-label={`${s.cls.name}, ${longDate(d)}, ${s.start} a ${s.end}${meta ? `, ${meta}` : ''}. Tomar asistencia`}
+                    aria-label={`${s.cls.name}, ${longDate(d)}, ${s.start} a ${s.end}${meta ? `, ${meta}` : ''}${w === 'live' ? ', en curso' : ''}. Tomar asistencia`}
                   >
-                    <strong>{s.cls.name}</strong>
-                    <span className="cal-block__time">{short || of > 1 ? s.start : `${s.start}–${s.end}`}</span>
-                    {detailed && meta && !short && <span className="cal-block__meta">{meta}</span>}
+                    <span className="cal-block__time"><b>{s.start}</b>{!short && of === 1 && <small>{s.end}</small>}{w === 'live' && !detailed && <span className="cal-live cal-live--dot" aria-hidden="true" />}</span>
+                    <span className="cal-block__main">
+                      <strong>{s.cls.name}{w === 'live' && detailed && <span className="cal-live">Ahora</span>}</strong>
+                      {detailed && !short && <span className="cal-block__meta">{meta || 'Sin profesor'}</span>}
+                    </span>
                   </button>
                 )
               })}
@@ -270,7 +279,7 @@ function TimeGrid({ days, slotsOn, today, onOpen, onNext, detailed = false }: { 
 }
 
 /** Week on phones: one row per day, a date badge and that day's classes (empty days stay, quietly). */
-function Agenda({ days, slotsOn, today, onOpen }: { days: string[]; slotsOn: (d: string) => Slot[]; today: string; onOpen: Open }) {
+function Agenda({ days, slotsOn, today, when, onOpen }: { days: string[]; slotsOn: (d: string) => Slot[]; today: string; when: When; onOpen: Open }) {
   return (
     <ol className="cal-agenda" aria-label="Clases de la semana">
       {days.map((d) => {
@@ -281,7 +290,7 @@ function Agenda({ days, slotsOn, today, onOpen }: { days: string[]; slotsOn: (d:
               <small>{weekdayShort(isoWeekday(d))}</small>
               <b>{Number(d.slice(8, 10))}</b>
             </span>
-            {list.length ? <SlotList date={d} slots={list} onOpen={onOpen} /> : <span className="cal-agenda__none">Sin clases</span>}
+            {list.length ? <SlotList date={d} slots={list} when={when} onOpen={onOpen} /> : <span className="cal-agenda__none">Sin clases</span>}
           </li>
         )
       })}
@@ -293,7 +302,7 @@ function Agenda({ days, slotsOn, today, onOpen }: { days: string[]; slotsOn: (d:
  * Month: each day shows its classes as chips (time + name, in the class color), "+N" when there are more. Tapping a
  * day selects it and its classes are listed below the grid; tapping a chip opens that class's pop-up.
  */
-function Month({ date, slotsOn, today, onPick, onDay, onOpen }: { date: string; slotsOn: (d: string) => Slot[]; today: string; onPick: (d: string) => void; onDay: (d: string) => void; onOpen: Open }) {
+function Month({ date, slotsOn, today, when, onPick, onDay, onOpen }: { date: string; slotsOn: (d: string) => Slot[]; today: string; when: When; onPick: (d: string) => void; onDay: (d: string) => void; onOpen: Open }) {
   const MAX = 3
   const picked = slotsOn(date)
   return (
@@ -319,7 +328,7 @@ function Month({ date, slotsOn, today, onPick, onDay, onOpen }: { date: string; 
                   {Number(d.slice(8, 10))}
                 </button>
                 {list.slice(0, MAX).map((s) => (
-                  <button key={s.id} type="button" className="cal-chip" style={{ ['--class-color' as string]: s.cls.color }}
+                  <button key={s.id} type="button" className={`cal-chip${stateCls(when(s, d))}`} style={{ ['--class-color' as string]: s.cls.color }}
                     onClick={(e) => { e.stopPropagation(); onOpen(target(s, d)) }}
                     aria-label={`${s.cls.name}, ${longDate(d)}, ${s.start}. Tomar asistencia`}>
                     <span className="cal-chip__time">{s.start}</span>
@@ -338,21 +347,21 @@ function Month({ date, slotsOn, today, onPick, onDay, onOpen }: { date: string; 
           <h2 id="cal-picked-h">{longDate(date)}{date === today && <span className="tag tag--accent">Hoy</span>}</h2>
           <button type="button" className="link-btn" onClick={() => onDay(date)}>Ver por horas</button>
         </div>
-        {picked.length ? <SlotList date={date} slots={picked} onOpen={onOpen} /> : <p className="hint">Sin clases este día.</p>}
+        {picked.length ? <SlotList date={date} slots={picked} when={when} onOpen={onOpen} /> : <p className="hint">Sin clases este día.</p>}
       </section>
     </>
   )
 }
 
-function SlotList({ date, slots, onOpen }: { date: string; slots: Slot[]; onOpen: Open }) {
+function SlotList({ date, slots, when, onOpen }: { date: string; slots: Slot[]; when: When; onOpen: Open }) {
   return (
     <ul className="cal-slots">
       {slots.map((s) => (
         <li key={s.id} style={{ ['--class-color' as string]: s.cls.color }}>
-          <button type="button" className="cal-slot" onClick={() => onOpen(target(s, date))} aria-label={`${s.cls.name}, ${s.start} a ${s.end}. Tomar asistencia`}>
+          <button type="button" className={`cal-slot${stateCls(when(s, date))}`} onClick={() => onOpen(target(s, date))} aria-label={`${s.cls.name}, ${s.start} a ${s.end}${when(s, date) === 'live' ? ', en curso' : ''}. Tomar asistencia`}>
             <span className="cal-slots__time">{s.start}<small>{s.end}</small></span>
             <span className="cal-slots__main">
-              <strong>{s.cls.name}</strong>
+              <strong>{s.cls.name}{when(s, date) === 'live' && <span className="cal-live">Ahora</span>}</strong>
               <span className="hint">{who(s) || 'Sin profesor'}</span>
             </span>
             <span className="cal-slots__go">Asistencia <Icon name="arrow" size={14} /></span>
