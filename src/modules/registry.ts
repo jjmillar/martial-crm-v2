@@ -11,11 +11,12 @@ import { clases } from './clases'
 import { calendario } from './calendario'
 import { asistencia } from './asistencia'
 import { pagos } from './pagos'
+import { contabilidad } from './contabilidad'
 import { cuenta } from './cuenta'
 import { pendientes, tareas } from './tareas'
 import { pagar } from './pagar'
 
 // One line per module. Order here is the order in the navigation.
-export const modules: ModuleManifest[] = [inicio, miembros, escuelas, asistencia, pagos, matriculas, calendario, planes, tareas, clases, alumnos, profesores, ajustes, cuenta, pendientes, pagar]
+export const modules: ModuleManifest[] = [inicio, miembros, escuelas, contabilidad, asistencia, pagos, matriculas, calendario, planes, tareas, clases, alumnos, profesores, ajustes, cuenta, pendientes, pagar]
 
 export const modulesFor = (role: AppRole | null) => (role ? modules.filter((m) => !m.hidden && m.roles.includes(role) && (!m.navFor || m.navFor.includes(role))) : [])

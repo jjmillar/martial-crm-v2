@@ -8,4 +8,6 @@ export const pagos: ModuleManifest = {
   icon: 'wallet',
   navGroup: 'principal',
   also: ['planes', 'pagar'],
+  /** Staff see payments in Contabilidad; students keep this menu for their own payments and plans. */
+  navFor: ['alumno'],
 }

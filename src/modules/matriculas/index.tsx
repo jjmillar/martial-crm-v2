@@ -7,4 +7,6 @@ export const matriculas: ModuleManifest = {
   roles: ['ceo', 'admin', 'user'],
   icon: 'enroll',
   navGroup: 'principal',
+  /** Lives in Contabilidad → Inscripciones; the route keeps the forms (/app/matriculas/nueva, /app/matriculas/<id>). */
+  hidden: true,
 }

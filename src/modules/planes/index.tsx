@@ -7,6 +7,6 @@ export const planes: ModuleManifest = {
   roles: ['ceo', 'admin', 'user', 'alumno'],
   icon: 'plan',
   navGroup: 'principal',
-  // Shown inside "Pagos y planes" (tab), not as its own menu item.
+  // A section of Contabilidad (staff) and of "Pagos y planes" (students), not its own menu item.
   hidden: true,
 }

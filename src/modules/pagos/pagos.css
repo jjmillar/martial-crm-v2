@@ -587,3 +587,77 @@
 .code-pair--stack {
   grid-template-columns: 1fr;
 }
+
+/* ---------- Contabilidad ---------- */
+/* Summary of the month: four numbers, each opens its list already filtered */
+.conta-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.conta-kpi {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 16px 18px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+.conta-kpi:hover {
+  border-color: var(--faint);
+}
+.conta-kpi:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.conta-kpi__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.conta-kpi strong {
+  overflow: hidden;
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.conta-kpi.is-warn .conta-kpi__label svg {
+  color: var(--accent);
+}
+.conta-list {
+  display: grid;
+  gap: 12px;
+}
+/* Inside an accordion the summary is the title: the sections' own headings go */
+.acc__body > .pp-section > .pp-section__head > div > h2 {
+  display: none;
+}
+.acc__body > .pp-section {
+  margin-top: 0;
+  padding-top: 12px;
+}
+@media (max-width: 900px) {
+  .conta-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .conta-kpi {
+    padding: 12px 14px;
+  }
+  .conta-kpi__label {
+    font-size: 12px;
+  }
+  .conta-kpi .hint {
+    font-size: 12px;
+  }
+}

@@ -97,7 +97,7 @@ function StaffHome() {
             <p className="hint">{d.newThisMonth ? `+${d.newThisMonth} inscritos este mes` : 'Sin inscripciones nuevas este mes'}</p>
           </Link>
 
-          <Link className="tile tile--link rise" to="/app/matriculas" style={{ animationDelay: '80ms' }}>
+          <Link className="tile tile--link rise" to="/app/contabilidad#inscripciones" style={{ animationDelay: '80ms' }}>
             <span className="eyebrow">Inscripciones vigentes</span>
             <p className="tile__big">{d.current}</p>
             <p className="hint">{d.expired ? `${d.expired} vencidas por renovar` : 'Ninguna vencida'}</p>
@@ -110,7 +110,7 @@ function StaffHome() {
           </Link>
 
           {isAdmin && (
-            <Link className="tile tile--link rise" to="/app/pagos" style={{ animationDelay: '160ms' }}>
+            <Link className="tile tile--link rise" to="/app/contabilidad#pagos" style={{ animationDelay: '160ms' }}>
               <span className="eyebrow">Recaudado · {monthTitle(today)}</span>
               <p className="tile__big">{formatCLP(d.collected)}</p>
               <p className="hint">{d.pendingCount ? `${formatCLP(d.pendingAmount)} por confirmar (${d.pendingCount})` : 'Sin pagos por confirmar'}</p>
@@ -140,7 +140,7 @@ function StaffHome() {
           <section className="tile tile--wide rise" style={{ animationDelay: '240ms' }}>
             <div className="tile__head">
               <span className="eyebrow">Por vencer (7 días)</span>
-              <Link className="link-btn" to="/app/matriculas">Inscripciones</Link>
+              <Link className="link-btn" to="/app/contabilidad#inscripciones">Inscripciones</Link>
             </div>
             {d.expiring.length === 0 ? (
               <p className="hint">Ninguna inscripción vence esta semana.</p>

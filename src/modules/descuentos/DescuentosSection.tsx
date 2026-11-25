@@ -9,7 +9,7 @@ import { Toggle } from '../../ui/Toggle'
 import { listPlans, plansKey } from '../planes/api'
 import { codeState, codesKey, deleteCode, listCodes, normalizeCode, saveCode, stateLabel, usesLabel, validityLabel, valueLabel, type CodeInput, type CodeRow } from './api'
 
-/** "Códigos de descuento", a section of "Pagos y planes" for the school's admins. */
+/** "Códigos de descuento", a section of Contabilidad for the school's admins. */
 export function DescuentosSection() {
   const { activeSchool, role } = useSchool()
   const schoolId = activeSchool?.id

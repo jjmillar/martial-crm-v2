@@ -1,60 +1,44 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { usePersisted } from '../../lib/persist'
-import { Link } from '../../lib/nav'
-import { useQuery } from '@tanstack/react-query'
-import { useSchool } from '../../lib/school'
+import { Link, useNavigate } from '../../lib/nav'
 import { formatDate, daysUntil } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
 import { Icon } from '../../ui/Icon'
-import { enrollmentsKey, listEnrollments, phaseLabel, phaseOf, type Phase } from './api'
-
-type Filter = 'vigentes' | 'por_vencer' | 'vencida' | 'pendiente' | 'pausada' | 'cancelada' | 'todas'
-const filters: { id: Filter; label: string }[] = [
-  { id: 'vigentes', label: 'Vigentes' },
-  { id: 'por_vencer', label: 'Por vencer' },
-  { id: 'vencida', label: 'Vencidas' },
-  { id: 'pendiente', label: 'Por pagar' },
-  { id: 'pausada', label: 'Pausadas' },
-  { id: 'cancelada', label: 'Canceladas' },
-  { id: 'todas', label: 'Todas' },
-]
-const matches = (f: Filter, p: Phase) =>
-  f === 'todas' || (f === 'vigentes' ? p === 'activa' || p === 'por_vencer' : f === p)
+import { ShowMore } from '../../ui/ShowMore'
+import { useShowMore } from '../../ui/useShowMore'
+import { phaseLabel } from './api'
+import { countPhase, ENROLL_FILTERS as filters, matches, useSchoolEnrollments, type EnrollFilter } from './data'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
+/** /app/matriculas: Inscripciones lives in Contabilidad now; old links land there. */
 export function MatriculasList() {
-  const { activeSchool } = useSchool()
-  const schoolId = activeSchool?.id
-  const q = useQuery({ queryKey: enrollmentsKey(schoolId), queryFn: () => listEnrollments(schoolId!), enabled: Boolean(schoolId) })
-  const [filter, setFilter] = usePersisted<Filter>('inscripciones.filtro', 'vigentes')
-  const [search, setSearch] = usePersisted('inscripciones.q', '', 'session')
+  const navigate = useNavigate()
+  useEffect(() => { navigate('/app/contabilidad#inscripciones', { replace: true }) }, [navigate])
+  return null
+}
 
-  const withPhase = useMemo(() => (q.data ?? []).map((e) => ({ ...e, phase: phaseOf(e) })), [q.data])
-  const counts = useMemo(() => Object.fromEntries(filters.map((f) => [f.id, withPhase.filter((e) => matches(f.id, e.phase)).length])) as Record<Filter, number>, [withPhase])
+/** Contabilidad → Inscripciones: search, filter by phase, 10 at a time, "Nueva inscripción". */
+export function InscripcionesSection({ filter, setFilter }: { filter: EnrollFilter; setFilter: (f: EnrollFilter) => void }) {
+  const { q, withPhase } = useSchoolEnrollments()
+  const [search, setSearch] = usePersisted('inscripciones.q', '', 'session')
+  const { shown, more } = useShowMore('inscripciones.mostrar', 10)
+
+  const counts = useMemo(() => Object.fromEntries(filters.map((f) => [f.id, countPhase(withPhase, f.id)])) as Record<EnrollFilter, number>, [withPhase])
   const rows = useMemo(() => {
     const needle = normalize(search.trim())
     return withPhase.filter((e) => matches(filter, e.phase) && (!needle || normalize(`${e.student?.full_name ?? ''} ${e.plan?.name ?? ''}`).includes(needle)))
   }, [withPhase, filter, search])
 
-  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus inscripciones.</p>
-
   return (
-    <div className="matriculas">
-      <header className="page-head page-head--row">
-        <div>
-          <h1>Inscripciones</h1>
-        </div>
-        {Boolean(q.data?.length) && <Link className="fab" to="nueva" aria-label="Nueva inscripción" title="Nueva inscripción"><Icon name="plus" size={22} /></Link>}
-      </header>
-
+    <div className="conta-list">
       {q.isLoading && <p className="hint">Cargando…</p>}
       {q.isError && <p className="alert">No se pudieron cargar las inscripciones.</p>}
       {q.data?.length === 0 && (
         <div className="card empty">
           <h2>Aún no hay inscripciones</h2>
           <p className="hint">Una inscripción une a un alumno con un plan: fija su precio y calcula el vencimiento.</p>
-          <Link className="btn" to="nueva"><Icon name="plus" size={16} /> Matricular alumno</Link>
+          <Link className="btn" to="/app/matriculas/nueva"><Icon name="plus" size={16} /> Matricular alumno</Link>
         </div>
       )}
 
@@ -66,8 +50,9 @@ export function MatriculasList() {
               <span className="sr-only">Buscar inscripción</span>
               <input className="input" type="search" placeholder="Buscar por alumno o plan" value={search} onChange={(e) => setSearch(e.target.value)} />
             </label>
+            <Link className="btn" to="/app/matriculas/nueva"><Icon name="plus" size={16} /> Nueva inscripción</Link>
           </div>
-          <div className="segmented segmented--wrap segmented--scroll" role="group" aria-label="Filtrar por estado">
+          <div className="segmented segmented--wrap segmented--scroll" role="group" aria-label="Filtrar inscripciones por estado">
             {filters.map((f) => (
               <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
                 {f.label} <span>{counts[f.id]}</span>
@@ -79,11 +64,11 @@ export function MatriculasList() {
       {Boolean(q.data?.length) && rows.length === 0 && <p className="hint">No hay inscripciones en este filtro.</p>}
 
       <ul className="student-list">
-        {rows.map((e) => {
+        {rows.slice(0, shown).map((e) => {
           const left = e.ends_at ? daysUntil(e.ends_at) : null
           return (
             <li key={e.id}>
-              <Link className="card student-row" to={e.id}>
+              <Link className="card student-row" to={`/app/matriculas/${e.id}`}>
                 <span className="student-row__main">
                   <strong>{e.student?.full_name ?? 'Alumno'}</strong>
                   <span className="hint">
@@ -99,6 +84,7 @@ export function MatriculasList() {
           )
         })}
       </ul>
+      <ShowMore shown={shown} total={rows.length} onMore={more} label="Mostrar más" />
     </div>
   )
 }

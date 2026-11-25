@@ -13,7 +13,7 @@ import { myEnrollments, type MyEnrollment } from '../portal/api'
 import { PlanActions, PlanStatus } from './ContratarPlan'
 import { todayIso } from '../../lib/dates'
 
-/** The plans, as a section of the "Pagos y planes" page (staff edit them, students only read). */
+/** The plans: a section of Contabilidad (staff edit them) and of "Pagos y planes" (students read and contract). */
 export function PlanesList() {
   const { activeSchool, role, student: myStudent } = useSchool()
   const schoolId = activeSchool?.id
@@ -79,7 +79,7 @@ export function PlanesList() {
             <li key={p.id}>
               <PlanCard student={student} className={`card plan-card${p.is_default && !student ? ' is-default' : ''}${myPlans.has(p.id) ? ' is-mine' : ''}${p.active ? '' : ' is-off'}`} to={`/app/planes/${p.id}`}>
                 <div className="plan-card__tags">
-                  <span className="eyebrow">{p.specialty_id ? spName.get(p.specialty_id) ?? 'Disciplina' : 'Todas las disciplinas'}</span>
+                  {p.specialty_id && <span className="tag">{spName.get(p.specialty_id) ?? 'Disciplina'}</span>}
                   {student ? <PlanStatus mine={myByPlan.get(p.id)} /> : myPlans.has(p.id) && <span className="tag tag--ok">Tu plan</span>}
                   {p.is_default && !student && <span className="tag tag--accent">Predeterminado</span>}
                   {p.is_trial && <span className="tag">Prueba</span>}

@@ -12,9 +12,13 @@ import { cycleInfo } from '../planes/cycles'
 import { CodeField } from '../descuentos/CodeField'
 import { redeemOnEnrollment, removeFromEnrollment, valueLabel } from '../descuentos/api'
 import {
+
   createEnrollment, deleteEnrollment, enrollmentsKey, getEnrollment, phaseLabel, phaseOf, updateEnrollment,
   type EnrollmentRow,
 } from './api'
+
+// The lists live in Contabilidad; the forms go back there.
+const BACK = '/app/contabilidad#inscripciones'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 const endsFor = (plan: Plan | undefined, start: string) => (plan?.duration_days ? addDays(start, plan.duration_days) : '')
@@ -26,7 +30,7 @@ export function MatriculaEditor() {
   const q = useQuery({ queryKey: ['enrollment', id], queryFn: () => getEnrollment(id!), enabled: !isNew })
   if (isNew) return <NuevaMatricula />
   if (q.isLoading) return <p className="hint">Cargando…</p>
-  if (!q.data) return <p className="alert">No encontramos esa inscripción. <Link to="..">Volver</Link></p>
+  if (!q.data) return <p className="alert">No encontramos esa inscripción. <Link to={BACK}>Volver</Link></p>
   return <MatriculaDetalle key={q.data.id} e={q.data} />
 }
 
@@ -88,7 +92,7 @@ function NuevaMatricula() {
     onSuccess: (e) => {
       qc.invalidateQueries({ queryKey: enrollmentsKey(schoolId) })
       qc.invalidateQueries({ queryKey: ['student-enrollments', e.student_id] })
-      navigate('..', { replace: true, state: { flash: 'Inscripción creada.' } })
+      navigate(BACK, { replace: true, state: { flash: 'Inscripción creada.' } })
     },
     onError: (e: Error) => setError(e.message),
   })
@@ -106,11 +110,11 @@ function NuevaMatricula() {
   return (
     <form className="alumno-form" onSubmit={onSubmit} noValidate>
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Inscripciones</Link>
+        <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Inscripciones</Link>
         <h1>Nueva inscripción</h1>
       </header>
 
-      {noPlans && <p className="alert">No hay planes activos. <Link to="/app/planes">Crea un plan</Link> primero.</p>}
+      {noPlans && <p className="alert">No hay planes activos. <Link to="/app/contabilidad#planes">Crea un plan</Link> primero.</p>}
       {noStudents && <p className="alert">No hay alumnos activos. <Link to="/app/alumnos/nuevo">Crea un alumno</Link> primero.</p>}
 
       <section className="card form-section">
@@ -177,7 +181,7 @@ function NuevaMatricula() {
       {error && <p className="alert" role="alert">{error}</p>}
       <div className="form-actions">
         <button className="btn" type="submit" disabled={save.isPending || noPlans || noStudents}>{save.isPending ? 'Guardando…' : 'Matricular'}</button>
-        <Link className="btn btn--ghost" to="..">Cancelar</Link>
+        <Link className="btn btn--ghost" to={BACK}>Cancelar</Link>
       </div>
     </form>
   )
@@ -224,7 +228,7 @@ function MatriculaDetalle({ e }: { e: EnrollmentRow }) {
     mutationFn: () => deleteEnrollment(e.id),
     onSuccess: async () => {
       await refresh()
-      navigate('..', { replace: true })
+      navigate(BACK, { replace: true })
     },
     onError: (err: Error) => setMsg({ ok: false, text: err.message }),
   })
@@ -237,7 +241,7 @@ function MatriculaDetalle({ e }: { e: EnrollmentRow }) {
   return (
     <div className="alumno-form">
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Inscripciones</Link>
+        <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Inscripciones</Link>
         <h1>{e.student?.full_name ?? 'Inscripción'}</h1>
         <p className="hint">
           <span className={`tag tag--phase-${phase}`}>{phaseLabel[phase]}</span> {e.plan?.name} · {formatCLP(e.price)} · desde {formatDate(e.start_date)}{e.ends_at ? ` hasta ${formatDate(e.ends_at)}` : ''}

@@ -11,9 +11,13 @@ import { listStudentEnrollments, phaseOf } from '../matriculas/api'
 import { CodeField } from '../descuentos/CodeField'
 import { redeemOnPayment, removeFromPayment, valueLabel } from '../descuentos/api'
 import {
+
   attachReceipt, createPayment, deletePayment, emailReceipt, getPayment, kindLabel, methodLabel, paymentsKey, receiptUrl, statusLabel, updatePayment, uploadReceipt,
   type PaymentRow,
 } from './api'
+
+// The lists live in Contabilidad; the forms go back there.
+const BACK = '/app/contabilidad#pagos'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 const methods: PaymentMethod[] = ['transferencia', 'efectivo', 'tarjeta', 'otro']
@@ -26,7 +30,7 @@ export function PagoEditor() {
   const q = useQuery({ queryKey: ['payment', id], queryFn: () => getPayment(id!), enabled: !isNew })
   if (isNew) return <NuevoPago />
   if (q.isLoading) return <p className="hint">Cargando…</p>
-  if (!q.data) return <p className="alert">No encontramos ese pago. <Link to="..">Volver</Link></p>
+  if (!q.data) return <p className="alert">No encontramos ese pago. <Link to={BACK}>Volver</Link></p>
   return <PagoDetalle key={q.data.id} p={q.data} />
 }
 
@@ -96,7 +100,7 @@ function NuevoPago() {
     onSuccess: (p) => {
       qc.invalidateQueries({ queryKey: paymentsKey(schoolId) })
       qc.invalidateQueries({ queryKey: ['student-payments', p.student_id] })
-      navigate('..', { replace: true, state: { flash: 'Pago registrado.' } })
+      navigate(BACK, { replace: true, state: { flash: 'Pago registrado.' } })
     },
     onError: (e: Error) => setError(e.message),
   })
@@ -112,7 +116,7 @@ function NuevoPago() {
   return (
     <form className="alumno-form" onSubmit={onSubmit} noValidate>
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Pagos</Link>
+        <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Pagos</Link>
         <h1>Registrar pago</h1>
         {!isAdmin && <p className="hint">Quedará pendiente hasta que un administrador lo confirme.</p>}
       </header>
@@ -197,7 +201,7 @@ function NuevoPago() {
       {error && <p className="alert" role="alert">{error}</p>}
       <div className="form-actions">
         <button className="btn" type="submit" disabled={save.isPending}>{save.isPending ? 'Guardando…' : 'Registrar pago'}</button>
-        <Link className="btn btn--ghost" to="..">Cancelar</Link>
+        <Link className="btn btn--ghost" to={BACK}>Cancelar</Link>
       </div>
     </form>
   )
@@ -247,14 +251,14 @@ function PagoDetalle({ p }: { p: PaymentRow }) {
   })
   const remove = useMutation({
     mutationFn: () => deletePayment(p.id, p.receipt_path),
-    onSuccess: async () => { await refresh(); navigate('..', { replace: true }) },
+    onSuccess: async () => { await refresh(); navigate(BACK, { replace: true }) },
     onError: (e: Error) => setMsg({ ok: false, text: e.message }),
   })
 
   return (
     <div className="alumno-form">
       <header className="page-head">
-        <Link className="link-btn back-link" to=".."><Icon name="back" size={16} /> Pagos</Link>
+        <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Pagos</Link>
         <h1>{formatCLP(p.amount)}</h1>
         <p className="hint"><span className={`tag tag--pay-${p.status}`}>{statusLabel[p.status]}</span> {p.concept}</p>
       </header>

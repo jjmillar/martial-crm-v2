@@ -1,22 +1,20 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { usePersisted } from '../../lib/persist'
-import { Link } from '../../lib/nav'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
+import { Link, useNavigate } from '../../lib/nav'
 import { useSchool } from '../../lib/school'
-import { formatDate, monthTitle, santiagoDate, todayIso } from '../../lib/dates'
+import { formatDate, santiagoDate } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
-import type { PaymentStatus } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
-import { listPayments, methodLabel, paymentsKey, statusLabel } from './api'
+import { methodLabel, statusLabel } from './api'
+import { useSchoolPayments, type PayFilter } from './data'
 import { PaidTag } from '../pagar/PaidTag'
-import { doubleChecked, latestSubmissions, submissionsKey } from '../pagar/api'
+import { doubleChecked } from '../pagar/api'
 import { MisPagos } from '../pagar/MisPagos'
-import { PlanesList } from '../planes/PlanesList'
-import { DescuentosSection } from '../descuentos/DescuentosSection'
 import { PaymentHistory } from './PaymentHistory'
+import { ShowMore } from '../../ui/ShowMore'
+import { useShowMore } from '../../ui/useShowMore'
 
-type Filter = PaymentStatus | 'todos'
+type Filter = PayFilter
 const filters: { id: Filter; label: string }[] = [
   { id: 'pendiente', label: 'Pendientes' },
   { id: 'pagado', label: 'Pagados' },
@@ -26,90 +24,50 @@ const filters: { id: Filter; label: string }[] = [
 ]
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
+/** /app/pagos: a student's own payments and plans ("Pagos y planes"). Staff work in Contabilidad → Pagos. */
 export function PagosList() {
   const { role } = useSchool()
-  return role === 'alumno' ? <MisPagos /> : <StaffPagos />
+  const navigate = useNavigate()
+  const staff = role !== null && role !== 'alumno'
+  useEffect(() => { if (staff) navigate('/app/contabilidad#pagos', { replace: true }) }, [staff, navigate])
+  return role === 'alumno' ? <MisPagos /> : null
 }
 
-function StaffPagos() {
-  const { activeSchool, role } = useSchool()
-  const schoolId = activeSchool?.id
-  const isAdmin = role === 'admin' || role === 'ceo'
-  // Admins: make sure due enrollment fees exist before listing (the daily job does the same; this is idempotent).
-  const fees = useQuery({
-    queryKey: ['enrollment-fees-run', schoolId],
-    queryFn: async () => { const { error } = await supabase.rpc('generate_enrollment_fees', { p_school_id: schoolId! }); return !error },
-    enabled: Boolean(schoolId) && isAdmin && Boolean(activeSchool?.enrollment_fee),
-    staleTime: 10 * 60_000,
-  })
-  const feesReady = !isAdmin || !activeSchool?.enrollment_fee || fees.isFetched
-  const q = useQuery({ queryKey: paymentsKey(schoolId), queryFn: () => listPayments(schoolId!), enabled: Boolean(schoolId) && feesReady })
-  // Transfers students reported from the payment gateway, waiting for the CEO.
-  const subs = useQuery({ queryKey: submissionsKey(`school:${schoolId}`), queryFn: () => latestSubmissions({ schoolId }), enabled: Boolean(schoolId) })
-  const [filter, setFilter] = usePersisted<Filter>('pagos.filtro', 'pendiente')
+/** Contabilidad → Pagos: search, filter by status, 10 at a time, "Registrar pago". */
+export function PagosSection({ filter, setFilter }: { filter: Filter; setFilter: (f: Filter) => void }) {
+  const { q, subs } = useSchoolPayments()
   const [search, setSearch] = usePersisted('pagos.q', '', 'session')
+  const { shown, more } = useShowMore('pagos.mostrar', 10)
 
-  const thisMonth = todayIso().slice(0, 7)
-  const stats = useMemo(() => {
-    const all = q.data ?? []
-    const paidMonth = all.filter((p) => p.status === 'pagado' && p.paid_at && santiagoDate(p.paid_at).slice(0, 7) === thisMonth)
-    const pending = all.filter((p) => p.status === 'pendiente')
-    return {
-      collected: paidMonth.reduce((a, p) => a + p.amount, 0),
-      collectedCount: paidMonth.length,
-      pending: pending.reduce((a, p) => a + p.amount, 0),
-      pendingCount: pending.length,
-    }
-  }, [q.data, thisMonth])
   const counts = useMemo(() => Object.fromEntries(filters.map((f) => [f.id, (q.data ?? []).filter((p) => f.id === 'todos' || p.status === f.id).length])) as Record<Filter, number>, [q.data])
   const rows = useMemo(() => {
     const needle = normalize(search.trim())
     return (q.data ?? []).filter((p) => (filter === 'todos' || p.status === filter) && (!needle || normalize(`${p.student?.full_name ?? ''} ${p.concept}`).includes(needle)))
   }, [q.data, filter, search])
 
-  if (!activeSchool) return <p className="page-note">Selecciona una escuela para ver sus pagos.</p>
-
   return (
-    <div className="matriculas">
-      <header className="page-head page-head--row">
-        <div>
-          <h1>Pagos y planes</h1>
-        </div>
-        {Boolean(q.data?.length) && <Link className="fab" to="/app/pagos/nuevo" aria-label="Registrar pago" title="Registrar pago"><Icon name="plus" size={22} /></Link>}
-      </header>
-
+    <div className="conta-list">
       {q.isLoading && <p className="hint">Cargando…</p>}
       {q.isError && <p className="alert">No se pudieron cargar los pagos.</p>}
       {q.data?.length === 0 && (
         <div className="card empty">
           <h2>Aún no hay pagos</h2>
           <p className="hint">Registra mensualidades, matrículas o packs en transferencia o efectivo. Puedes adjuntar el comprobante.</p>
-          <Link className="btn" to="nuevo"><Icon name="plus" size={16} /> Registrar pago</Link>
+          <Link className="btn" to="/app/pagos/nuevo"><Icon name="plus" size={16} /> Registrar pago</Link>
         </div>
       )}
 
       {Boolean(q.data?.length) && (
         <>
-          <div className="kpis">
-            <div className="card kpi">
-              <span className="eyebrow">Recaudado · {monthTitle(todayIso())}</span>
-              <strong>{formatCLP(stats.collected)}</strong>
-              <span className="hint">{stats.collectedCount} {stats.collectedCount === 1 ? 'pago' : 'pagos'}</span>
-            </div>
-            <button type="button" className="card kpi kpi--link" onClick={() => setFilter('pendiente')}>
-              <span className="eyebrow">Por confirmar</span>
-              <strong>{formatCLP(stats.pending)}</strong>
-              <span className="hint">{stats.pendingCount} {stats.pendingCount === 1 ? 'pago pendiente' : 'pagos pendientes'}</span>
-            </button>
-          </div>
           <div className="toolbar">
             <label className="search">
               <Icon name="search" size={16} />
               <span className="sr-only">Buscar pago</span>
               <input className="input" type="search" placeholder="Buscar por alumno o concepto" value={search} onChange={(e) => setSearch(e.target.value)} />
             </label>
+            <Link className="btn" to="/app/pagos/nuevo"><Icon name="plus" size={16} /> Registrar pago</Link>
           </div>
-          <div className="segmented segmented--wrap segmented--scroll" role="group" aria-label="Filtrar por estado">
+          <div className="segmented segmented--wrap segmented--scroll" role="group" aria-label="Filtrar pagos por estado">
             {filters.map((f) => (
               <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>{f.label} <span>{counts[f.id]}</span></button>
             ))}
@@ -119,9 +77,9 @@ function StaffPagos() {
       {Boolean(q.data?.length) && rows.length === 0 && <p className="hint">No hay pagos en este filtro.</p>}
 
       <ul className="student-list">
-        {rows.map((p) => (
+        {rows.slice(0, shown).map((p) => (
           <li key={p.id}>
-            <Link className="card student-row" to={p.id}>
+            <Link className="card student-row" to={`/app/pagos/${p.id}`}>
               <span className="student-row__main">
                 <strong>{p.student?.full_name ?? 'Alumno'}</strong>
                 <span className="hint">{p.concept} · {methodLabel[p.method]} · {formatDate(santiagoDate(p.paid_at ?? p.created_at))}{p.receipt_path ? ' · 📎' : ''}</span>
@@ -136,10 +94,14 @@ function StaffPagos() {
           </li>
         ))}
       </ul>
-
-      <PlanesList />
-      <DescuentosSection />
-      {q.isSuccess && <PaymentHistory payments={q.data} staff doubleIds={doubleChecked(subs.data)} />}
+      <ShowMore shown={shown} total={rows.length} onMore={more} label="Mostrar más" />
     </div>
   )
+}
+
+/** Contabilidad → Historial: the latest transactions of the school. */
+export function HistorialSection() {
+  const { q, subs } = useSchoolPayments()
+  if (!q.isSuccess) return <p className="hint">Cargando…</p>
+  return <PaymentHistory payments={q.data} staff doubleIds={doubleChecked(subs.data)} />
 }
