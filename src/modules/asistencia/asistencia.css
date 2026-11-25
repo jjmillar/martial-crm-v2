@@ -333,3 +333,56 @@
 .att-req__main .hint {
   overflow-wrap: anywhere;
 }
+
+/* Landing of the room QR (/app/qr/<code>): one big card, readable at arm's length */
+.qr-checkin {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+}
+.qr-checkin__card {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: min(100%, 440px);
+  padding: 32px 24px;
+  text-align: center;
+}
+.qr-checkin__card h1 {
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+.qr-checkin__card .btn {
+  margin-top: 8px;
+}
+.qr-checkin__icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.qr-checkin__icon.is-ok {
+  background: color-mix(in srgb, #2fbf71 18%, transparent);
+  color: #2fbf71;
+}
+.qr-checkin__icon.is-bad {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+.qr-checkin__icon.is-wait {
+  animation: qr-pulse 1.2s ease-in-out infinite;
+}
+@keyframes qr-pulse { 50% { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .qr-checkin__icon.is-wait { animation: none; } }
+.qr-checkin__class {
+  font-size: 20px;
+  font-weight: 700;
+}
+.qr-checkin__people {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}

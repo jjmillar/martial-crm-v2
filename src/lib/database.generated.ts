@@ -210,6 +210,7 @@ export type Database = {
       };
       attendance: {
         Row: {
+          by_qr: boolean;
           class_id: string;
           confirmed_at: string | null;
           confirmed_by: string | null;
@@ -224,6 +225,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          by_qr?: boolean;
           class_id: string;
           confirmed_at?: string | null;
           confirmed_by?: string | null;
@@ -237,6 +239,7 @@ export type Database = {
           student_id: string;
         };
         Update: {
+          by_qr?: boolean;
           class_id?: string;
           confirmed_at?: string | null;
           confirmed_by?: string | null;
@@ -1506,6 +1509,36 @@ export type Database = {
           },
         ];
       };
+      school_check_in_codes: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          school_id: string;
+          token: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          school_id: string;
+          token: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          school_id?: string;
+          token?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "school_check_in_codes_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: true;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       school_members: {
         Row: {
           created_at: string;
@@ -2470,6 +2503,7 @@ export type Database = {
       check_in: {
         Args: { p_class_id: string };
         Returns: {
+          by_qr: boolean;
           class_id: string;
           confirmed_at: string | null;
           confirmed_by: string | null;
@@ -2492,6 +2526,7 @@ export type Database = {
       check_in_for: {
         Args: { p_class_id: string; p_date: string; p_student_id: string };
         Returns: {
+          by_qr: boolean;
           class_id: string;
           confirmed_at: string | null;
           confirmed_by: string | null;
@@ -2514,6 +2549,7 @@ export type Database = {
       check_in_on: {
         Args: { p_class_id: string; p_date: string };
         Returns: {
+          by_qr: boolean;
           class_id: string;
           confirmed_at: string | null;
           confirmed_by: string | null;
@@ -2721,6 +2757,10 @@ export type Database = {
         Returns: undefined;
       };
       platform_whoami: { Args: Record<PropertyKey, never>; Returns: Json };
+      qr_check_in: {
+        Args: { p_student_id?: string; p_token: string };
+        Returns: Json;
+      };
       rate_limit_hit: {
         Args: {
           p_bucket: string;
@@ -2780,6 +2820,7 @@ export type Database = {
         Args: { p_approve: boolean; p_ids: string[] };
         Returns: number;
       };
+      rotate_check_in_code: { Args: { p_school_id: string }; Returns: string };
       rut_is_valid: { Args: { p_rut: string }; Returns: boolean };
       rut_key: { Args: { p_rut: string }; Returns: string };
       save_class_session: {

@@ -578,3 +578,55 @@
   letter-spacing: 0.3em;
   font-variant-numeric: tabular-nums;
 }
+
+/* Check-in con QR */
+.qr-settings {
+  display: grid;
+  gap: 16px;
+}
+.qr-settings__first {
+  justify-self: start;
+}
+.qr-settings__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.qr-settings__poster {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.qr-settings__side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.qr-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.qr-settings__rotate {
+  display: grid;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.qr-settings__rotate .qr-settings__actions,
+.qr-settings__rotate > .btn {
+  justify-self: start;
+  margin-top: 4px;
+}
+@media (max-width: 640px) {
+  .qr-settings__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .qr-settings__poster {
+    max-width: 300px;
+    justify-self: center;
+  }
+}

@@ -17,6 +17,7 @@ import { PasarelaPago } from './PasarelaPago'
 import { Actividad } from './Actividad'
 import { ArtesMarciales } from '../artes/ArtesMarciales'
 import { EscuelasSection } from '../escuelas/EscuelasPage'
+import { QrCheckIn } from './QrCheckIn'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
 
@@ -75,6 +76,9 @@ function SchoolSections() {
       </Acc>
       <Acc id="agendamiento" icon="calendar" title="Agendamiento" hint="Clases de prueba gratis desde la landing">
         <Agendamiento key={`agenda-${school.id}`} school={school} />
+      </Acc>
+      <Acc id="qr" icon="qr" title="Check-in con QR" hint="QR para pegar en la sala: el alumno lo escanea y queda su asistencia">
+        <QrCheckIn key={`qr-${school.id}`} school={school} />
       </Acc>
       <Acc id="artes" icon="teacher" title="Artes marciales" hint="Las artes que enseña la escuela y sus cinturones (adultos y kids)">
         <ArtesMarciales key={`artes-${school.id}`} schoolId={school.id} />

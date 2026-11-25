@@ -33,7 +33,7 @@ export const view = (s: Session) => ({
 export const sessionKey = (classId: string, date: string, start: string) => `${classId}|${date}|${start.slice(0, 5)}`
 
 /** One attendance on a card: who marked it (the student themself or the team) and who approved it, kept for analytics. */
-export type Mark = { id?: string; student_id: string; confirmed: boolean; self_marked?: boolean; confirmed_by?: string | null; confirmed_at?: string | null; by_guardian?: boolean }
+export type Mark = { id?: string; student_id: string; confirmed: boolean; self_marked?: boolean; confirmed_by?: string | null; confirmed_at?: string | null; by_guardian?: boolean; by_qr?: boolean }
 
 /** A check-in made by the student's guardian (apoderado) instead of the student. */
 export const byGuardian = (r: { self_marked?: boolean | null; marked_by?: string | null; student?: { user_id?: string | null } | null }) =>
@@ -46,9 +46,9 @@ export type TrialBooking = {
 export const attendanceKey = (classId: string, date: string) => ['attendance', classId, date] as const
 
 export async function listAttendance(classId: string, date: string): Promise<Mark[]> {
-  const { data, error } = await supabase.from('attendance').select('id, student_id, self_marked, confirmed_at, confirmed_by, marked_by, student:students(user_id)').eq('class_id', classId).eq('date', date)
+  const { data, error } = await supabase.from('attendance').select('id, student_id, self_marked, confirmed_at, confirmed_by, marked_by, by_qr, student:students(user_id)').eq('class_id', classId).eq('date', date)
   if (error) throw error
-  return data.map((r) => ({ id: r.id, student_id: r.student_id, confirmed: Boolean(r.confirmed_at), self_marked: r.self_marked, confirmed_by: r.confirmed_by, confirmed_at: r.confirmed_at, by_guardian: byGuardian(r) }))
+  return data.map((r) => ({ id: r.id, student_id: r.student_id, confirmed: Boolean(r.confirmed_at), self_marked: r.self_marked, confirmed_by: r.confirmed_by, confirmed_at: r.confirmed_at, by_guardian: byGuardian(r), by_qr: r.by_qr }))
 }
 
 /** Creates the school's missing session records up to today and numbers them (cheap when there is nothing new). */
