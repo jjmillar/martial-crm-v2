@@ -1264,6 +1264,155 @@ export type Database = {
         };
         Relationships: [];
       };
+      platform_discount_codes: {
+        Row: {
+          active: boolean;
+          amount: number | null;
+          code: string;
+          created_at: string;
+          created_by: string | null;
+          description: string | null;
+          id: string;
+          max_uses: number | null;
+          percent: number | null;
+          plan_id: string | null;
+          scope: Database["public"]["Enums"]["discount_scope"];
+          updated_at: string;
+          valid_from: string | null;
+          valid_until: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          amount?: number | null;
+          code: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          id?: string;
+          max_uses?: number | null;
+          percent?: number | null;
+          plan_id?: string | null;
+          scope?: Database["public"]["Enums"]["discount_scope"];
+          updated_at?: string;
+          valid_from?: string | null;
+          valid_until?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          amount?: number | null;
+          code?: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          id?: string;
+          max_uses?: number | null;
+          percent?: number | null;
+          plan_id?: string | null;
+          scope?: Database["public"]["Enums"]["discount_scope"];
+          updated_at?: string;
+          valid_from?: string | null;
+          valid_until?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "platform_discount_codes_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_plans";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      platform_invoices: {
+        Row: {
+          amount: number;
+          base_amount: number;
+          created_at: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          discount_amount: number;
+          discount_code: string | null;
+          discount_code_id: string | null;
+          id: string;
+          owner_id: string;
+          period: string;
+          period_end: string;
+          period_start: string;
+          plan_id: string | null;
+          plan_name: string;
+          reference: string | null;
+          reject_reason: string | null;
+          reported_at: string | null;
+          status: Database["public"]["Enums"]["platform_invoice_status"];
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          base_amount: number;
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          discount_amount?: number;
+          discount_code?: string | null;
+          discount_code_id?: string | null;
+          id?: string;
+          owner_id: string;
+          period: string;
+          period_end: string;
+          period_start: string;
+          plan_id?: string | null;
+          plan_name: string;
+          reference?: string | null;
+          reject_reason?: string | null;
+          reported_at?: string | null;
+          status?: Database["public"]["Enums"]["platform_invoice_status"];
+        };
+        Update: {
+          amount?: number;
+          base_amount?: number;
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          discount_amount?: number;
+          discount_code?: string | null;
+          discount_code_id?: string | null;
+          id?: string;
+          owner_id?: string;
+          period?: string;
+          period_end?: string;
+          period_start?: string;
+          plan_id?: string | null;
+          plan_name?: string;
+          reference?: string | null;
+          reject_reason?: string | null;
+          reported_at?: string | null;
+          status?: Database["public"]["Enums"]["platform_invoice_status"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "platform_invoices_discount_code_id_fkey";
+            columns: ["discount_code_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_discount_codes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "platform_invoices_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "owners";
+            referencedColumns: ["user_id"];
+          },
+          {
+            foreignKeyName: "platform_invoices_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_plans";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       platform_operators: {
         Row: {
           created_at: string;
@@ -1314,6 +1463,93 @@ export type Database = {
           name?: string;
           period?: string;
           price_clp?: number;
+        };
+        Relationships: [];
+      };
+      platform_redemptions: {
+        Row: {
+          code_id: string;
+          created_at: string;
+          discount: number;
+          id: string;
+          invoice_id: string | null;
+          owner_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          code_id: string;
+          created_at?: string;
+          discount?: number;
+          id?: string;
+          invoice_id?: string | null;
+          owner_id: string;
+        };
+        Update: {
+          code_id?: string;
+          created_at?: string;
+          discount?: number;
+          id?: string;
+          invoice_id?: string | null;
+          owner_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "platform_redemptions_code_id_fkey";
+            columns: ["code_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_discount_codes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "platform_redemptions_invoice_id_fkey";
+            columns: ["invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_invoices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "platform_redemptions_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "owners";
+            referencedColumns: ["user_id"];
+          },
+        ];
+      };
+      platform_settings: {
+        Row: {
+          id: boolean;
+          transfer_account_number: string | null;
+          transfer_account_type: string | null;
+          transfer_bank: string | null;
+          transfer_email: string | null;
+          transfer_holder: string | null;
+          transfer_rut: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: boolean;
+          transfer_account_number?: string | null;
+          transfer_account_type?: string | null;
+          transfer_bank?: string | null;
+          transfer_email?: string | null;
+          transfer_holder?: string | null;
+          transfer_rut?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: boolean;
+          transfer_account_number?: string | null;
+          transfer_account_type?: string | null;
+          transfer_bank?: string | null;
+          transfer_email?: string | null;
+          transfer_holder?: string | null;
+          transfer_rut?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
         };
         Relationships: [];
       };
@@ -2105,6 +2341,10 @@ export type Database = {
       };
       subscriptions: {
         Row: {
+          discount_code: string | null;
+          discount_code_id: string | null;
+          discount_fixed: number | null;
+          discount_percent: number | null;
           notes: string | null;
           owner_id: string;
           period_end: string | null;
@@ -2116,6 +2356,10 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          discount_code?: string | null;
+          discount_code_id?: string | null;
+          discount_fixed?: number | null;
+          discount_percent?: number | null;
           notes?: string | null;
           owner_id: string;
           period_end?: string | null;
@@ -2126,6 +2370,10 @@ export type Database = {
           updated_by?: string | null;
         };
         Update: {
+          discount_code?: string | null;
+          discount_code_id?: string | null;
+          discount_fixed?: number | null;
+          discount_percent?: number | null;
           notes?: string | null;
           owner_id?: string;
           period_end?: string | null;
@@ -2136,6 +2384,13 @@ export type Database = {
           updated_by?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "subscriptions_discount_code_id_fkey";
+            columns: ["discount_code_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_discount_codes";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "subscriptions_owner_id_fkey";
             columns: ["owner_id"];
@@ -2499,6 +2754,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      billing_owner_ok: { Args: Record<PropertyKey, never>; Returns: boolean };
       book_trial: {
         Args: {
           p_date: string;
@@ -2735,7 +2991,12 @@ export type Database = {
         }[];
       };
       my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
+      my_subscription: { Args: Record<PropertyKey, never>; Returns: Json };
       my_ward_ids: { Args: Record<PropertyKey, never>; Returns: string[] };
+      platform_code_lookup: {
+        Args: { p_code: string; p_owner: string; p_plan: string };
+        Returns: Record<string, unknown>;
+      };
       platform_customers: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -2757,6 +3018,18 @@ export type Database = {
           updated_at: string;
         }[];
       };
+      platform_decide_invoice: {
+        Args: { p_approve: boolean; p_id: string; p_reason?: string };
+        Returns: undefined;
+      };
+      platform_discount_uses: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          code_id: string;
+          saved: number;
+          uses: number;
+        }[];
+      };
       platform_events: {
         Args: { p_limit?: number };
         Returns: {
@@ -2765,6 +3038,29 @@ export type Database = {
           details: Json;
           id: number;
           owner_id: string;
+        }[];
+      };
+      platform_finalize_invoice: { Args: { p_id: string }; Returns: undefined };
+      platform_invoices_list: {
+        Args: { p_limit?: number };
+        Returns: {
+          amount: number;
+          base_amount: number;
+          created_at: string;
+          customer: string;
+          decided_at: string;
+          discount_amount: number;
+          discount_code: string;
+          email: string;
+          id: string;
+          owner_id: string;
+          period_end: string;
+          period_start: string;
+          plan_name: string;
+          reference: string;
+          reject_reason: string;
+          reported_at: string;
+          status: Database["public"]["Enums"]["platform_invoice_status"];
         }[];
       };
       platform_update_subscription: {
@@ -2992,6 +3288,12 @@ export type Database = {
         };
         Returns: string;
       };
+      subscription_apply_code: { Args: { p_code: string }; Returns: Json };
+      subscription_checkout: { Args: { p_plan: string }; Returns: string };
+      subscription_report_transfer: {
+        Args: { p_reference?: string };
+        Returns: undefined;
+      };
       sync_all_class_sessions: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
@@ -3040,6 +3342,11 @@ export type Database = {
       payment_kind: "plan" | "matricula" | "otro";
       payment_method: "transferencia" | "efectivo" | "tarjeta" | "otro";
       payment_status: "pendiente" | "pagado" | "fallido" | "reembolsado";
+      platform_invoice_status:
+        | "pendiente"
+        | "por_confirmar"
+        | "pagada"
+        | "anulada";
       request_kind: "alumno" | "miembro";
       request_status: "pendiente" | "aprobada" | "rechazada";
       school_role: "admin" | "user";
@@ -3189,6 +3496,12 @@ export const Constants = {
       payment_kind: ["plan", "matricula", "otro"],
       payment_method: ["transferencia", "efectivo", "tarjeta", "otro"],
       payment_status: ["pendiente", "pagado", "fallido", "reembolsado"],
+      platform_invoice_status: [
+        "pendiente",
+        "por_confirmar",
+        "pagada",
+        "anulada",
+      ],
       request_kind: ["alumno", "miembro"],
       request_status: ["pendiente", "aprobada", "rechazada"],
       school_role: ["admin", "user"],
