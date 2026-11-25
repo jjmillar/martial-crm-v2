@@ -5,7 +5,7 @@ import { useSchool } from '../../lib/school'
 import { formatRut } from '../../lib/rut'
 import { beltSuggestions } from '../../lib/belts'
 import { artsKey, degreeText, listArts } from '../artes/api'
-import { BeltEmote } from '../artes/Belt'
+import { BeltBar } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { CatalogoDialog } from '../ajustes/CatalogoDialog'
@@ -165,7 +165,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
                 ))}
                 {belt && (
                   <div className="belt-preview field--wide" aria-hidden="true">
-                    <BeltEmote color={belt.color} stripe={belt.stripe} bar={belt.bar} pattern={belt.pattern} degree={Number(form.belt_degree || 0)} size={64} />
+                    <BeltBar color={belt.color} stripe={belt.stripe} bar={belt.bar} pattern={belt.pattern} degree={Number(form.belt_degree || 0)} size="xl" />
                     <b>{beltArt?.name} · {belt.name}{Number(form.belt_degree) > 0 ? ` · ${degreeText(Number(form.belt_degree), belt.degree_name)}` : ''}</b>
                   </div>
                 )}

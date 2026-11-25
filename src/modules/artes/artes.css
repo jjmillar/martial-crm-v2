@@ -15,6 +15,8 @@
 }
 .beltbar--sm { width: 26px; height: 7px; }
 .beltbar--lg { width: 46px; height: 12px; }
+/* Long belt (teacher cards, belt editor preview) */
+.beltbar--xl { width: 112px; height: 16px; border-radius: 3px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.25); }
 /* Lengthwise band (kids two-color belts) */
 .beltbar--banda {
   background: linear-gradient(to bottom, var(--belt) 0 34%, var(--stripe) 34% 66%, var(--belt) 66%);
@@ -54,28 +56,10 @@
 .beltbar__rank.is-many { gap: 1px; width: 44%; }
 .beltbar__rank.is-many i { width: 1px; }
 .beltbar--sm .beltbar__rank i { width: 1px; }
-
-/* Tied belt "emote" (teacher cards, belt editor): on a soft tile so black belts read on dark backgrounds */
-.belt-emote {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  padding: 4px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--text) 9%, transparent);
-}
-.belt-emote svg {
-  overflow: visible;
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.3));
-}
-.belt-emote__edge {
-  fill: none;
-  stroke: color-mix(in srgb, var(--text) 30%, transparent);
-  stroke-width: 0.8;
-}
-.belt-emote__knot {
-  stroke: color-mix(in srgb, var(--text) 40%, transparent);
-}
+.beltbar--xl .beltbar__rank { width: 28%; gap: 3px; padding: 0 3px; }
+.beltbar--xl .beltbar__rank i { width: 3px; }
+.beltbar--xl .beltbar__rank.is-many { width: 38%; gap: 2px; }
+.beltbar--xl .beltbar__rank.is-many i { width: 1.5px; }
 
 .beltchip {
   display: inline-flex;

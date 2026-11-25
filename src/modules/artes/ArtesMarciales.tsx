@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Icon } from '../../ui/Icon'
 import { Modal } from '../../ui/Modal'
 import { Toggle } from '../../ui/Toggle'
-import { BeltBar, BeltEmote } from './Belt'
+import { BeltBar } from './Belt'
 import {
   addFromTemplate, artsKey, createArt, DEGREE_NAMES, deleteArt, deleteBelt, degreeText, listArts, listTemplates, moveBelt, saveBelt,
   templatesKey, TRACKS, updateArt, type Art, type Belt, type BeltDraft, type Track,
@@ -202,8 +202,7 @@ function BeltForm({ art, edit, onDone, onClose }: { art: Art; edit: BeltEdit; on
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
       </div>
       <div className="belt-preview">
-        <BeltEmote color={d.color} stripe={d.stripe} bar={d.bar} pattern={d.pattern} degree={d.max_degree} size={64} />
-        <BeltBar color={d.color} stripe={d.stripe} bar={d.bar} pattern={d.pattern} degree={d.max_degree} size="lg" />
+        <BeltBar color={d.color} stripe={d.stripe} bar={d.bar} pattern={d.pattern} degree={d.max_degree} size="xl" />
         <b>{d.name || 'Nuevo cinturón'}</b>
       </div>
       <form className="belt-form" onSubmit={(e) => { e.preventDefault(); save.mutate() }} noValidate>

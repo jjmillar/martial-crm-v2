@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { beltSwatch } from '../../lib/belts'
 import { artsKey, degreeText, listArts } from '../artes/api'
-import { BeltEmote } from '../artes/Belt'
+import { BeltBar } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from './api'
@@ -103,7 +103,7 @@ export function ProfesoresList() {
                 <strong className="teacher-card__name">{t.full_name}</strong>
                 {real ? (
                   <span className="teacher-belt">
-                    <BeltEmote color={real.b.color} stripe={real.b.stripe} bar={real.b.bar} pattern={real.b.pattern} degree={t.belt_degree ?? 0} size={60} />
+                    <BeltBar color={real.b.color} stripe={real.b.stripe} bar={real.b.bar} pattern={real.b.pattern} degree={t.belt_degree ?? 0} size="xl" />
                     <span className="teacher-belt__text">
                       <span className="teacher-belt__art">{real.art}</span>
                       <span>{real.b.name}{t.belt_degree ? ` · ${degreeText(t.belt_degree, real.b.degree_name)}` : ''}</span>
