@@ -3,7 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import QRCode from 'qrcode'
 import type { School } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
-import { checkInUrl, getCheckInCode, qrCodeKey, rotateCheckInCode } from '../asistencia/qr'
+import { checkInUrl, getCheckInCode, qrCodeKey, QR_RADIUS_M, rotateCheckInCode } from '../asistencia/qr'
+import { ensureSchoolGeo, geoKey } from '../../lib/geocode'
+import { useSchool } from '../../lib/school'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'long' })
 
@@ -17,6 +19,21 @@ export function QrCheckIn({ school }: { school: School }) {
   const [error, setError] = useState<string | null>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const [ready, setReady] = useState(false)
+  const { reload } = useSchool()
+  const [geo, setGeo] = useState<'checking' | 'ok' | 'no_address' | 'not_found' | 'error'>('checking')
+
+  // The school's coordinates come from its address (no setup): make sure they match it.
+  const addrKey = geoKey(school)
+  const tried = useRef<string | null>(null) // one lookup per address, even if saving it fails
+  useEffect(() => {
+    if (addrKey && school.geo_address === addrKey && school.geo_lat != null) { setGeo('ok'); return }
+    if (addrKey && tried.current === addrKey) return
+    tried.current = addrKey
+    setGeo('checking')
+    ensureSchoolGeo(school)
+      .then((r) => { setGeo(r); if (r === 'ok') void reload() })
+      .catch(() => setGeo('error'))
+  }, [addrKey, school, reload])
 
   const rotate = useMutation({
     mutationFn: () => rotateCheckInCode(school.id),
@@ -65,8 +82,22 @@ export function QrCheckIn({ school }: { school: School }) {
       <p className="hint">
         Imprime este QR y pégalo en la sala. El alumno lo escanea con la cámara del teléfono y, con su sesión iniciada
         (o después de iniciarla), su asistencia queda <b>confirmada al instante</b> para la clase que empieza dentro de
-        la próxima hora o que está en curso.
+        la próxima hora o que está en curso, si está en la escuela.
       </p>
+      <div className={`qr-geo${geo === 'ok' ? '' : ' is-warn'}`}>
+        <Icon name="pin" size={18} />
+        {geo === 'checking' && <span>Buscando la ubicación de la escuela…</span>}
+        {geo === 'ok' && (
+          <span>
+            Ubicación de la escuela: <b>{school.address}{school.city ? `, ${school.city}` : ''}</b>. Se confirma al instante a menos de {QR_RADIUS_M} m;
+            más lejos o sin ubicación queda por aprobar en Tareas.{' '}
+            {school.geo_lat != null && <a href={`https://www.openstreetmap.org/?mlat=${school.geo_lat}&mlon=${school.geo_lng}#map=18/${school.geo_lat}/${school.geo_lng}`} target="_blank" rel="noopener noreferrer">Ver en el mapa ↗</a>}
+          </span>
+        )}
+        {geo === 'no_address' && <span>La escuela no tiene dirección, así que el QR confirma sin revisar la ubicación. Agrégala en <a href="#escuela">Datos de la escuela</a>.</span>}
+        {geo === 'not_found' && <span>No encontramos «{school.address}{school.city ? `, ${school.city}` : ''}» en el mapa, así que el QR confirma sin revisar la ubicación. Revisa la dirección en <a href="#escuela">Datos de la escuela</a> (calle, número y comuna).</span>}
+        {geo === 'error' && <span>No pudimos buscar la dirección en el mapa ahora. Vuelve a abrir esta sección en un rato.</span>}
+      </div>
       {code.isLoading && <p className="hint">Cargando…</p>}
       {code.isError && <p className="alert">No se pudo cargar el QR.</p>}
       {error && <p className="alert" role="alert">{error}</p>}
@@ -152,7 +183,7 @@ async function drawPoster(c: HTMLCanvasElement, url: string, school: School) {
   g.fillStyle = '#111114'
   g.font = '600 40px Inter, system-ui, sans-serif'
   g.fillText('1. Abre la cámara y apunta al código', W / 2, 1480)
-  g.fillText('2. Inicia sesión si te lo pide', W / 2, 1540)
+  g.fillText('2. Inicia sesión y permite tu ubicación', W / 2, 1540)
   g.font = '400 32px Inter, system-ui, sans-serif'
   g.fillStyle = '#5a5a64'
   g.fillText('Funciona desde 1 hora antes de la clase hasta que termina', W / 2, 1610)

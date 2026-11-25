@@ -13,6 +13,7 @@ import { byGuardian, pendingCheckIns, pendingCheckInsKey, reviewAttendance, type
 import { decideSubmission, listReviews, reviewsKey, type Review } from '../pagar/api'
 import { decideChild, pendingChildren, pendingChildrenKey, type PendingChild } from '../portal/guardian'
 import { decideAchievement, medalOf, pendingAchievements, pendingAchievementsKey, type PendingAchievement } from '../artes/api'
+import { qrNote } from '../asistencia/qr'
 
 type Free = { id: string; school_id: string; full_name: string | null; rut: string | null; email: string | null }
 type Item =
@@ -155,7 +156,7 @@ export function Aprobaciones() {
                 <li key={`a-${a.id}`} className="appr" style={{ ['--class-color' as string]: a.class?.color }}>
                   <span className="appr__main">
                     <span className="appr__title"><span className="tag appr__kind">Asistencia</span><strong>{a.student?.full_name ?? 'Alumno'}</strong></span>
-                    <span className="hint">{a.class?.name ?? 'Clase'} · {formatDate(a.date)} · {byGuardian(a) ? 'su apoderado marcó' : 'marcó'} a las {timeFmt.format(new Date(a.created_at))}</span>
+                    <span className="hint">{a.class?.name ?? 'Clase'} · {formatDate(a.date)} · {byGuardian(a) ? 'su apoderado marcó' : 'marcó'} a las {timeFmt.format(new Date(a.created_at))}{a.by_qr && ` · ${qrNote(a.qr_distance_m)}`}</span>
                   </span>
                   <span className="appr__actions">
                     <button type="button" className="btn" disabled={busy} onClick={() => reviewAtt.mutate({ rows: [a], approve: true })}>Aprobar</button>

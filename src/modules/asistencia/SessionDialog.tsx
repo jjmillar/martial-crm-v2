@@ -13,6 +13,7 @@ import { Toggle } from '../../ui/Toggle'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { classesKey, listTags, saveClassDescription, type ClassFull } from '../clases/api'
 import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
+import { qrNote } from './qr'
 import { CatalogoDialog } from '../ajustes/CatalogoDialog'
 import { attendanceKey, classStarted, incompleteKey, reviewAttendance, listAttendance, saveSession, setNotHeld, view, type Mark, type Session, type TrialBooking } from './api'
 
@@ -187,13 +188,13 @@ function Roster({ cls, date }: { cls: ClassFull; date: string }) {
         {roster.map((s) => {
           const m = marks.get(s.id)
           const pending = Boolean(m && !m.confirmed)
-          const record = m && !pending ? (m.by_qr ? `Marcó ${m.by_guardian ? 'el apoderado' : 'el alumno'} con el QR de la sala` : m.self_marked ? `Marcó ${m.by_guardian ? 'el apoderado' : 'el alumno'} · aprobó ${who(m.confirmed_by)}` : `Marcó ${who(m.confirmed_by)}`) : null
+          const record = m && !pending ? (m.by_qr && m.auto ? `Marcó ${m.by_guardian ? 'el apoderado' : 'el alumno'} con el QR en la escuela` : m.by_qr ? `${qrNote(m.qr_distance_m)} · aprobó ${who(m.confirmed_by)}` : m.self_marked ? `Marcó ${m.by_guardian ? 'el apoderado' : 'el alumno'} · aprobó ${who(m.confirmed_by)}` : `Marcó ${who(m.confirmed_by)}`) : null
           return (
             <li key={s.id}>
               {pending ? (
                 <div className="att-student is-pending">
                   <span className="att-check" aria-hidden="true"><Icon name="clock" size={14} /></span>
-                  <span className="att-student__name">{s.full_name}<span className="hint">Marcó su asistencia · por aprobar</span></span>
+                  <span className="att-student__name">{s.full_name}<span className="hint">{m?.by_qr ? qrNote(m.qr_distance_m) : 'Marcó su asistencia'} · por aprobar</span></span>
                   <span className="att-review">
                     <button type="button" className="btn" onClick={() => toggle.mutate({ studentIds: [s.id], action: 'confirm' })}>Aprobar</button>
                     <button type="button" className="btn btn--ghost" onClick={() => toggle.mutate({ studentIds: [s.id], action: 'reject' })}>Rechazar</button>

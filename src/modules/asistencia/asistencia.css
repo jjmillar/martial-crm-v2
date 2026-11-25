@@ -386,3 +386,7 @@
   gap: 8px;
   width: 100%;
 }
+.qr-checkin__icon.is-wait-static {
+  background: color-mix(in srgb, #e8c547 18%, transparent);
+  color: #c9a227;
+}

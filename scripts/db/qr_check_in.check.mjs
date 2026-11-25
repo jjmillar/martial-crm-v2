@@ -32,7 +32,7 @@ check('rotation is audited', (await db.query(`select count(*)::int c from public
 // Scans -------------------------------------------------------------------------------------------------------------
 const clock = (await db.query(`select extract(hour from now() at time zone 'America/Santiago')::int h,
   extract(isodow from (now() at time zone 'America/Santiago')::date)::int w, (now() at time zone 'America/Santiago')::date::text d`)).rows[0]
-const scan = (user, token, sid = null) => as(db, user, `select public.qr_check_in($1,$2) r`, [token, sid]).then((x) => x.rows[0].r)
+const scan = (user, token, sid = null, lat = null, lng = null) => as(db, user, `select public.qr_check_in($1,$2,$3,$4) r`, [token, sid, lat, lng]).then((x) => x.rows[0].r)
 
 check('invalid token is rejected', (await scan(ST, 'zz')).error === 'invalid_code' && (await scan(ST, '0'.repeat(32))).error === 'invalid_code')
 check('anon cannot call it', !(await tryAs(db, null, `select public.qr_check_in($1)`, [t1])).ok)
@@ -83,6 +83,34 @@ if (clock.h >= 4 && clock.h < 20) {
   check('the old code stops working', (await scan(MOM, t1, mom)).error === 'invalid_code')
   check('the new one works', (await scan(MOM, t2, mom)).ok)
   await db.query(`update public.classes set active=false where id=$1`, [ongoing])
+
+  // Location: school coordinates from its address; within 150 m confirmed, farther or unknown → pending request.
+  const GEO = await newUser(db, 'geo')
+  const geo = await mkSt(sc, 'Gina', GEO)
+  await as(db, OWNER, `update public.schools set address='Av. Siempre Viva 742', city='Santiago' where id=$1`, [sc])
+  await as(db, ADM, `update public.schools set geo_lat=-33.4372, geo_lng=-70.6506, geo_address='Av. Siempre Viva 742, Santiago' where id=$1`, [sc])
+  check('a student cannot set the school coordinates', (await tryAs(db, GEO, `update public.schools set geo_lat=0, geo_lng=0 where id=$1 returning id`, [sc])).rows?.length !== 1
+    && (await db.query(`select geo_lat from public.schools where id=$1`, [sc])).rows[0].geo_lat === -33.4372)
+  r = await scan(GEO, t2)
+  check('no phone location → pending (no_location), not confirmed', r.pending && r.reason === 'no_location' && !r.ok, r)
+  let g = (await db.query(`select confirmed_at, by_qr, qr_distance_m from public.attendance where student_id=$1`, [geo])).rows[0]
+  check('stored as a pending QR request', g.confirmed_at === null && g.by_qr && g.qr_distance_m === null, g)
+  check('no XP while pending', (await as(db, GEO, `select (public.student_progress($1)->>'xp')::int x`, [geo])).rows[0].x === 0)
+  r = await scan(GEO, t2, null, -33.4600, -70.6506) // ~2.5 km south
+  check('2.5 km away → pending (far) with the distance', r.pending && r.reason === 'far' && r.distance > 2000 && r.distance < 3000, r)
+  g = (await db.query(`select confirmed_at, qr_distance_m from public.attendance where student_id=$1`, [geo])).rows[0]
+  check('only the distance is stored (still pending)', g.confirmed_at === null && g.qr_distance_m === r.distance, g)
+  r = await scan(GEO, t2, null, -33.4380, -70.6506) // ~90 m
+  check('then within 150 m → confirmed', r.ok && !r.pending && r.distance < 150, r)
+  check('one row, confirmed', (await db.query(`select count(*)::int c, bool_and(confirmed_at is not null) ok from public.attendance where student_id=$1`, [geo])).rows[0].ok)
+  check('no coordinate columns on attendance', (await db.query(`select count(*)::int c from information_schema.columns where table_name='attendance' and column_name ~ '(lat|lng|lon)'`)).rows[0].c === 0)
+  await as(db, OWNER, `update public.schools set address='Otra calle 1' where id=$1`, [sc])
+  check('changing the address clears the old coordinates', (await db.query(`select geo_lat, geo_address from public.schools where id=$1`, [sc])).rows[0].geo_lat === null)
+  const GEO2 = await newUser(db, 'geo2'), geo2 = await mkSt(sc, 'Gus', GEO2)
+  r = await scan(GEO2, t2, null, -10, -10)
+  check('school without coordinates → confirmed as before', r.ok && !r.pending, r)
+  check('distance_m is not callable by users', !(await tryAs(db, GEO, `select public.distance_m(0,0,1,1)`)).ok)
+  void geo2
 } else {
   console.log(`(skipped time-window checks: Santiago hour ${clock.h} too close to midnight)`)
 }

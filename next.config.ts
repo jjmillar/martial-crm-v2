@@ -7,14 +7,15 @@ const supabaseWs = supabaseUrl.replace(/^https:/, 'wss:')
 
 // Security headers (OWASP Secure Headers / ASVS 5.0 V3, see docs/security.md). CSP: Next.js inlines its bootstrap
 // scripts, so scripts allow 'unsafe-inline' but never 'unsafe-eval' or other hosts; data only goes to our Supabase
-// project; nothing may frame the app (clickjacking).
+// project (plus the OpenStreetMap geocoder for the school's own address); nothing may frame the app (clickjacking).
+// Geolocation only for our own pages (QR check-in checks the student is at the school).
 const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   `img-src 'self' data: blob: ${supabaseUrl}`,
-  `connect-src 'self' ${supabaseUrl} ${supabaseWs}`,
+  `connect-src 'self' ${supabaseUrl} ${supabaseWs} https://nominatim.openstreetmap.org`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -27,7 +28,7 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), payment=(), usb=()' },
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
 ]
 

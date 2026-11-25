@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import type { School } from '../../lib/database.types'
 import { formatCLP, parseCLP } from '../../lib/money'
+import { ensureSchoolGeo } from '../../lib/geocode'
 
 const MAX_LOGO = 2 * 1024 * 1024
 type CalView = 'day' | 'week' | 'month'
@@ -32,9 +33,15 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
         enrollment_fee: fee,
       }).eq('id', school.id)
       if (error) throw new Error('No se pudo guardar. Solo los administradores editan la escuela.')
+      // The QR check-in uses the address's coordinates: refresh them when the address changed (best effort).
+      const geo = await ensureSchoolGeo({ ...school, address: f.address.trim() || null, city: f.city.trim() || null,
+        ...(f.address.trim() !== (school.address ?? '') || f.city.trim() !== (school.city ?? '') ? { geo_address: null, geo_lat: null, geo_lng: null } : {}) }).catch(() => 'ok' as const)
       await reload()
+      return geo
     },
-    onSuccess: () => setMsg({ ok: true, text: 'Datos de la escuela guardados.' }),
+    onSuccess: (geo) => setMsg({ ok: true, text: geo === 'not_found'
+      ? 'Datos guardados, pero no encontramos la dirección en el mapa (el QR de asistencia no podrá revisar la ubicación). Prueba con calle, número y comuna.'
+      : 'Datos de la escuela guardados.' }),
     onError: (e: Error) => setMsg({ ok: false, text: e.message }),
   })
 

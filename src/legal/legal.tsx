@@ -156,6 +156,7 @@ export function Privacidad() {
         <li><strong>Cuenta:</strong> nombre, apellidos, correo, teléfono (opcional) y contraseña (guardada cifrada; nadie puede leerla).</li>
         <li><strong>Alumnos:</strong> además, RUT, fecha de nacimiento y dirección, que la escuela usa para identificarte, saber tu edad y categoría, y emitir sus documentos.</li>
         <li><strong>Actividad en la escuela:</strong> clases, asistencia, artes marciales, cinturones y grados, logros, nivel y experiencia.</li>
+        <li><strong>Ubicación al marcar asistencia con el QR de la sala:</strong> si lo permites, el teléfono envía tu ubicación una sola vez para comprobar que estás en la escuela. Solo guardamos la distancia a la escuela, en metros, nunca dónde estabas. Si no la permites, la asistencia queda por aprobar.</li>
         <li><strong>Pagos:</strong> planes, montos, estado y comprobantes de transferencia que subes. No guardamos datos de tarjetas.</li>
         <li><strong>Apoderados:</strong> el vínculo entre el apoderado y el alumno a su cargo.</li>
         <li><strong>Clases de prueba:</strong> nombre y datos de contacto que entregas al reservar.</li>
@@ -178,7 +179,7 @@ export function Privacidad() {
       <ul>
         <li>Dentro de tu escuela, solo las personas con el rol que corresponde. Otras escuelas no ven nada de la tuya.</li>
         <li>En internet, solo lo que la escuela publica en su landing y lo que tú eliges mostrar en tu perfil público (nombre, cinturón, nivel, logros). Nunca RUT, dirección, fecha de nacimiento, correo ni teléfono.</li>
-        <li>Proveedores que nos ayudan a operar, con contrato y solo para eso: Supabase (base de datos, autenticación y archivos, alojados en São Paulo, Brasil), Netlify (alojamiento del sitio, Estados Unidos), Resend (envío de correos, Estados Unidos) y Google Fonts (tipografía, que recibe la dirección IP de tu navegador).</li>
+        <li>Proveedores que nos ayudan a operar, con contrato y solo para eso: Supabase (base de datos, autenticación y archivos, alojados en São Paulo, Brasil), Netlify (alojamiento del sitio, Estados Unidos), Resend (envío de correos, Estados Unidos) Google Fonts (tipografía, que recibe la dirección IP de tu navegador) y OpenStreetMap (ubica en el mapa la dirección de la escuela; solo recibe esa dirección).</li>
         <li>Autoridades, solo cuando la ley lo exige.</li>
       </ul>
 

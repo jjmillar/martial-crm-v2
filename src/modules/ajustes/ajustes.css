@@ -630,3 +630,24 @@
     justify-self: center;
   }
 }
+.qr-geo {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.qr-geo svg {
+  flex: none;
+  margin-top: 1px;
+  color: #2fbf71;
+}
+.qr-geo.is-warn svg {
+  color: #c9a227;
+}
+.qr-geo.is-warn {
+  border-color: color-mix(in srgb, #e8c547 45%, var(--line));
+}

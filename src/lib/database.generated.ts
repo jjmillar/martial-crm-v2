@@ -219,6 +219,7 @@ export type Database = {
           date: string;
           id: string;
           marked_by: string | null;
+          qr_distance_m: number | null;
           school_id: string;
           self_marked: boolean;
           student_id: string;
@@ -234,6 +235,7 @@ export type Database = {
           date?: string;
           id?: string;
           marked_by?: string | null;
+          qr_distance_m?: number | null;
           school_id: string;
           self_marked?: boolean;
           student_id: string;
@@ -248,6 +250,7 @@ export type Database = {
           date?: string;
           id?: string;
           marked_by?: string | null;
+          qr_distance_m?: number | null;
           school_id?: string;
           self_marked?: boolean;
           student_id?: string;
@@ -1619,6 +1622,9 @@ export type Database = {
           enrollment_fee: number;
           enrollment_fee_months: number;
           enrollment_fee_since: string | null;
+          geo_address: string | null;
+          geo_lat: number | null;
+          geo_lng: number | null;
           id: string;
           landing_about: string | null;
           landing_accent: string | null;
@@ -1657,6 +1663,9 @@ export type Database = {
           enrollment_fee?: number;
           enrollment_fee_months?: number;
           enrollment_fee_since?: string | null;
+          geo_address?: string | null;
+          geo_lat?: number | null;
+          geo_lng?: number | null;
           id?: string;
           landing_about?: string | null;
           landing_accent?: string | null;
@@ -1694,6 +1703,9 @@ export type Database = {
           enrollment_fee?: number;
           enrollment_fee_months?: number;
           enrollment_fee_since?: string | null;
+          geo_address?: string | null;
+          geo_lat?: number | null;
+          geo_lng?: number | null;
           id?: string;
           landing_about?: string | null;
           landing_accent?: string | null;
@@ -2512,6 +2524,7 @@ export type Database = {
           date: string;
           id: string;
           marked_by: string | null;
+          qr_distance_m: number | null;
           school_id: string;
           self_marked: boolean;
           student_id: string;
@@ -2535,6 +2548,7 @@ export type Database = {
           date: string;
           id: string;
           marked_by: string | null;
+          qr_distance_m: number | null;
           school_id: string;
           self_marked: boolean;
           student_id: string;
@@ -2558,6 +2572,7 @@ export type Database = {
           date: string;
           id: string;
           marked_by: string | null;
+          qr_distance_m: number | null;
           school_id: string;
           self_marked: boolean;
           student_id: string;
@@ -2599,6 +2614,9 @@ export type Database = {
           enrollment_fee: number;
           enrollment_fee_months: number;
           enrollment_fee_since: string | null;
+          geo_address: string | null;
+          geo_lat: number | null;
+          geo_lng: number | null;
           id: string;
           landing_about: string | null;
           landing_accent: string | null;
@@ -2681,6 +2699,10 @@ export type Database = {
         Args: { p_amount: number; p_fixed: number; p_percent: number };
         Returns: number;
       };
+      distance_m: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number };
+        Returns: number;
+      };
       find_user_id_by_email: { Args: { p_email: string }; Returns: string };
       generate_enrollment_fees: {
         Args: { p_school_id?: string; p_today?: string };
@@ -2758,7 +2780,12 @@ export type Database = {
       };
       platform_whoami: { Args: Record<PropertyKey, never>; Returns: Json };
       qr_check_in: {
-        Args: { p_student_id?: string; p_token: string };
+        Args: {
+          p_lat?: number;
+          p_lng?: number;
+          p_student_id?: string;
+          p_token: string;
+        };
         Returns: Json;
       };
       rate_limit_hit: {
