@@ -67,9 +67,10 @@ export function ArtesMarciales({ schoolId }: { schoolId: string }) {
       {error && <p className="alert" role="alert">{error}</p>}
 
       {arts.isLoading && <p className="hint">Cargando…</p>}
-      {arts.data?.length === 0 && <p className="hint">La escuela aún no tiene artes marciales. Agrega una del catálogo para empezar.</p>}
+      {arts.data && !arts.data.some((a) => a.active) && <p className="alert" role="alert">La escuela debe tener al menos una arte marcial activa: agrega una del catálogo o crea la tuya.</p>}
       <ul className="art-list">
-        {arts.data?.map((a) => <ArtCard key={a.id} art={a} templateName={templates.data?.find((t) => t.key === a.template_key)?.name ?? null} onChange={refresh} />)}
+        {arts.data?.map((a) => <ArtCard key={a.id} art={a} templateName={templates.data?.find((t) => t.key === a.template_key)?.name ?? null} onChange={refresh}
+          last={a.active && arts.data!.filter((x) => x.active).length === 1} />)}
       </ul>
     </div>
   )
@@ -83,7 +84,8 @@ const BELT_COLORS = [
 
 type BeltEdit = { belt?: Belt; draft: BeltDraft }
 
-function ArtCard({ art, templateName, onChange }: { art: Art; templateName: string | null; onChange: () => unknown }) {
+/** `last`: the school's only active art. It can't be turned off or deleted (every school teaches at least one). */
+function ArtCard({ art, templateName, onChange, last }: { art: Art; templateName: string | null; onChange: () => unknown; last: boolean }) {
   const [renaming, setRenaming] = useState(false)
   const [artName, setArtName] = useState(art.name)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -127,7 +129,7 @@ function ArtCard({ art, templateName, onChange }: { art: Art; templateName: stri
         {!renaming && (
           <span className="art-card__tools">
             <button type="button" className="icon-btn" onClick={() => setRenaming(true)} aria-label={`Cambiar nombre de ${art.name}`} title="Cambiar nombre"><Icon name="edit" size={16} /></button>
-            <button type="button" className="icon-btn" onClick={() => setConfirmDelete(true)} aria-label={`Eliminar ${art.name}`} title="Eliminar"><Icon name="trash" size={16} /></button>
+            <button type="button" className="icon-btn" onClick={() => (last ? setError('Es la única arte marcial activa de la escuela: agrega otra antes de eliminarla.') : setConfirmDelete(true))} aria-label={`Eliminar ${art.name}`} title="Eliminar"><Icon name="trash" size={16} /></button>
           </span>
         )}
       </header>
@@ -163,7 +165,8 @@ function ArtCard({ art, templateName, onChange }: { art: Art; templateName: stri
         )
       })}
 
-      <Toggle checked={art.active} onChange={(v) => toggle.mutate(v)} label="Activa" hint="Desactivada no aparece al asignar artes a los alumnos; quienes ya la tienen la conservan." />
+      <Toggle checked={art.active} onChange={(v) => (!v && last ? setError('Es la única arte marcial activa de la escuela: activa o agrega otra antes de desactivarla.') : toggle.mutate(v))} label="Activa"
+        hint={last ? 'Es la única activa: la escuela debe impartir al menos una arte marcial.' : 'Desactivada no aparece al asignar artes a los alumnos; quienes ya la tienen la conservan.'} />
 
       <Modal open={open} onClose={() => setOpen(false)} label="Cinturón">
         {edit && <BeltForm art={art} edit={edit} onDone={() => { setOpen(false); return onChange() }} onClose={() => setOpen(false)} />}

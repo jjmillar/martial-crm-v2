@@ -16,6 +16,7 @@ import { Exportar } from './Exportar'
 import { PasarelaPago } from './PasarelaPago'
 import { Actividad } from './Actividad'
 import { ArtesMarciales } from '../artes/ArtesMarciales'
+import { artsKey, listArts } from '../artes/api'
 import { QrCheckIn } from './QrCheckIn'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
@@ -48,10 +49,12 @@ export function AjustesPage() {
 function SchoolSections() {
   const { activeSchool, role } = useSchool()
   const school = activeSchool!
+  const arts = useQuery({ queryKey: artsKey(school.id), queryFn: () => listArts(school.id) })
+  const noArts = Boolean(arts.data && !arts.data.some((a) => a.active))
   return (
     <>
       <h2 className="acc-group">Escuela</h2>
-      <Acc id="escuela" icon="school" title="Datos de la escuela" hint="Nombre, logo, contacto y matrícula">
+      <Acc id="escuela" icon="school" title="Datos de la escuela" hint={noArts ? 'Falta elegir las artes marciales que imparte' : 'Nombre, logo, contacto, artes marciales y matrícula'}>
         <EscuelaPerfil key={school.id} school={school} embedded />
       </Acc>
       <Acc id="landing" icon="globe" title="Landing page" hint="Página pública, colores y fotos">

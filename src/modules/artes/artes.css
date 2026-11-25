@@ -311,3 +311,31 @@
 }
 .artes .catalog__form .btn { white-space: nowrap; }
 .logro .tag { flex: none; }
+
+/* Required pick of the arts a school teaches (Datos de la escuela, Nueva escuela) */
+.arts-pick {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.arts-pick legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.arts-pick .pick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.arts-pick.is-invalid .pick-chip[aria-pressed='false'] {
+  border-color: var(--danger, #e0492c);
+}
+.arts-pick.is-invalid legend {
+  color: var(--danger, #e0492c);
+}

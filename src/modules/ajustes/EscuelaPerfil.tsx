@@ -1,10 +1,13 @@
-import { useState, type FormEvent } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useEffect, useState, type FormEvent } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import type { School } from '../../lib/database.types'
 import { formatCLP, parseCLP } from '../../lib/money'
 import { ensureSchoolGeo } from '../../lib/geocode'
+import { artsKey, listArts, listTemplates, templatesKey } from '../artes/api'
+import { ArtsPicker } from '../artes/ArtsPicker'
+import { applyPicks, ARTS_REQUIRED, initialPicks, picksOk, type ArtPick } from '../artes/picks'
 
 const MAX_LOGO = 2 * 1024 * 1024
 type CalView = 'day' | 'week' | 'month'
@@ -13,6 +16,16 @@ type CalView = 'day' | 'week' | 'month'
 // `embedded`: rendered inside another container (the Escuelas pop-up), so no card frame of its own.
 export function EscuelaPerfil({ school, embedded = false }: { school: School; embedded?: boolean }) {
   const { reload } = useSchool()
+  const qc = useQueryClient()
+  // The martial arts it teaches are required: belts and degrees come from them (Ajustes → Artes marciales).
+  const arts = useQuery({ queryKey: artsKey(school.id), queryFn: () => listArts(school.id) })
+  const templates = useQuery({ queryKey: templatesKey, queryFn: listTemplates, staleTime: Infinity })
+  const [picks, setPicks] = useState<ArtPick[] | null>(null)
+  const [artsInvalid, setArtsInvalid] = useState(false)
+  // Built once from the saved arts (a background refetch never wipes what is being edited); rebuilt after saving.
+  useEffect(() => {
+    if (picks === null && arts.data && templates.data) setPicks(initialPicks(arts.data, templates.data))
+  }, [picks, arts.data, templates.data])
   const [f, setF] = useState({
     name: school.name, address: school.address ?? '', city: school.city ?? '', phone: school.phone ?? '',
     email: school.email ?? '', description: school.description ?? '', default_calendar_view: school.default_calendar_view as CalView,
@@ -24,6 +37,8 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
   const save = useMutation({
     mutationFn: async () => {
       if (!f.name.trim()) throw new Error('La escuela necesita un nombre.')
+      if (!picks || !arts.data) throw new Error('Espera a que carguen las artes marciales.')
+      if (!picksOk(picks)) { setArtsInvalid(true); throw new Error(ARTS_REQUIRED) }
       if (f.email.trim() && !/^\S+@\S+\.\S+$/.test(f.email.trim())) throw new Error('Correo inválido.')
       const fee = f.enrollment_fee.trim() ? parseCLP(f.enrollment_fee) : 0
       if (fee === null || Number.isNaN(fee) || fee < 0) throw new Error('Matrícula inválida: usa pesos enteros, ej: 30.000.')
@@ -33,6 +48,14 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
         enrollment_fee: fee,
       }).eq('id', school.id)
       if (error) throw new Error('No se pudo guardar. Solo los administradores editan la escuela.')
+      try {
+        await applyPicks(school.id, picks, arts.data)
+      } catch {
+        throw new Error('Los datos se guardaron, pero no se pudieron guardar las artes marciales. Intenta de nuevo.')
+      } finally {
+        await Promise.all([qc.invalidateQueries({ queryKey: artsKey(school.id) }), qc.invalidateQueries({ queryKey: ['school-student-arts', school.id] })])
+        setPicks(null)
+      }
       // The QR check-in uses the address's coordinates: refresh them when the address changed (best effort).
       const geo = await ensureSchoolGeo({ ...school, address: f.address.trim() || null, city: f.city.trim() || null,
         ...(f.address.trim() !== (school.address ?? '') || f.city.trim() !== (school.city ?? '') ? { geo_address: null, geo_lat: null, geo_lng: null } : {}) }).catch(() => 'ok' as const)
@@ -71,7 +94,7 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
       <div className="ajustes__section-head">
         <div>
           <h2 id="escuela-h">{embedded ? school.name : 'Escuela'}</h2>
-          <p className="hint">Datos que aparecen en comprobantes y correos.</p>
+          <p className="hint">Datos que aparecen en comprobantes y correos, y las artes marciales que enseña.</p>
         </div>
       </div>
       <div className="logo-row">
@@ -95,6 +118,11 @@ export function EscuelaPerfil({ school, embedded = false }: { school: School; em
             <option value="week">Semana</option>
             <option value="month">Mes</option>
           </select>
+        </div>
+        <div className="field field--wide">
+          {arts.data && !arts.data.some((x) => x.active) && <p className="alert" role="alert">Falta elegir las artes marciales que imparte la escuela: sin ellas no hay cinturones ni grados para los alumnos.</p>}
+          {picks ? <ArtsPicker picks={picks} invalid={artsInvalid} idPrefix={`sc-arts-${school.id}`} onChange={(p) => { setPicks(p); setArtsInvalid(false); setMsg(null) }} />
+            : arts.isError || templates.isError ? <p className="alert">No se pudieron cargar las artes marciales.</p> : <p className="hint">Cargando artes marciales…</p>}
         </div>
         <div className="field field--wide"><label htmlFor="sc-desc">Descripción</label><textarea id="sc-desc" className="input" rows={3} value={f.description} onChange={(e) => set('description', e.target.value)} /></div>
       </div>
