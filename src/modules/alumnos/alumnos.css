@@ -50,7 +50,8 @@
     white-space: normal;
   }
 
-  .student-row .belt {
+  .student-row .belt,
+  .student-row .student-row__belts {
     margin-left: 54px;
   }
 

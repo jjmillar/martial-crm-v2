@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSchool } from '../../lib/school'
 import { beltSwatch } from '../../lib/belts'
 import { artsKey, degreeText, listArts } from '../artes/api'
-import { BeltBar } from '../artes/Belt'
+import { BeltChip } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from './api'
@@ -82,26 +82,23 @@ export function ProfesoresList() {
       )}
       {Boolean(teachers.data?.length) && rows.length === 0 && <p className="hint">Ningún profesor coincide con los filtros.</p>}
 
-      <ul className="teacher-grid">
+      <ul className="student-list">
         {rows.slice(0, shown).map((t) => {
           const swatch = beltSwatch(t.belt)
           const real = t.belt_id ? beltById.get(t.belt_id) : undefined
+          const sps = t.specialty_ids.map((id) => spName.get(id)).filter(Boolean)
           return (
             <li key={t.id}>
-              <Link className={`card teacher-card${t.active ? '' : ' is-off'}`} to={`/app/profesores/${t.id}`}>
-                <div className="teacher-card__top">
-                  <span className="avatar avatar--lg" aria-hidden="true">{`${t.first_name[0] ?? ''}${t.first_last_name[0] ?? ''}`.toUpperCase()}</span>
-                  {!t.active && <span className="tag">Inactivo</span>}
-                  {t.user_id && <span className="tag" title="Tiene cuenta en Martial CRM">Con cuenta</span>}
-                </div>
-                <strong className="teacher-card__name">{t.full_name}</strong>
+              <Link className={`student-row card${t.active ? '' : ' is-off'}`} to={`/app/profesores/${t.id}`}>
+                <span className="avatar" aria-hidden="true">{`${t.first_name[0] ?? ''}${t.first_last_name[0] ?? ''}`.toUpperCase()}</span>
+                <span className="student-row__main">
+                  <strong>{t.full_name}</strong>
+                  <span className="hint">{[sps.join(', '), t.phone, t.email].filter(Boolean).join(' · ') || 'Sin datos de contacto'}</span>
+                </span>
                 {real ? (
-                  <span className="teacher-belt">
-                    <BeltBar color={real.b.color} stripe={real.b.stripe} bar={real.b.bar} pattern={real.b.pattern} degree={t.belt_degree ?? 0} size="xl" />
-                    <span className="teacher-belt__text">
-                      <span className="teacher-belt__art">{real.art}</span>
-                      <span>{real.b.name}{t.belt_degree ? ` · ${degreeText(t.belt_degree, real.b.degree_name)}` : ''}</span>
-                    </span>
+                  <span className="student-row__belts">
+                    <BeltChip size="sm" name={real.b.name} color={real.b.color} stripe={real.b.stripe} bar={real.b.bar} pattern={real.b.pattern}
+                      degree={t.belt_degree ?? 0} degreeText={t.belt_degree ? degreeText(t.belt_degree, real.b.degree_name) : null} art={real.art} />
                   </span>
                 ) : t.belt && (
                   <span className="belt">
@@ -109,12 +106,8 @@ export function ProfesoresList() {
                     {t.belt}{t.belt_degree ? ` · ${t.belt_degree}°` : ''}
                   </span>
                 )}
-                {t.specialty_ids.length > 0 && (
-                  <ul className="chips">
-                    {t.specialty_ids.map((id) => spName.get(id) && <li key={id}>{spName.get(id)}</li>)}
-                  </ul>
-                )}
-                <span className="hint teacher-card__contact">{[t.phone, t.email].filter(Boolean).join(' · ') || 'Sin datos de contacto'}</span>
+                {t.user_id && <span className="tag" title="Tiene cuenta en Martial CRM">Con cuenta</span>}
+                {!t.active && <span className="tag">Inactivo</span>}
               </Link>
             </li>
           )
