@@ -1,7 +1,7 @@
 'use client'
-import { ModulePage } from '@/shell/ModulePage'
-import { EscuelasPage } from '@/modules/escuelas/EscuelasPage'
+import { redirect } from 'next/navigation'
 
+// Escuelas moved into Ajustes (accordion "Escuelas"); old links land there.
 export default function Page() {
-  return <ModulePage id="escuelas"><EscuelasPage /></ModulePage>
+  redirect('/app/ajustes#escuelas')
 }

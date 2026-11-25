@@ -53,6 +53,71 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+/* Wordmark with the active school under it (a dropdown when there are several) */
+.brand {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.school-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  max-width: 100%;
+  margin-left: 36px; /* under the name, not the logo */
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.school-switch--one {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.school-switch:not(.school-switch--one) {
+  gap: 4px;
+  padding: 2px 6px 2px 8px;
+  margin-left: 28px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+}
+.school-switch:not(.school-switch--one):hover,
+.school-switch:has(select:focus-visible) {
+  border-color: var(--line);
+  background: var(--surface-2);
+}
+.school-switch:has(select:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.school-switch__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.school-switch select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font: inherit;
+}
+.school-switch select option {
+  background: var(--surface);
+  color: var(--text);
+}
+.school-switch svg {
+  flex: none;
+  color: var(--muted);
+  pointer-events: none;
 }
 
 .nav {

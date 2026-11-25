@@ -3,7 +3,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { RequireAuth } from './RequireAuth'
 import { RequireRole } from './RequireRole'
 import { resolvePath } from '../lib/nav'
-import { modulesFor } from '../modules/registry'
+import { modules, modulesFor } from '../modules/registry'
 
 const auth = { session: null as unknown, loading: false }
 const school = { role: null as 'ceo' | 'admin' | 'user' | 'alumno' | null, loading: false }
@@ -72,9 +72,9 @@ describe('RequireRole', () => {
 })
 
 describe('modulesFor', () => {
-  it('shows Escuelas only to the CEO', () => {
-    expect(modulesFor('ceo').map((m) => m.id)).toContain('escuelas')
-    expect(modulesFor('admin').map((m) => m.id)).not.toContain('escuelas')
+  it('keeps Escuelas out of the menu (it lives in Ajustes) and the route CEO-only', () => {
+    expect(modulesFor('ceo').map((m) => m.id)).not.toContain('escuelas')
+    expect(modules.find((m) => m.id === 'escuelas')?.roles).toEqual(['ceo'])
     expect(modulesFor(null)).toEqual([])
   })
   it('puts Mi cuenta inside Ajustes for every role and shows Tareas to staff only', () => {

@@ -10,6 +10,7 @@ import { ThemeToggle } from '../ui/ThemeToggle'
 import { Wordmark } from '../ui/Wordmark'
 import { Flash } from '../ui/Flash'
 import { MobileMenu } from './MobileMenu'
+import { SchoolSwitcher } from './SchoolSwitcher'
 import { PendingSignup } from '../modules/portal/PendingSignup'
 import { PersonSwitcher } from '../modules/portal/PersonSwitcher'
 import { usePendingCount } from '../modules/tareas/api'
@@ -25,7 +26,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className="shell">
       <aside className="sidebar">
         <div className="sidebar__top">
-          <Wordmark to="/app" />
+          <div className="brand">
+            <Wordmark to="/app" />
+            <SchoolSwitcher />
+          </div>
           <ThemeToggle />
         </div>
 

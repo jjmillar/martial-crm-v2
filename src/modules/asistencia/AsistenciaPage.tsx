@@ -9,7 +9,6 @@ import { Icon } from '../../ui/Icon'
 import { DateNav } from '../../ui/DateNav'
 import { classesKey, listClasses } from '../clases/api'
 import { StudentAttendance } from '../portal/StudentPortal'
-import { SchoolFilter } from '../../ui/SchoolFilter'
 import { attendanceCounts, listSessions, sessionKey, syncSessions, trialBookings, view as cardView, type Session, type TrialBooking } from './api'
 import { SessionDialog } from './SessionDialog'
 
@@ -117,7 +116,6 @@ function StaffAttendance() {
   return (
     <div className="asistencia">
       <header className="page-head">
-        <SchoolFilter />
         <h1>Asistencia</h1>
       </header>
 

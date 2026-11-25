@@ -54,7 +54,6 @@ export function PlataformaPage() {
   return (
     <div className="plataforma">
       <header className="page-head">
-        <span className="eyebrow">Plataforma</span>
         <h1>Suscripciones</h1>
         <p className="hint">Los clientes de Martial CRM y el estado de su suscripción. Aquí no se ven datos de alumnos.</p>
       </header>

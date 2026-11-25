@@ -15,8 +15,8 @@ import { LandingSettings } from './LandingSettings'
 import { Exportar } from './Exportar'
 import { PasarelaPago } from './PasarelaPago'
 import { Actividad } from './Actividad'
-import { SchoolFilter } from '../../ui/SchoolFilter'
 import { ArtesMarciales } from '../artes/ArtesMarciales'
+import { EscuelasSection } from '../escuelas/EscuelasPage'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
 
@@ -33,13 +33,27 @@ export function AjustesPage() {
   return (
     <div className="ajustes">
       <header className="page-head">
-        {manages ? <SchoolFilter /> : <span className="eyebrow">Configuración</span>}
         <h1>Ajustes</h1>
-        <p className="hint">{manages ? 'Toca una sección para abrirla.' : 'Tu perfil, contraseña y apariencia.'}</p>
+        <p className="hint">{manages || role === 'ceo' ? 'Toca una sección para abrirla.' : 'Tu perfil, contraseña y apariencia.'}</p>
       </header>
-      {manages && <SchoolSections />}
+      {manages ? <SchoolSections /> : role === 'ceo' && (
+        <>
+          <h2 className="acc-group">Escuela</h2>
+          <EscuelasAcc />
+        </>
+      )}
       <CuentaSections />
     </div>
+  )
+}
+
+/** CEO only: create and edit their schools (it used to be the "Escuelas" menu). */
+function EscuelasAcc() {
+  const { schools } = useSchool()
+  return (
+    <Acc id="escuelas" icon="school" title="Escuelas" hint={schools.length ? `${schools.length} ${schools.length === 1 ? 'escuela' : 'escuelas'} · crear y editar` : 'Crea tu primera escuela'}>
+      <EscuelasSection />
+    </Acc>
   )
 }
 
@@ -49,6 +63,7 @@ function SchoolSections() {
   return (
     <>
       <h2 className="acc-group">Escuela</h2>
+      {role === 'ceo' && <EscuelasAcc />}
       <Acc id="escuela" icon="school" title="Datos de la escuela" hint="Nombre, logo, contacto y matrícula">
         <EscuelaPerfil key={school.id} school={school} embedded />
       </Acc>

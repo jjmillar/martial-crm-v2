@@ -8,7 +8,6 @@ import { hhmm, isoWeekday, weekdayShort } from '../../lib/weekdays'
 import { DateNav } from '../../ui/DateNav'
 import { Icon } from '../../ui/Icon'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
-import { SchoolFilter } from '../../ui/SchoolFilter'
 import { useSessionPopup, type SessionTarget } from '../asistencia/SessionPopup'
 
 type View = 'day' | 'week' | 'month'
@@ -123,7 +122,6 @@ export function CalendarioPage() {
   return (
     <div className="calendario">
       <header className="page-head">
-        <SchoolFilter />
         <h1>Calendario</h1>
       </header>
 

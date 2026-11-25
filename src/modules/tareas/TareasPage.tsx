@@ -7,7 +7,6 @@ import { Icon } from '../../ui/Icon'
 import { Aprobaciones } from './Aprobaciones'
 import { ClasesSinAsistencia } from './ClasesSinAsistencia'
 import { columns, listTasks, tasksKey, type Task, type TaskStatus } from './api'
-import { SchoolFilter } from '../../ui/SchoolFilter'
 
 const DONE_SHOWN = 20
 const nowPos = () => Date.now() / 1000
@@ -19,7 +18,6 @@ export function TareasPage() {
   return (
     <div className="tareas">
       <header className="page-head">
-        <SchoolFilter fallback="Tareas" />
         <h1>Tareas</h1>
         <p className="hint">Lo que espera tu aprobación, las clases sin asistencia y las tareas del equipo.</p>
       </header>

@@ -39,7 +39,6 @@ function usePay(id: string | undefined) {
 // The payment page (/app/pagar/<id>), kept for links (e.g. from e-mails). In the app, "Pagar" opens <PayDialog> instead.
 export function Checkout() {
   const { id } = useParams()
-  const { schools } = useSchool()
   const { loading, p, last } = usePay(id)
   if (loading) return <p className="hint">Cargando…</p>
   if (!p) return <p className="alert">No encontramos ese pago. <Link to="/app/pagos">Ver mis pagos</Link></p>
@@ -47,7 +46,6 @@ export function Checkout() {
     <div className="checkout" data-motion>
       <header className="page-head">
         <Link className="link-btn back-link" to="/app/pagos"><Icon name="back" size={16} /> Mis pagos</Link>
-        <span className="eyebrow">{schools.find((s) => s.id === p.school_id)?.name ?? 'Tu escuela'} · Pago</span>
         <h1>Pagar</h1>
       </header>
       <PayPanel key={p.id} p={p} last={last} />

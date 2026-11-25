@@ -302,14 +302,13 @@ function NextClass({ classes, today }: { classes: ClassFull[]; today: string }) 
 
 /** Asistencia for students: today's check-in and full history. */
 export function StudentAttendance() {
-  const { school, studentId, child, name } = useMe()
+  const { studentId, child, name } = useMe()
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
   const first = name.split(' ')[0]
   const histMore = useShowMore('portal.historial')
   return (
     <div className="asistencia portal-att">
       <header className="page-head">
-        <span className="eyebrow">{school?.name}</span>
         <h1>{child ? `Asistencia de ${first}` : 'Mi asistencia'}</h1>
         <p className="hint">{child ? `Marca la asistencia de ${first}` : 'Marca tu asistencia'} desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). La escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
       </header>

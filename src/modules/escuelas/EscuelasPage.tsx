@@ -16,9 +16,9 @@ async function schoolStats(): Promise<Record<string, Stats>> {
   return Object.fromEntries((data ?? []).map((r) => [r.school_id, r]))
 }
 
-// CEO-only (S3): every school on the platform as cards with key numbers; tapping one opens its settings
-// (same component as Ajustes) in a pop-up. With no schools the create form is the page; afterwards "+".
-export function EscuelasPage() {
+// CEO-only (S3), the "Escuelas" accordion in Ajustes: the owner's schools as cards with key numbers; tapping one
+// opens its settings in a pop-up. With no schools the create form shows right there; afterwards "Nueva escuela".
+export function EscuelasSection() {
   const { schools, reload, setActiveSchool, activeSchool, loading } = useSchool()
   const navigate = useNavigate()
   const [createOpen, setCreateOpen] = useState(false)
@@ -55,15 +55,8 @@ export function EscuelasPage() {
   if (schools.length === 0) {
     return (
       <div className="escuelas">
-        <header className="page-head">
-          <span className="eyebrow">Plataforma</span>
-          <h1>Escuelas</h1>
-          <p className="hint">Como CEO ves todas las escuelas. Crea la primera y luego invita a su administrador.</p>
-        </header>
-        <section className="card escuelas__first">
-          <h2>Nueva escuela</h2>
-          <SchoolForm onCreated={onCreated} />
-        </section>
+        <p className="hint">Crea tu primera escuela y luego invita a su administrador desde Miembros.</p>
+        <SchoolForm onCreated={onCreated} />
       </div>
     )
   }
@@ -72,16 +65,10 @@ export function EscuelasPage() {
 
   return (
     <div className="escuelas">
-      <header className="page-head page-head--row">
-        <div>
-          <span className="eyebrow">Plataforma</span>
-          <h1>Escuelas</h1>
-          <p className="hint">{schools.length} {schools.length === 1 ? 'escuela' : 'escuelas'} en la plataforma. Toca una para ver y editar sus datos.</p>
-        </div>
-        <button type="button" className="fab" onClick={openCreate} aria-label="Nueva escuela" title="Nueva escuela">
-          <Icon name="plus" size={22} />
-        </button>
-      </header>
+      <div className="ajustes__section-head">
+        <p className="hint">Toca una escuela para ver y editar sus datos. La escuela activa se elige bajo “Martial CRM”, arriba a la izquierda.</p>
+        <button type="button" className="btn" onClick={openCreate}><Icon name="plus" size={16} /> Nueva escuela</button>
+      </div>
 
       {created && <p className="alert alert--ok" role="status">Escuela “{created}” creada. Ábrela e invita a su administrador desde Miembros.</p>}
 

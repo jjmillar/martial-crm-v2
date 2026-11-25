@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
-import { roleLabel } from '../../lib/roles'
 import { daysUntil, formatDate, longDate, monthTitle, santiagoDate, startOfWeek, todayIso } from '../../lib/dates'
 import { formatCLP } from '../../lib/money'
 import { hhmm, isoWeekday } from '../../lib/weekdays'
@@ -14,7 +13,6 @@ import { enrollmentsKey, listEnrollments, phaseOf } from '../matriculas/api'
 import { listPayments, paymentsKey } from '../pagos/api'
 import { StudentHome } from '../portal/StudentPortal'
 import { useApprovalsCount } from '../tareas/api'
-import { SchoolFilter } from '../../ui/SchoolFilter'
 import { useSessionPopup } from '../asistencia/SessionPopup'
 
 async function weekAttendance(schoolId: string, from: string): Promise<number> {
@@ -76,13 +74,11 @@ function StaffHome() {
   return (
     <div className="bento">
       <section className={`tile tile--hero rise${isAdmin ? '' : ' tile--full'}`}>
-        <span className="eyebrow">{role ? roleLabel[role] : 'Sin rol'}</span>
         <h1>Hola{firstName ? `, ${firstName}` : ''}.</h1>
         <p className="tile__lead">
           {activeSchool ? <>{longDate(today)}{schools.length < 2 && <> · {activeSchool.name}</>}</> : 'Todavía no tienes una escuela seleccionada.'}
         </p>
-        {schools.length > 1 && <SchoolFilter />}
-        {role === 'ceo' && <Link className="btn btn--ghost tile__cta" to="/app/escuelas">{schools.length} {schools.length === 1 ? 'escuela' : 'escuelas'} · Gestionar</Link>}
+        {role === 'ceo' && <Link className="btn btn--ghost tile__cta" to="/app/ajustes#escuelas">{schools.length} {schools.length === 1 ? 'escuela' : 'escuelas'} · Gestionar</Link>}
       </section>
 
       {pending > 0 && (

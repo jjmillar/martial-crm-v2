@@ -14,7 +14,7 @@ import { PaymentHistory } from '../pagos/PaymentHistory'
 // "Ya pagué"; the school confirms it), the
 // school's plans, and at the end the history (paid payments and transfer reports in review or rejected).
 export function MisPagos() {
-  const { activeSchool, student } = useSchool()
+  const { student } = useSchool()
   const id = student?.id
   const pays = useQuery({ queryKey: ['my-payments', id, 'all'], queryFn: () => listStudentPayments(id!), enabled: Boolean(id) })
   const subs = useQuery({ queryKey: submissionsKey(id), queryFn: () => latestSubmissions({ studentId: id }), enabled: Boolean(id) })
@@ -28,7 +28,6 @@ export function MisPagos() {
   return (
     <div className="pagos my-pays-page">
       <header className="page-head">
-        <span className="eyebrow">{activeSchool?.name}</span>
         <h1>Pagos y planes</h1>
         {total > 0 && <p className="hint">Tienes {formatCLP(total)} por pagar.</p>}
       </header>

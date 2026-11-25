@@ -10,7 +10,6 @@ import type { PaymentStatus } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { listPayments, methodLabel, paymentsKey, statusLabel } from './api'
 import { PaidTag } from '../pagar/PaidTag'
-import { SchoolFilter } from '../../ui/SchoolFilter'
 import { doubleChecked, latestSubmissions, submissionsKey } from '../pagar/api'
 import { MisPagos } from '../pagar/MisPagos'
 import { PlanesList } from '../planes/PlanesList'
@@ -74,7 +73,6 @@ function StaffPagos() {
     <div className="matriculas">
       <header className="page-head page-head--row">
         <div>
-          <SchoolFilter />
           <h1>Pagos y planes</h1>
         </div>
         {Boolean(q.data?.length) && <Link className="fab" to="/app/pagos/nuevo" aria-label="Registrar pago" title="Registrar pago"><Icon name="plus" size={22} /></Link>}

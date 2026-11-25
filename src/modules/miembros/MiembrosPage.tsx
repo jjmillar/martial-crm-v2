@@ -12,7 +12,6 @@ import { Modal } from '../../ui/Modal'
 import { ShowMore } from '../../ui/ShowMore'
 import { useShowMore } from '../../ui/useShowMore'
 import { openFromHash } from '../../ui/openFromHash'
-import { SchoolFilter } from '../../ui/SchoolFilter'
 import { AlumnosList } from '../alumnos/AlumnosList'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { ProfesoresList } from '../profesores/ProfesoresList'
@@ -43,7 +42,6 @@ export function MiembrosPage() {
   return (
     <div className="miembros">
       <header className="page-head">
-        <SchoolFilter />
         <h1>Miembros</h1>
         <p className="hint">Toca una sección para abrirla.</p>
       </header>
