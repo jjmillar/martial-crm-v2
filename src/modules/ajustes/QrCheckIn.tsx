@@ -6,6 +6,7 @@ import { Icon } from '../../ui/Icon'
 import { checkInUrl, getCheckInCode, qrCodeKey, QR_RADIUS_M, rotateCheckInCode } from '../asistencia/qr'
 import { ensureSchoolGeo, geoKey } from '../../lib/geocode'
 import { useSchool } from '../../lib/school'
+import { SchoolMapPicker } from './SchoolMapPicker'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'long' })
 
@@ -25,8 +26,10 @@ export function QrCheckIn({ school }: { school: School }) {
   // The school's coordinates come from its address (no setup): make sure they match it.
   const addrKey = geoKey(school)
   const tried = useRef<string | null>(null) // one lookup per address, even if saving it fails
+  const [picking, setPicking] = useState(false)
   useEffect(() => {
-    if (addrKey && school.geo_address === addrKey && school.geo_lat != null) { setGeo('ok'); return }
+    // Coordinates for the current address (looked up or fixed by hand), or set by hand on a school without address.
+    if (school.geo_lat != null && (!addrKey || school.geo_address === addrKey)) { setGeo('ok'); return }
     if (addrKey && tried.current === addrKey) return
     tried.current = addrKey
     setGeo('checking')
@@ -89,15 +92,20 @@ export function QrCheckIn({ school }: { school: School }) {
         {geo === 'checking' && <span>Buscando la ubicación de la escuela…</span>}
         {geo === 'ok' && (
           <span>
-            Ubicación de la escuela: <b>{school.address}{school.city ? `, ${school.city}` : ''}</b>. Se confirma al instante a menos de {QR_RADIUS_M} m;
-            más lejos o sin ubicación queda por aprobar en Tareas.{' '}
-            {school.geo_lat != null && <a href={`https://www.openstreetmap.org/?mlat=${school.geo_lat}&mlon=${school.geo_lng}#map=18/${school.geo_lat}/${school.geo_lng}`} target="_blank" rel="noopener noreferrer">Ver en el mapa ↗</a>}
+            Ubicación de la escuela: <b>{school.address ? `${school.address}${school.city ? `, ${school.city}` : ''}` : 'marcada en el mapa'}</b>. Se confirma al instante a menos de {QR_RADIUS_M} m;
+            más lejos o sin ubicación queda por aprobar en Tareas. ¿El punto no está en la sala? Ajústalo en el mapa.
           </span>
         )}
         {geo === 'no_address' && <span>La escuela no tiene dirección, así que el QR confirma sin revisar la ubicación. Agrégala en <a href="#escuela">Datos de la escuela</a>.</span>}
         {geo === 'not_found' && <span>No encontramos «{school.address}{school.city ? `, ${school.city}` : ''}» en el mapa, así que el QR confirma sin revisar la ubicación. Revisa la dirección en <a href="#escuela">Datos de la escuela</a> (calle, número y comuna).</span>}
-        {geo === 'error' && <span>No pudimos buscar la dirección en el mapa ahora. Vuelve a abrir esta sección en un rato.</span>}
+        {geo === 'error' && <span>No pudimos buscar la dirección en el mapa ahora. Puedes marcar la sala a mano en el mapa.</span>}
+        {geo !== 'checking' && (
+          <button type="button" className="btn btn--ghost qr-geo__btn" onClick={() => setPicking(true)}>
+            <Icon name="pin" size={16} /> {geo === 'ok' ? 'Ajustar en el mapa' : 'Marcar en el mapa'}
+          </button>
+        )}
       </div>
+      <SchoolMapPicker school={school} open={picking} onClose={() => setPicking(false)} onSaved={() => { setGeo('ok'); void reload() }} />
       {code.isLoading && <p className="hint">Cargando…</p>}
       {code.isError && <p className="alert">No se pudo cargar el QR.</p>}
       {error && <p className="alert" role="alert">{error}</p>}

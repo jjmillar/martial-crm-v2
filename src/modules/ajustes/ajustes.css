@@ -651,3 +651,41 @@
 .qr-geo.is-warn {
   border-color: color-mix(in srgb, #e8c547 45%, var(--line));
 }
+.qr-geo {
+  flex-wrap: wrap;
+}
+.qr-geo > span {
+  flex: 1 1 200px;
+}
+.qr-geo__btn {
+  flex: none;
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* Map picker (pop-up): fix the school's point by hand */
+.map-picker {
+  display: grid;
+  gap: 12px;
+}
+.map-picker__map {
+  height: min(60vh, 420px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.map-pin span {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: #e0492c;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+  transform: rotate(-45deg);
+}
+.map-picker .leaflet-container {
+  font: inherit;
+}
