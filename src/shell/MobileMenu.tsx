@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPoi
 import { NavLink, useLocation } from '../lib/nav'
 import type { ModuleManifest } from '../modules/types'
 import { Icon } from '../ui/Icon'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import { closeDialog } from '../ui/motion'
 
 // Mobile navigation (S4): a draggable floating hamburger button that opens a sheet with every module,
@@ -169,7 +170,7 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
       >
         <div className="sheet__body">
           <div className="sheet__head">
-            <span className="eyebrow">Menú</span>
+            <strong className="sheet__title">Menú</strong>
             <button type="button" className="icon-btn" onClick={() => closeDialog(sheet.current)} aria-label="Cerrar">
               <Icon name="close" />
             </button>
@@ -190,9 +191,12 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
               <strong>{who}</strong>
               <span className="hint">{roleText}</span>
             </div>
-            <button type="button" className="btn btn--ghost" onClick={onSignOut}>
-              <Icon name="logout" size={16} /> Salir
-            </button>
+            <div className="sheet__actions">
+              <ThemeToggle />
+              <button type="button" className="btn btn--ghost" onClick={onSignOut}>
+                <Icon name="logout" size={16} /> Salir
+              </button>
+            </div>
           </div>
         </div>
       </dialog>

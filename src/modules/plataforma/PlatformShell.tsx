@@ -32,7 +32,6 @@ export function PlatformShell() {
       <aside className="sidebar">
         <div className="sidebar__top">
           <Wordmark to="/app/plataforma" />
-          <ThemeToggle />
         </div>
         <nav className="nav" aria-label="Secciones">
           {NAV.map((m) => (
@@ -46,9 +45,12 @@ export function PlatformShell() {
             <strong>{who}</strong>
             <span className="hint">Administrador de la plataforma</span>
           </div>
-          <button type="button" className="icon-btn" onClick={signOut} aria-label="Cerrar sesión" title="Cerrar sesión">
-            <Icon name="logout" />
-          </button>
+          <div className="sidebar__actions">
+            <ThemeToggle />
+            <button type="button" className="icon-btn" onClick={signOut} aria-label="Cerrar sesión" title="Cerrar sesión">
+              <Icon name="logout" />
+            </button>
+          </div>
         </div>
       </aside>
 

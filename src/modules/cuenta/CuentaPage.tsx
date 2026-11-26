@@ -5,7 +5,6 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
 import { roleLabel } from '../../lib/roles'
-import { ThemeToggle } from '../../ui/ThemeToggle'
 import { Acc } from '../../ui/Accordion'
 import { MiFicha } from './MiFicha'
 import { Seguridad } from './Seguridad'
@@ -110,18 +109,6 @@ export function CuentaSections() {
         {pwMsg && <p className={`alert${pwMsg.ok ? ' alert--ok' : ''}`} role={pwMsg.ok ? 'status' : 'alert'}>{pwMsg.text}</p>}
         <div className="form-actions"><button className="btn" type="submit" disabled={savePw.isPending}>Cambiar contraseña</button></div>
       </form>
-      </Acc>
-
-      <Acc id="apariencia" icon="moon" title="Apariencia" hint="Tema claro u oscuro">
-      <section className="card form-section">
-        <div className="ajustes__section-head">
-          <div>
-            <h2>Apariencia</h2>
-            <p className="hint">Tema claro u oscuro en este dispositivo.</p>
-          </div>
-          <ThemeToggle />
-        </div>
-      </section>
       </Acc>
 
       {role !== 'ceo' && role !== 'alumno' && memberships.length > 0 && (

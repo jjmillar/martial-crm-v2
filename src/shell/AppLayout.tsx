@@ -30,7 +30,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <Wordmark to="/app" />
             <SchoolSwitcher />
           </div>
-          <ThemeToggle />
         </div>
 
         <nav className="nav" aria-label="Secciones">
@@ -48,9 +47,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <strong>{profile?.full_name || user?.email}</strong>
             <span className="hint">{role ? roleLabel[role] : 'Sin rol asignado'}</span>
           </div>
-          <button type="button" className="icon-btn" onClick={signOut} aria-label="Cerrar sesión" title="Cerrar sesión">
-            <Icon name="logout" />
-          </button>
+          <div className="sidebar__actions">
+            <ThemeToggle />
+            <button type="button" className="icon-btn" onClick={signOut} aria-label="Cerrar sesión" title="Cerrar sesión">
+              <Icon name="logout" />
+            </button>
+          </div>
         </div>
       </aside>
 

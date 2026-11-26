@@ -38,7 +38,7 @@ export function AjustesPage() {
     <div className="ajustes">
       <header className="page-head">
         <h1>Ajustes</h1>
-        <p className="hint">{manages ? 'Toca una sección para abrirla.' : 'Tu perfil, contraseña y apariencia.'}</p>
+        <p className="hint">{manages ? 'Toca una sección para abrirla.' : 'Tu perfil y contraseña.'}</p>
       </header>
       {manages && <SchoolSections />}
       <CuentaSections />

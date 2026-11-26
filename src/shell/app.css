@@ -158,6 +158,14 @@
   border-top: 1px solid var(--line);
 }
 
+.sidebar__actions,
+.sheet__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
 .sidebar__who {
   display: grid;
   min-width: 0;
@@ -351,6 +359,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.sheet__title {
+  font-size: 16px;
 }
 
 .sheet__grid {
