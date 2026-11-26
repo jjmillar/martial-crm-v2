@@ -7,8 +7,9 @@ import { Link } from '../../lib/nav'
 import { BeltChip } from '../../modules/artes/Belt'
 import { fromAchievement, fromMilestone, LogrosList, LogrosSummary } from '../../modules/artes/Logros'
 
-const XP_PER_LEVEL = 100
-const levelOf = (xp: number) => Math.floor(xp / XP_PER_LEVEL) + 1
+import { XP_PER_LEVEL } from '../../modules/portal/xp'
+import { SkillsBreakdown } from '../../modules/portal/SkillsBreakdown'
+
 const sinceFmt = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
 // A student's public page (/e/<school>/a/<handle>): who they are, their belt, level and skills, in their school's
@@ -25,7 +26,6 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
   }
   const s = p.school
   const schoolHref = s.landing ? `/e/${s.slug}` : null
-  const topSkill = p.skills?.[0]?.xp ?? 0
   const pct = p.stats ? Math.round((p.stats.level_xp / XP_PER_LEVEL) * 100) : 0
 
   return (
@@ -86,18 +86,7 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
         {p.skills && (
           <section className="sprof__card rise" style={{ animationDelay: '120ms' }} aria-label="Skills">
             <h2 className="sprof__title">Skills</h2>
-            {p.skills.length === 0 ? <p className="sp-muted">Las skills aparecen a medida que entrena.</p> : (
-              <ul className="skills">
-                {p.skills.map((k) => (
-                  <li key={k.label}>
-                    <span className="skills__name">{k.icon ? `${k.icon} ` : ''}{k.label}</span>
-                    <span className="skills__lvl">Nv {levelOf(k.xp)}</span>
-                    <span className="skills__bar"><span style={{ width: `${topSkill ? Math.max(6, Math.round((k.xp / topSkill) * 100)) : 0}%` }} /></span>
-                    <span className="skills__xp">{k.xp} XP</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <SkillsBreakdown skills={p.skills} own={false} emptyText="Las skills aparecen a medida que entrena." />
           </section>
         )}
 

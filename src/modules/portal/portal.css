@@ -368,3 +368,92 @@
   color: inherit;
   text-decoration: underline;
 }
+
+/* Skills: Gi vs NoGi (one split bar) + the other skills as % of their total */
+.skillset {
+  display: grid;
+  gap: 22px;
+  --gi: var(--accent);
+  --nogi: color-mix(in srgb, var(--text) 78%, transparent);
+}
+.skillset__title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.skillset__title span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.ginogi {
+  display: grid;
+}
+.ginogi__labels,
+.ginogi__counts {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ginogi__side {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.ginogi__side b {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.ginogi__side i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.ginogi__side--gi i {
+  background: var(--gi);
+}
+.ginogi__side--nogi i {
+  background: var(--nogi);
+}
+.ginogi__bar {
+  display: flex;
+  gap: 3px;
+  height: 16px;
+  margin: 8px 0 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+.ginogi__bar span {
+  height: 100%;
+  transition: width var(--dur-slow) var(--ease-out);
+}
+.ginogi__gi {
+  background: var(--gi);
+}
+.ginogi__nogi {
+  background: var(--nogi);
+}
+.ginogi__counts {
+  color: var(--muted);
+  font-size: 12px;
+}
+.skills li:has(.skills__pct) {
+  grid-template-areas: 'name pct' 'bar bar' 'xp xp';
+}
+.skills__pct {
+  grid-area: pct;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ginogi__bar span {
+    transition: none;
+  }
+}

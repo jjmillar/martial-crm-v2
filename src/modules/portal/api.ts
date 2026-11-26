@@ -13,9 +13,7 @@ export type Progress = {
   skills: Skill[]
 }
 
-export const XP_PER_CLASS = 10
-export const XP_PER_LEVEL = 100
-export const levelOf = (xp: number) => Math.floor(xp / XP_PER_LEVEL) + 1
+export { XP_PER_CLASS, XP_PER_LEVEL, levelOf } from './xp'
 
 export const progressKey = (studentId: string | undefined) => ['student-progress', studentId] as const
 export async function studentProgress(studentId: string): Promise<Progress> {

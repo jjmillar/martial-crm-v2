@@ -15,8 +15,9 @@ import { useShowMore } from '../../ui/useShowMore'
 import { classStarted } from '../asistencia/api'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
 import { MisCinturones, MisLogros } from '../artes/Logros'
+import { SkillsBreakdown } from './SkillsBreakdown'
 import {
-  checkIn, levelOf, myAttendance, myAttendanceKey, myEnrollments, myPendingPayments, progressKey, studentProgress, undoCheckIn,
+  checkIn, myAttendance, myAttendanceKey, myEnrollments, myPendingPayments, progressKey, studentProgress, undoCheckIn,
   XP_PER_CLASS, XP_PER_LEVEL, type MyAttendance,
 } from './api'
 
@@ -165,7 +166,6 @@ export function StudentHome() {
   const p = progress.data
   const firstName = (child ? name : profile?.full_name || name).split(' ')[0]
   const pct = p ? Math.round((p.level_xp / p.next_level_xp) * 100) : 0
-  const topSkill = p?.skills[0]?.xp ?? 0
   const current = (enr.data ?? []).find((e) => e.status === 'activa')
 
   return (
@@ -214,18 +214,7 @@ export function StudentHome() {
 
 
       <section className="tile tile--wide rise" style={{ animationDelay: '120ms' }} aria-label="Skills">
-        <div className="tile__head"><span className="eyebrow">Skills</span></div>
-        {p && p.skills.length === 0 && <p className="hint">Tus skills aparecen cuando asistas a clases con skills (por ejemplo Guardia o Derribos).</p>}
-        <ul className="skills">
-          {p?.skills.map((s) => (
-            <li key={s.tag_id}>
-              <span className="skills__name">{s.icon ? `${s.icon} ` : ''}{s.label}</span>
-              <span className="skills__lvl">Nv {levelOf(s.xp)}</span>
-              <span className="skills__bar"><span style={{ width: `${topSkill ? Math.max(6, Math.round((s.xp / topSkill) * 100)) : 0}%` }} /></span>
-              <span className="skills__xp">{s.xp} XP</span>
-            </li>
-          ))}
-        </ul>
+        {p ? <SkillsBreakdown skills={p.skills} own emptyText="Tus skills aparecen cuando asistas a clases con skills (por ejemplo Gi, NoGi o Guardia)." /> : <p className="hint">Cargando…</p>}
       </section>
 
       <section className="tile tile--wide rise" style={{ animationDelay: '130ms' }} aria-label="Cinturones">
