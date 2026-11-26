@@ -633,8 +633,8 @@ export type Database = {
       };
       classes: {
         Row: {
-          art_id: string | null;
           active: boolean;
+          art_id: string | null;
           capacity: number | null;
           color: string;
           created_at: string;
@@ -651,8 +651,8 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
-          art_id?: string | null;
           active?: boolean;
+          art_id?: string | null;
           capacity?: number | null;
           color?: string;
           created_at?: string;
@@ -668,8 +668,8 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
-          art_id?: string | null;
           active?: boolean;
+          art_id?: string | null;
           capacity?: number | null;
           color?: string;
           created_at?: string;
@@ -1187,8 +1187,8 @@ export type Database = {
       };
       plans: {
         Row: {
-          art_id: string | null;
           active: boolean;
+          art_id: string | null;
           billing_cycle: Database["public"]["Enums"]["billing_cycle"];
           class_count: number | null;
           created_at: string;
@@ -1207,8 +1207,8 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
-          art_id?: string | null;
           active?: boolean;
+          art_id?: string | null;
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"];
           class_count?: number | null;
           created_at?: string;
@@ -1226,8 +1226,8 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
-          art_id?: string | null;
           active?: boolean;
+          art_id?: string | null;
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"];
           class_count?: number | null;
           created_at?: string;
