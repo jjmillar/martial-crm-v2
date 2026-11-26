@@ -276,9 +276,9 @@
 .logro--rechazado .logro__main strong { color: var(--muted); }
 .logro__icon {
   display: grid;
-  place-items: center;
+  place-items: center start; /* the icon lines up with the list's left edge, the text with the next column */
   flex: none;
-  width: 48px;
+  width: 40px;
 }
 .logro__emoji {
   font-size: 24px;

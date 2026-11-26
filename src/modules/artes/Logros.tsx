@@ -179,7 +179,7 @@ export function MisLogros({ studentId, schoolId, child }: { studentId: string; s
   return (
     <>
       <div className="tile__head">
-        <span className="eyebrow">Logros</span>
+        <h2 className="tile__title">Logros</h2>
         <button type="button" className="link-btn" onClick={() => setOpen(true)}><Icon name="plus" size={14} /> Registrar torneo</button>
       </div>
       <LogrosSummary medals={approved.filter((a) => a.kind === 'torneo').map((a) => a.medal)} graduations={approved.filter((a) => a.kind === 'graduacion').length} milestones={milestones.data?.length ?? 0} />
@@ -233,7 +233,7 @@ function AchievementForm({ kind, schoolId, note, submit, onDone, onClose }: Form
   return (
     <>
       <div className="modal__head">
-        <span className="eyebrow">{TITLES[kind]}</span>
+        <h2 className="modal__title">{TITLES[kind]}</h2>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
       </div>
       <form className="belt-form" onSubmit={(e) => { e.preventDefault(); save.mutate() }} noValidate>

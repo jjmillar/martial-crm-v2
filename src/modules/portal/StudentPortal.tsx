@@ -169,34 +169,30 @@ export function StudentHome() {
   const current = (enr.data ?? []).find((e) => e.status === 'activa')
 
   return (
-    <div className="bento">
-      <section className="tile tile--hero rise">
-        <span className="eyebrow">{child ? 'Perfil de tu hijo' : 'Alumno'} · {school?.name}</span>
-        <h1>{child ? firstName : <>Hola{firstName ? `, ${firstName}` : ''}.</>}</h1>
-        <p className="tile__lead">{child ? `Como apoderado ves su nivel, su plan y sus pagos, y marcas su asistencia.` : longDate(today)}</p>
-      </section>
+    <div className="bento bento--student">
+      <header className="st-hero rise">
+        <p className="st-hero__meta">{child ? `Perfil de tu hijo · ${school?.name ?? ''}` : `${school?.name ?? ''} · ${longDate(today)}`}</p>
+        <h1>{child ? firstName : <>Hola{firstName ? `, ${firstName}` : ''}</>}</h1>
+        {child && <p className="hint">Como apoderado ves su nivel, su plan y sus pagos, y marcas su asistencia.</p>}
+      </header>
 
 
       <section className="tile level-card rise" style={{ animationDelay: '40ms' }} aria-label="Tu nivel">
-        <div className="level-badge" style={{ ['--pct' as string]: `${pct}%` }}>
-          <span className="level-badge__inner">
-            <span className="level-badge__label">Nivel</span>
-            <strong>{p?.level ?? '—'}</strong>
-          </span>
+        <div className="lvl">
+          <span>Nivel</span>
+          <strong>{p?.level ?? '—'}</strong>
         </div>
         <div className="xp">
           <div className="xp__bar" role="progressbar" aria-valuemin={0} aria-valuemax={p?.next_level_xp ?? 100} aria-valuenow={p?.level_xp ?? 0} aria-label="Experiencia para el siguiente nivel">
             <span style={{ width: `${pct}%` }} />
           </div>
-          <p className="hint">
-            {p ? <><b>{p.level_xp}</b> / {p.next_level_xp} XP</> : 'Cargando…'}
-          </p>
+          <p className="xp__text">{p ? <><b>{p.level_xp}</b> / {p.next_level_xp} XP</> : 'Cargando…'}</p>
         </div>
       </section>
 
       <section className="tile tile--wide rise" style={{ animationDelay: '60ms' }} id="marcar-asistencia">
         <div className="tile__head">
-          <span className="eyebrow">Marcar asistencia</span>
+          <h2 className="tile__title">Marcar asistencia</h2>
           <Link className="link-btn" to="/app/asistencia">Historial</Link>
         </div>
         <TodayCheckIn />
@@ -205,8 +201,7 @@ export function StudentHome() {
 
       {incomplete.data && !child && (
         <Link className="tile tile--wide tile--link tile--alert rise" to="/app/ajustes#ficha">
-          <span className="eyebrow">Tu ficha</span>
-          <p className="tile__big tile__big--sm">Completa tus datos</p>
+          <h2 className="tile__title">Completa tu ficha</h2>
           <p className="hint">Teléfono, fecha de nacimiento y contacto de emergencia para tu escuela.</p>
         </Link>
       )}
@@ -217,7 +212,7 @@ export function StudentHome() {
       </section>
 
       <section className="tile tile--wide rise" style={{ animationDelay: '130ms' }} aria-label="Cinturones">
-        <div className="tile__head"><span className="eyebrow">{child ? 'Sus cinturones' : 'Mis cinturones'}</span></div>
+        <h2 className="tile__title">{child ? 'Sus cinturones' : 'Mis cinturones'}</h2>
         {studentId && <MisCinturones studentId={studentId} child={child} />}
       </section>
 
@@ -226,17 +221,17 @@ export function StudentHome() {
       </section>
 
       <section className="tile rise" style={{ animationDelay: '160ms' }}>
-        <span className="eyebrow">{child ? 'Su plan' : 'Mi plan'}</span>
+        <h2 className="tile__title">{child ? 'Su plan' : 'Mi plan'}</h2>
         {current ? (
           <>
-            <p className="tile__big tile__big--sm">{current.plan?.name}</p>
+            <p className="st-plan">{current.plan?.name}</p>
             <p className="hint">{current.ends_at ? `Vigente hasta el ${formatDate(current.ends_at)}` : 'Sin fecha de vencimiento'}</p>
           </>
         ) : <p className="hint">{child ? 'No tiene una inscripción activa.' : 'No tienes una inscripción activa.'}</p>}
       </section>
 
       <section className="tile tile--span2 rise" style={{ animationDelay: '200ms' }}>
-        <div className="tile__head"><span className="eyebrow">Pagos pendientes</span><Link className="link-btn" to="/app/pagos">{child ? 'Sus pagos' : 'Mis pagos'}</Link></div>
+        <div className="tile__head"><h2 className="tile__title">Pagos pendientes</h2><Link className="link-btn" to="/app/pagos">{child ? 'Sus pagos' : 'Mis pagos'}</Link></div>
         {(pay.data ?? []).length === 0 ? <p className="hint">Estás al día.</p> : (
           <ul className="mini-list">
             {pay.data!.map((x) => (
@@ -252,7 +247,7 @@ export function StudentHome() {
       </section>
 
       <section className="tile tile--wide tile--history rise" style={{ animationDelay: '240ms' }}>
-        <div className="tile__head"><span className="eyebrow">Últimas clases</span><Link className="link-btn" to="/app/asistencia">Ver todas</Link></div>
+        <div className="tile__head"><h2 className="tile__title">Últimas clases</h2><Link className="link-btn" to="/app/asistencia">Ver todas</Link></div>
         <AttendanceHistory rows={(att.data ?? []).slice(0, 3)} child={child} />
       </section>
       <PayDialog paymentId={paying} open={payOpen} onClose={() => setPayOpen(false)} />

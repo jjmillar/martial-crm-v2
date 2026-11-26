@@ -378,7 +378,7 @@
 }
 .skillset__title {
   margin: 0 0 10px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -398,7 +398,7 @@
 }
 .ginogi__side {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
   font-weight: 600;
 }
@@ -412,6 +412,7 @@
   width: 10px;
   height: 10px;
   border-radius: 3px;
+  align-self: center;
 }
 .ginogi__side--gi i {
   background: var(--gi);
@@ -456,4 +457,143 @@
   .ginogi__bar span {
     transition: none;
   }
+}
+
+/* ---- Student Inicio (2026-11-26 audit): plain titles, no card-in-card, one progress bar, rows on one grid ---- */
+.tile__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.bento--student .tile__head {
+  align-items: baseline;
+}
+.bento--student > .st-hero {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  padding: 4px 2px 6px;
+}
+.st-hero h1 {
+  font-size: clamp(30px, 6vw, 44px);
+}
+.st-hero__meta {
+  color: var(--muted);
+  font-size: 14px;
+}
+.st-plan {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+/* Level: the number, then the only progress bar and "XP / needed" */
+.bento--student .level-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+}
+.lvl {
+  display: grid;
+  flex: none;
+  justify-items: center;
+  min-width: 64px;
+  line-height: 1;
+}
+.lvl span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.lvl strong {
+  margin-top: 4px;
+  font-size: 40px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+.bento--student .xp {
+  gap: 8px;
+}
+.xp__text {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.xp__text b {
+  color: var(--text);
+}
+
+/* Class rows: flat list (no card inside the card). Time | name, and the action under the name. */
+.bento--student .checkin-list,
+.bento--student .today-list,
+.portal-att .checkin-list,
+.portal-att .today-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.bento--student .checkin-list li,
+.bento--student .today-list li,
+.portal-att .checkin-list li,
+.portal-att .today-list li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 0 12px 14px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.bento--student .checkin-list li + li,
+.bento--student .today-list li + li,
+.portal-att .checkin-list li + li,
+.portal-att .today-list li + li {
+  border-top: 1px solid var(--line);
+}
+/* the class color as a slim pill, aligned with the row's text */
+.bento--student .checkin-list li::before,
+.bento--student .today-list li::before,
+.portal-att .checkin-list li::before,
+.portal-att .today-list li::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--class-color, var(--line));
+}
+.bento--student .today-list__time,
+.portal-att .today-list__time {
+  min-width: 0;
+  align-self: start;
+  padding-top: 1px;
+}
+.bento--student .checkin-list li .today-list__name,
+.portal-att .checkin-list li .today-list__name {
+  grid-column: 2 / -1;
+}
+/* In "Marcar asistencia" the action sits under the class name, left-aligned with it */
+.bento--student .checkin-list .btn,
+.bento--student .checkin-list .checkin-state,
+.bento--student .checkin-list .tag,
+.portal-att .checkin-list .btn,
+.portal-att .checkin-list .checkin-state,
+.portal-att .checkin-list .tag {
+  grid-column: 2 / -1;
+  justify-self: start;
+  margin-left: 0;
+}
+.bento--student .checkin-list .btn,
+.portal-att .checkin-list .btn {
+  min-height: 40px;
+}
+.bento--student .checkin-sub,
+.portal-att .checkin-sub {
+  margin-top: 14px;
 }
