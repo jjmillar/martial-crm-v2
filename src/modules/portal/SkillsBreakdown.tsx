@@ -1,11 +1,8 @@
-import { levelOf } from './xp'
 import { splitSkills, type SkillLike } from './skills'
-
-const clases = (n: number) => `${n} ${n === 1 ? 'clase' : 'clases'}`
 
 /**
  * A student's skills (portal Inicio and public profile): first Gi vs NoGi in one split bar (share of training of each),
- * then every other skill with its share of the total of those skills, its level, XP and classes.
+ * then every other skill with its share of the total of those skills (bar + %).
  */
 export function SkillsBreakdown<T extends SkillLike>({ skills, own, emptyText }: { skills: T[]; own: boolean; emptyText: string }) {
   const s = splitSkills(skills)
@@ -29,10 +26,6 @@ export function SkillsBreakdown<T extends SkillLike>({ skills, own, emptyText }:
                 {giPct > 0 && <span className="ginogi__gi" style={{ width: `${giPct}%` }} />}
                 {nogiPct > 0 && <span className="ginogi__nogi" style={{ width: `${nogiPct}%` }} />}
               </div>
-              <div className="ginogi__counts">
-                <span>{clases(s.gi?.classes ?? 0)}</span>
-                <span>{clases(s.nogi?.classes ?? 0)}</span>
-              </div>
             </>
           ) : (
             <>
@@ -45,14 +38,13 @@ export function SkillsBreakdown<T extends SkillLike>({ skills, own, emptyText }:
 
       {s.others.length > 0 && (
         <section className="skillset__others" aria-labelledby="skills-others-h">
-          <h3 id="skills-others-h" className="skillset__title">Otras skills <span>· {clases(s.othersTotal)} en total</span></h3>
+          <h3 id="skills-others-h" className="skillset__title">Skills</h3>
           <ul className="skills">
             {s.others.map((k) => (
               <li key={k.label}>
                 <span className="skills__name">{k.icon ? `${k.icon} ` : ''}{k.label}</span>
                 <span className="skills__pct">{k.pct}%</span>
                 <span className="skills__bar" role="img" aria-label={`${k.label}: ${k.pct} %`}><span style={{ width: `${Math.max(k.pct, 3)}%` }} /></span>
-                <span className="skills__xp">Nv {levelOf(k.xp)} · {k.xp} XP · {clases(k.classes)}</span>
               </li>
             ))}
           </ul>
