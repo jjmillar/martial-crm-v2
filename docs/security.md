@@ -122,6 +122,8 @@ aunque la funcionalidad esté lista.
 - Headers: `Permissions-Policy` now allows `geolocation=(self)` (still no camera, microphone, payment or usb). `connect-src` adds `https://nominatim.openstreetmap.org`.
 - Manual fix (2026-11-25): when the geocoded point is wrong, the school's CEO/admins can move it on a map (Leaflet + OpenStreetMap tiles, `img-src` adds `https://tile.openstreetmap.org`). The point is saved with the current address under the same admin-only update policy, so the automatic lookup doesn't replace it; changing the address clears it as before.
 
+- Since `20261126000003` the app check-in opens 1 hour before the class too (`class_open()`, used by the `attendance_window` trigger; executable by `authenticated` only). Self check-ins still wait for the team's approval. `xp_level()` / `xp_to_reach()` are pure math (no data access), granted to `authenticated`; `student_progress`, `student_public_profile` and `student_milestones` keep their previous grants.
+
 ## Paying the subscription (2026-11-26, `20261126000001`)
 - The CEO pays Martial CRM like students pay their school: bank transfer to the platform's account, "Ya transferí", and the operator confirms it. Each period is a charge in `platform_invoices`. The customer can read only their own (RLS); nobody writes there directly. Every change goes through security-definer functions that check the caller:
   - **Customer:** `my_subscription`, `subscription_checkout`, `subscription_apply_code`, `subscription_report_transfer`. The caller must be an owner (`billing_owner_ok`: `owners` row plus `mfa_ok`). A suspended customer still passes, so they can pay to get back in.

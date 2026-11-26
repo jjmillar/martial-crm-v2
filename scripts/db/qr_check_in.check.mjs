@@ -60,8 +60,8 @@ if (clock.h >= 4 && clock.h < 20) {
   r = await scan(ST, t1)
   check('scanning again says already marked (no duplicate)', r.ok && r.already, r)
   check('one row only', (await db.query(`select count(*)::int c from public.attendance where student_id=$1`, [ana])).rows[0].c === 1)
-  const early = await tryAs(db, MOM, `select public.check_in($1)`, [soon])
-  check('the app check-in still waits for the start (marker not left on)', !early.ok && /class not started/.test(early.err), early.err)
+  const early = await tryAs(db, MOM, `select public.check_in($1)`, [far])
+  check('the app check-in still waits for 1 h before the start (marker not left on)', !early.ok && /class not started/.test(early.err), early.err)
   const staffEarly = await tryAs(db, STAFF, `insert into public.attendance (school_id, class_id, student_id, date) values ($1,$2,$3,$4)`, [sc, far, mom, clock.d])
   check('staff still cannot mark before the start', !staffEarly.ok && /class not started/.test(staffEarly.err), staffEarly.err)
 

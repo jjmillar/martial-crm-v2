@@ -7,7 +7,7 @@ import { Link } from '../../lib/nav'
 import { BeltChip } from '../../modules/artes/Belt'
 import { fromAchievement, fromMilestone, LogrosList, LogrosSummary } from '../../modules/artes/Logros'
 
-import { XP_PER_LEVEL } from '../../modules/portal/xp'
+import { levelInfo } from '../../modules/portal/xp'
 import { SkillsBreakdown } from '../../modules/portal/SkillsBreakdown'
 
 const sinceFmt = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' })
@@ -26,7 +26,8 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
   }
   const s = p.school
   const schoolHref = s.landing ? `/e/${s.slug}` : null
-  const pct = p.stats ? Math.round((p.stats.level_xp / XP_PER_LEVEL) * 100) : 0
+  const need = p.stats ? p.stats.next_level_xp ?? levelInfo(p.stats.xp).next_level_xp : 100
+  const pct = p.stats ? Math.round((p.stats.level_xp / need) * 100) : 0
 
   return (
     <div className={`school-page sprof${s.theme === 'grafito' ? ' school-page--mono' : ''}`} style={brandStyle(s)}>
@@ -71,7 +72,7 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
             <dl className="sprof__stats">
               <div><dt>XP total</dt><dd>{p.stats.xp}</dd></div>
               <div><dt>Clases</dt><dd>{p.stats.attended}</dd></div>
-              <div><dt>Al nivel {p.stats.level + 1}</dt><dd>{XP_PER_LEVEL - p.stats.level_xp} XP</dd></div>
+              <div><dt>Al nivel {p.stats.level + 1}</dt><dd>{need - p.stats.level_xp} XP</dd></div>
             </dl>
           </section>
         )}

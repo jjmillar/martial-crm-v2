@@ -25,7 +25,7 @@ export const landingPhotoUrl = (path: string) => `${url}/storage/v1/object/publi
 export type StudentProfile = {
   handle: string; name: string; initials: string; headline: string | null; bio: string | null; since: string
   belt: string | null; belt_degree: number | null
-  stats: { xp: number; level: number; level_xp: number; attended: number } | null
+  stats: { xp: number; level: number; level_xp: number; next_level_xp?: number; attended: number } | null
   skills: { label: string; icon: string | null; xp: number }[] | null
   /** Belt per art (when show_belt). Absent in profiles cached before 2026-11-24. */
   arts?: { art: string; belt: string | null; color: string | null; stripe: string | null; bar?: string | null; pattern?: string | null; degree: number; degree_text: string | null; rank: string | null; track: string | null }[] | null

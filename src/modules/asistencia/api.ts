@@ -88,6 +88,18 @@ export async function attendanceCounts(schoolId: string, from: string, to: strin
   return m
 }
 
+/** Minutes before the start from which students can mark their attendance (public.class_open, same as the QR). */
+export const OPEN_BEFORE_MIN = 60
+const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
+const fromMin = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
+/** "HH:MM" from which a class starting at `start` can be marked (never before 00:00 of that day). */
+export const opensAt = (start: string) => fromMin(Math.max(0, toMin(start) - OPEN_BEFORE_MIN))
+
+/** Students can mark their attendance from 1 hour before the class starts (the database enforces it too). */
+export function classOpen(date: string, start: string, now = new Date()): boolean {
+  return classStarted(date, opensAt(start), now)
+}
+
 /** Attendance is taken only once the class has started (the database enforces it too). */
 export function classStarted(date: string, start: string, now = new Date()): boolean {
   const zone = 'America/Santiago'

@@ -12,13 +12,13 @@ import { latestSubmissions, submissionsKey } from '../pagar/api'
 import { PayDialog } from '../pagar/Checkout'
 import { ShowMore } from '../../ui/ShowMore'
 import { useShowMore } from '../../ui/useShowMore'
-import { classStarted } from '../asistencia/api'
+import { classOpen, opensAt } from '../asistencia/api'
 import { classesKey, listClasses, type ClassFull } from '../clases/api'
 import { MisCinturones, MisLogros } from '../artes/Logros'
 import { SkillsBreakdown } from './SkillsBreakdown'
 import {
   checkIn, myAttendance, myAttendanceKey, myEnrollments, myPendingPayments, progressKey, studentProgress, undoCheckIn,
-  XP_PER_CLASS, XP_PER_LEVEL, type MyAttendance,
+  XP_PER_CLASS, type MyAttendance,
 } from './api'
 
 function useMe() {
@@ -32,7 +32,7 @@ function useMe() {
 const PAST_DAYS = 7
 
 /**
- * "Marcar asistencia" for students: today's classes (enabled once each starts) and the classes of the last
+ * "Marcar asistencia" for students: today's classes (enabled from 1 hour before each starts) and the classes of the last
  * 7 days not yet approved, so a forgotten one (e.g. yesterday's) can still be marked. Each mark is a request the
  * school's team approves.
  */
@@ -83,12 +83,12 @@ export function TodayCheckIn() {
           <strong>{c.name}</strong>
           <span className="hint">{isToday ? `${hhmm(s.start_time)}–${hhmm(s.end_time)}` : dayLabel(date, today)}{c.room ? ` · ${c.room}` : ''}</span>
         </span>
-        {!a && (classStarted(date, s.start_time) ? (
+        {!a && (classOpen(date, s.start_time) ? (
           <button type="button" className="btn" disabled={mark.isPending} onClick={() => mark.mutate({ classId: c.id, date })}>
             <Icon name="check" size={16} /> Marcar asistencia
           </button>
         ) : (
-          <span className="tag" title="Podrás marcar tu asistencia cuando empiece la clase">Desde las {hhmm(s.start_time)}</span>
+          <span className="tag" title="Puedes marcar tu asistencia desde 1 hora antes de la clase">Desde las {opensAt(s.start_time)}</span>
         ))}
         {a && !a.confirmed_at && (
           <span className="checkin-state">
@@ -185,13 +185,12 @@ export function StudentHome() {
           </span>
         </div>
         <div className="xp">
-          <div className="xp__bar" role="progressbar" aria-valuemin={0} aria-valuemax={XP_PER_LEVEL} aria-valuenow={p?.level_xp ?? 0} aria-label="Experiencia para el siguiente nivel">
+          <div className="xp__bar" role="progressbar" aria-valuemin={0} aria-valuemax={p?.next_level_xp ?? 100} aria-valuenow={p?.level_xp ?? 0} aria-label="Experiencia para el siguiente nivel">
             <span style={{ width: `${pct}%` }} />
           </div>
           <p className="hint">
-            {p ? <><b>{p.level_xp}</b> / {XP_PER_LEVEL} XP · faltan {XP_PER_LEVEL - p.level_xp} para el nivel {p.level + 1}</> : 'Cargando…'}
+            {p ? <><b>{p.level_xp}</b> / {p.next_level_xp} XP</> : 'Cargando…'}
           </p>
-          {p && <p className="hint">{p.xp} XP en total · {p.attended} {p.attended === 1 ? 'clase' : 'clases'}{p.pending ? ` · ${p.pending} por aprobar` : ''}</p>}
         </div>
       </section>
 
@@ -201,7 +200,7 @@ export function StudentHome() {
           <Link className="link-btn" to="/app/asistencia">Historial</Link>
         </div>
         <TodayCheckIn />
-        <p className="hint">{child ? `Marca la asistencia de ${firstName}` : 'Marca tu asistencia'} desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). La escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
+        <p className="hint">{child ? `Marca la asistencia de ${firstName}` : 'Marca tu asistencia'} desde 1 hora antes de que empiece la clase (o hasta {PAST_DAYS} días después si se te pasó).</p>
       </section>
 
       {incomplete.data && !child && (
@@ -282,7 +281,7 @@ function NextClass({ classes, today }: { classes: ClassFull[]; today: string }) 
         <li style={{ ['--class-color' as string]: next.c.color }}>
           <span className="today-list__time">{hhmm(next.x.start_time)}</span>
           <span className="today-list__name"><strong>{next.c.name}</strong><span className="hint">{longDate(next.date)}{next.c.room ? ` · ${next.c.room}` : ''}</span></span>
-          <span className="tag">Desde las {hhmm(next.x.start_time)}</span>
+          <span className="tag">Desde las {opensAt(next.x.start_time)}</span>
         </li>
       </ul>
     </div>
@@ -299,7 +298,7 @@ export function StudentAttendance() {
     <div className="asistencia portal-att">
       <header className="page-head">
         <h1>{child ? `Asistencia de ${first}` : 'Mi asistencia'}</h1>
-        <p className="hint">{child ? `Marca la asistencia de ${first}` : 'Marca tu asistencia'} desde que empieza la clase (o hasta {PAST_DAYS} días después si se te pasó). La escuela la aprueba y suma {XP_PER_CLASS} XP.</p>
+        <p className="hint">{child ? `Marca la asistencia de ${first}` : 'Marca tu asistencia'} desde 1 hora antes de que empiece la clase (o hasta {PAST_DAYS} días después si se te pasó).</p>
       </header>
       <section className="card form-section checkin-card" aria-labelledby="mark-h">
         <h2 id="mark-h">Marcar asistencia</h2>
