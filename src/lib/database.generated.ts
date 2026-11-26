@@ -2907,6 +2907,10 @@ export type Database = {
         Args: { p_code: string; p_email: string; p_user: string };
         Returns: string;
       };
+      class_open: {
+        Args: { p_class_id: string; p_date: string };
+        Returns: boolean;
+      };
       class_snapshot_skills: {
         Args: { p_class_id: string };
         Returns: string[];
@@ -3391,6 +3395,8 @@ export type Database = {
         Args: { p_enrollment_id: string; p_student_id: string };
         Returns: Json;
       };
+      xp_level: { Args: { p_xp: number }; Returns: Json };
+      xp_to_reach: { Args: { p_level: number }; Returns: number };
     };
     Enums: {
       billing_cycle: "mensual" | "trimestral" | "semestral" | "anual" | "unico";
