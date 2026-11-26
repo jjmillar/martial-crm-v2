@@ -109,7 +109,7 @@
   text-align: center;
 }
 
-/* Catalog chips (skills, specialties). Desktop: colored edit/delete icons float over the chip's corner on hover.
+/* Catalog chips (skills, badges). Desktop: colored edit/delete icons float over the chip's corner on hover.
    Phone (no hover): a long press opens the edit/delete pop-up, so the icons never show there. */
 .chips--catalog {
   row-gap: 12px;

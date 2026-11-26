@@ -6,7 +6,7 @@ import { Catalogo, type CatalogProps } from './Catalogo'
 import { catalogQuery } from './catalogApi'
 
 /**
- * Edit a catalog (tags, specialties) in a pop-up from inside another form: the page and whatever was typed stay.
+ * Edit a catalog (skills, badges) in a pop-up from inside another form: the page and whatever was typed stay.
  */
 export function CatalogoDialog({ label, onChange, ...catalog }: Omit<CatalogProps, 'canEdit'> & { label: ReactNode; onChange: () => void }) {
   const [open, setOpen] = useState(false)
@@ -18,7 +18,7 @@ export function CatalogoDialog({ label, onChange, ...catalog }: Omit<CatalogProp
       <button type="button" className="link-btn" onClick={() => setOpen(true)}>{label}</button>
       <Modal open={open} onClose={() => setOpen(false)} label={catalog.title} isolate>
         <div className="modal__head">
-          <span className="eyebrow">Editar sin salir</span>
+          <span className="hint">Editar sin salir</span>
           <button type="button" className="icon-btn" onClick={() => setOpen(false)} aria-label="Cerrar"><Icon name="close" /></button>
         </div>
         <Catalogo {...catalog} canEdit onChange={onChange} />

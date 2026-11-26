@@ -8,7 +8,7 @@ import type { Student } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { listStudents, studentsKey } from '../alumnos/api'
 import { listMembers, inviteMember } from '../miembros/api'
-import { listTeachers, teachersKey, type TeacherWithSpecialties } from '../profesores/api'
+import { listTeachers, teachersKey, type TeacherWithArts } from '../profesores/api'
 
 // Card item 6: one person can be a student, a teacher and a member (account) at the same time.
 // Links: students.user_id (portal account), teachers.student_id, teachers.user_id (member account).
@@ -176,7 +176,7 @@ export function StudentLinks({ student }: { student: Student }) {
 
 /** Teacher detail: student link and matching suggestions. The member account (teachers.user_id) is a field of
  *  the teacher form itself, so its suggestion lives there (linking it from here would be overwritten on save). */
-export function TeacherLinks({ teacher }: { teacher: TeacherWithSpecialties }) {
+export function TeacherLinks({ teacher }: { teacher: TeacherWithArts }) {
   const { isAdmin, students } = useLinkData()
   const refresh = useRefresh()
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)

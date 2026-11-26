@@ -357,6 +357,13 @@ textarea.input {
   gap: 12px;
 }
 
+.modal__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
 /* Optional way out of a pop-up opened from another menu (docs/ui-standards.md §6) */
 .modal__more {
   display: flex;

@@ -5,7 +5,7 @@ import type { PlanPayload } from './api'
 
 export type PlanForm = {
   name: string
-  specialty_id: string
+  art_id: string
   price: string
   enrollment_fee: string
   billing_cycle: BillingCycle
@@ -19,12 +19,12 @@ export type PlanForm = {
 }
 
 export const emptyPlan: PlanForm = {
-  name: '', specialty_id: '', price: '', enrollment_fee: '', billing_cycle: 'mensual', duration_days: '30',
+  name: '', art_id: '', price: '', enrollment_fee: '', billing_cycle: 'mensual', duration_days: '30',
   sessions_per_week: '', class_count: '', description: '', is_trial: false, is_default: false, active: true,
 }
 
 export const formFromPlan = (p: Plan): PlanForm => ({
-  name: p.name, specialty_id: p.specialty_id ?? '', price: formatCLP(p.price),
+  name: p.name, art_id: p.art_id ?? '', price: formatCLP(p.price),
   enrollment_fee: p.enrollment_fee ? formatCLP(p.enrollment_fee) : '', billing_cycle: p.billing_cycle,
   duration_days: p.duration_days?.toString() ?? '', sessions_per_week: p.sessions_per_week?.toString() ?? '',
   class_count: p.class_count?.toString() ?? '', description: p.description ?? '',
@@ -59,7 +59,7 @@ const optionalInt = (min: number, max: number, msg: string) =>
 const schema = z
   .object({
     name: text.min(1, 'Escribe el nombre del plan.').max(80, 'Máximo 80 caracteres.'),
-    specialty_id: text.transform((v) => (v === '' ? null : v)),
+    art_id: text.transform((v) => (v === '' ? null : v)),
     price: money(true),
     enrollment_fee: money(false),
     billing_cycle: z.enum(['mensual', 'trimestral', 'semestral', 'anual', 'unico']),

@@ -26,7 +26,7 @@ export function ClasesList() {
     return (classes.data ?? []).filter((c) =>
       (showInactive || c.active) &&
       (!day || c.schedules.some((s) => s.weekday === day)) &&
-      (!needle || normalize(`${c.name} ${c.teacher?.full_name ?? ''} ${c.specialty?.name ?? ''}`).includes(needle)),
+      (!needle || normalize(`${c.name} ${c.teacher?.full_name ?? ''} ${c.art?.name ?? ''}`).includes(needle)),
     )
   }, [classes.data, q, day, showInactive])
   const inactiveCount = (classes.data ?? []).filter((c) => !c.active).length
@@ -77,7 +77,7 @@ export function ClasesList() {
           <li key={c.id}>
             <Link className={`card class-card${c.active ? '' : ' is-off'}`} to={`/app/clases/${c.id}`} style={{ ['--class-color' as string]: c.color }}>
               <div className="plan-card__tags">
-                {c.specialty && <span className="tag">{c.specialty.name}</span>}
+                {c.art && <span className="tag">{c.art.name}</span>}
                 <span className="tag">{levelLabel[c.level]}</span>
                 {!c.active && <span className="tag">Inactiva</span>}
               </div>

@@ -8,9 +8,8 @@ import { artsKey, degreeText, listArts } from '../artes/api'
 import { BeltBar } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
-import { CatalogoDialog } from '../ajustes/CatalogoDialog'
 import { listMembers } from '../miembros/api'
-import { deleteTeacher, getTeacher, listSpecialties, listTeachers, saveTeacher, specialtiesKey, teachersKey, type TeacherWithSpecialties } from './api'
+import { deleteTeacher, getTeacher, listTeachers, saveTeacher, teachersKey, type TeacherWithArts } from './api'
 import { emptyTeacher, formFromTeacher, parseTeacher, type TeacherForm } from './schema'
 import { TeacherLinks } from '../vinculos/Vinculos'
 
@@ -30,20 +29,19 @@ export function ProfesorEditor() {
   return <ProfesorForm key={teacher.data.id} teacher={teacher.data} />
 }
 
-function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
+function ProfesorForm({ teacher }: { teacher?: TeacherWithArts }) {
   const { activeSchool, role } = useSchool()
   const schoolId = activeSchool?.id
   const canEdit = role === 'admin' || role === 'ceo'
   const navigate = useNavigate()
   const qc = useQueryClient()
 
-  const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
   const members = useQuery({ queryKey: ['members', schoolId], queryFn: () => listMembers(schoolId!), enabled: Boolean(schoolId) })
   const teachers = useQuery({ queryKey: teachersKey(schoolId), queryFn: () => listTeachers(schoolId!), enabled: Boolean(schoolId) })
   const arts = useQuery({ queryKey: artsKey(schoolId), queryFn: () => listArts(schoolId!), enabled: Boolean(schoolId) })
 
   const [form, setForm] = useState<TeacherForm>(() => (teacher ? formFromTeacher(teacher) : emptyTeacher))
-  const [picked, setPicked] = useState<string[]>(() => teacher?.specialty_ids ?? [])
+  const [picked, setPicked] = useState<string[]>(() => teacher?.art_ids ?? [])
   const [errors, setErrors] = useState<Errors>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -59,6 +57,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }))
   }
   // Belts come from the school's arts; the free-text belt keeps its name (exports, old screens).
+  const teachable = (arts.data ?? []).filter((a) => a.active || picked.includes(a.id))
   const allBelts = (arts.data ?? []).flatMap((a) => a.belts.map((b) => ({ b, a })))
   const hasBelts = allBelts.length > 0
   const found = allBelts.find((x) => x.b.id === form.belt_id)
@@ -68,7 +67,7 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
     const b = allBelts.find((x) => x.b.id === id)?.b
     setForm((f) => ({ ...f, belt_id: id, belt: b?.name ?? '', belt_degree: b && Number(f.belt_degree) <= b.max_degree ? f.belt_degree : '' }))
   }
-  const toggleSpecialty = (id: string) => {
+  const toggleArt = (id: string) => {
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
   }
 
@@ -187,28 +186,19 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithSpecialties }) {
             )}
           </div>
           <div className="field">
-            <span className="field__label" id="sp-label">Especialidades</span>
-            {specialties.data?.length ? (
+            <span className="field__label" id="sp-label">Artes marciales que enseña</span>
+            {teachable.length ? (
               <div className="pick-chips" role="group" aria-labelledby="sp-label">
-                {specialties.data.filter((s) => s.active || picked.includes(s.id)).map((s) => (
-                  <button key={s.id} type="button" className="pick-chip" aria-pressed={picked.includes(s.id)} onClick={() => toggleSpecialty(s.id)}>
-                    {s.name}
+                {teachable.map((a) => (
+                  <button key={a.id} type="button" className="pick-chip" aria-pressed={picked.includes(a.id)} onClick={() => toggleArt(a.id)}>
+                    {a.name}
                   </button>
                 ))}
               </div>
             ) : (
-              <p className="hint">Aún no hay especialidades.</p>
+              <p className="hint">{arts.isLoading ? 'Cargando…' : 'La escuela aún no tiene artes marciales.'}</p>
             )}
-            {canEdit && schoolId && (
-              <CatalogoDialog
-                label="Crear o editar especialidades"
-                table="specialties" schoolId={schoolId}
-                title="Especialidades"
-                description="Disciplinas que enseñan los profesores."
-                placeholder="Ej: Jiu-jitsu brasileño"
-                onChange={() => qc.invalidateQueries({ queryKey: specialtiesKey(schoolId) })}
-              />
-            )}
+            <p className="hint">Son las artes de la escuela: se agregan y editan en Ajustes → Artes marciales.</p>
           </div>
           {field('bio', 'Bio corta', <textarea {...inputProps('bio')} rows={3} maxLength={600} placeholder="Trayectoria, logros, estilo de enseñanza…" />, true)}
         </section>

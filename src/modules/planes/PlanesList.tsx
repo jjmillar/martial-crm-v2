@@ -6,7 +6,7 @@ import { useSchool } from '../../lib/school'
 import { formatCLP } from '../../lib/money'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
-import { listSpecialties, specialtiesKey } from '../profesores/api'
+import { artsKey, listArts } from '../artes/api'
 import { listPlans, plansKey } from './api'
 import { cycleInfo, planFeatures } from './cycles'
 import { myEnrollments, type MyEnrollment } from '../portal/api'
@@ -31,10 +31,10 @@ export function PlanesList() {
   const myPlans = useMemo(() => new Set([...myByPlan.values()].filter((e) => e.status === 'activa' && (!e.ends_at || e.ends_at >= todayIso())).map((e) => e.plan_id)), [myByPlan])
   const canEdit = role === 'admin' || role === 'ceo'
   const plans = useQuery({ queryKey: plansKey(schoolId), queryFn: () => listPlans(schoolId!), enabled: Boolean(schoolId) })
-  const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
+  const arts = useQuery({ queryKey: artsKey(schoolId), queryFn: () => listArts(schoolId!), enabled: Boolean(schoolId) })
   const [showInactive, setShowInactive] = usePersisted('planes.inactivos', false)
 
-  const spName = useMemo(() => new Map((specialties.data ?? []).map((s) => [s.id, s.name])), [specialties.data])
+  const artName = useMemo(() => new Map((arts.data ?? []).map((a) => [a.id, a.name])), [arts.data])
   const inactiveCount = (plans.data ?? []).filter((p) => !p.active).length
   const rows = (plans.data ?? []).filter((p) => (showInactive && !student) || p.active)
 
@@ -79,7 +79,7 @@ export function PlanesList() {
             <li key={p.id}>
               <PlanCard student={student} className={`card plan-card${p.is_default && !student ? ' is-default' : ''}${myPlans.has(p.id) ? ' is-mine' : ''}${p.active ? '' : ' is-off'}`} to={`/app/planes/${p.id}`}>
                 <div className="plan-card__tags">
-                  {p.specialty_id && <span className="tag">{spName.get(p.specialty_id) ?? 'Disciplina'}</span>}
+                  {p.art_id && <span className="tag">{artName.get(p.art_id) ?? 'Arte marcial'}</span>}
                   {student ? <PlanStatus mine={myByPlan.get(p.id)} /> : myPlans.has(p.id) && <span className="tag tag--ok">Tu plan</span>}
                   {p.is_default && !student && <span className="tag tag--accent">Predeterminado</span>}
                   {p.is_trial && <span className="tag">Prueba</span>}

@@ -1,34 +1,27 @@
 import { supabase } from '../../lib/supabase'
-import type { Specialty, Teacher, TeacherInsert } from '../../lib/database.types'
+import type { Teacher, TeacherInsert } from '../../lib/database.types'
 
-export type TeacherWithSpecialties = Teacher & { specialty_ids: string[] }
+/** A teacher with the school arts (Ajustes → Artes marciales) they teach. */
+export type TeacherWithArts = Teacher & { art_ids: string[] }
 
 export const teachersKey = (schoolId: string | undefined) => ['teachers', schoolId] as const
-// Distinct from the Ajustes catalog key, which caches a different (mapped) shape.
-export const specialtiesKey = (schoolId: string | undefined) => ['specialties', schoolId] as const
 
-export async function listTeachers(schoolId: string): Promise<TeacherWithSpecialties[]> {
+export async function listTeachers(schoolId: string): Promise<TeacherWithArts[]> {
   const { data, error } = await supabase
     .from('teachers')
-    .select('*, teacher_specialties(specialty_id)')
+    .select('*, teacher_arts(art_id)')
     .eq('school_id', schoolId)
     .order('full_name')
   if (error) throw error
-  return data.map(({ teacher_specialties, ...t }) => ({ ...t, specialty_ids: teacher_specialties.map((x) => x.specialty_id) }))
+  return data.map(({ teacher_arts, ...t }) => ({ ...t, art_ids: teacher_arts.map((x) => x.art_id) }))
 }
 
-export async function getTeacher(id: string): Promise<TeacherWithSpecialties | null> {
-  const { data, error } = await supabase.from('teachers').select('*, teacher_specialties(specialty_id)').eq('id', id).maybeSingle()
+export async function getTeacher(id: string): Promise<TeacherWithArts | null> {
+  const { data, error } = await supabase.from('teachers').select('*, teacher_arts(art_id)').eq('id', id).maybeSingle()
   if (error) throw error
   if (!data) return null
-  const { teacher_specialties, ...t } = data
-  return { ...t, specialty_ids: teacher_specialties.map((x) => x.specialty_id) }
-}
-
-export async function listSpecialties(schoolId: string): Promise<Specialty[]> {
-  const { data, error } = await supabase.from('specialties').select('*').eq('school_id', schoolId).order('name')
-  if (error) throw error
-  return data
+  const { teacher_arts, ...t } = data
+  return { ...t, art_ids: teacher_arts.map((x) => x.art_id) }
 }
 
 function friendly(message: string): string {
@@ -42,15 +35,15 @@ function friendly(message: string): string {
 
 export type TeacherPayload = Omit<TeacherInsert, 'school_id'>
 
-/** Creates or updates the teacher, then replaces its specialties. */
-export async function saveTeacher(schoolId: string, id: string | null, payload: TeacherPayload, specialtyIds: string[]): Promise<Teacher> {
+/** Creates or updates the teacher, then replaces the arts they teach. */
+export async function saveTeacher(schoolId: string, id: string | null, payload: TeacherPayload, artIds: string[]): Promise<Teacher> {
   const q = id
     ? supabase.from('teachers').update(payload).eq('id', id)
     : supabase.from('teachers').insert({ ...payload, school_id: schoolId })
   const { data, error } = await q.select('*').single()
   if (error) throw new Error(friendly(error.message))
-  const { error: spErr } = await supabase.rpc('set_teacher_specialties', { p_teacher_id: data.id, p_specialty_ids: specialtyIds })
-  if (spErr) throw new Error('El profesor se guardó, pero no sus especialidades. Intenta guardar de nuevo.')
+  const { error: spErr } = await supabase.rpc('set_teacher_arts', { p_teacher_id: data.id, p_art_ids: artIds })
+  if (spErr) throw new Error('El profesor se guardó, pero no sus artes marciales. Intenta guardar de nuevo.')
   return data
 }
 

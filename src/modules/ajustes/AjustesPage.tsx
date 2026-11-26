@@ -72,10 +72,9 @@ function SchoolSections() {
       <Acc id="artes" icon="teacher" title="Artes marciales" hint="Las artes que enseña la escuela y sus cinturones (adultos y kids)">
         <ArtesMarciales key={`artes-${school.id}`} schoolId={school.id} />
       </Acc>
-      <Acc id="catalogos" icon="plan" title="Catálogos" hint="Especialidades, skills e insignias">
-        <p className="hint">Listas que usa toda la escuela. Desactivar oculta un elemento de las opciones sin borrar su historial.</p>
+      <Acc id="catalogos" icon="plan" title="Catálogos" hint="Skills e insignias">
+        <p className="hint">Listas que usa toda la escuela (las disciplinas son las artes de «Artes marciales»). Desactivar oculta un elemento de las opciones sin borrar su historial.</p>
         <div className="catalog-grid">
-          <Catalogo table="specialties" schoolId={school.id} canEdit title="Especialidades" description="Disciplinas que enseñan los profesores." placeholder="Ej: Jiu-jitsu brasileño" />
           <Catalogo table="tags" schoolId={school.id} canEdit withIcon title="Skills" description="Clasifican las clases y son lo que entrenan los alumnos: cada asistencia confirmada suma XP a las skills de esa clase." placeholder="Ej: Guardia, Derribos" />
           <Catalogo table="school_badges" schoolId={school.id} canEdit withIcon title="Insignias" description="Logros propios de la escuela que el equipo otorga a mano desde la ficha del alumno (ej: Mejor compañero)." placeholder="Ej: Mejor compañero 2026" />
         </div>

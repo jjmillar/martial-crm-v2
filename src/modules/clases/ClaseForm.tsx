@@ -7,7 +7,8 @@ import type { ClassLevel } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { CatalogoDialog } from '../ajustes/CatalogoDialog'
-import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from '../profesores/api'
+import { listTeachers, teachersKey } from '../profesores/api'
+import { artsKey, listArts } from '../artes/api'
 import { classColors, classesKey, deleteClass, getClass, levelLabel, listTags, saveClass, type Block, type ClassFull } from './api'
 
 // Classes live in Escuelas → Clases; the forms go back there.
@@ -35,11 +36,11 @@ function ClaseForm({ c }: { c?: ClassFull }) {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const teachers = useQuery({ queryKey: teachersKey(schoolId), queryFn: () => listTeachers(schoolId!), enabled: Boolean(schoolId) })
-  const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
+  const arts = useQuery({ queryKey: artsKey(schoolId), queryFn: () => listArts(schoolId!), enabled: Boolean(schoolId) })
   const tags = useQuery({ queryKey: ['tags', schoolId], queryFn: () => listTags(schoolId!), enabled: Boolean(schoolId) })
 
   const [name, setName] = useState(c?.name ?? '')
-  const [specialtyId, setSpecialtyId] = useState(c?.specialty_id ?? '')
+  const [artId, setArtId] = useState(c?.art_id ?? '')
   const [teacherId, setTeacherId] = useState(c?.teacher_id ?? '')
   const [level, setLevel] = useState<ClassLevel>(c?.level ?? 'todos')
   const [room, setRoom] = useState(c?.room ?? '')
@@ -71,7 +72,7 @@ function ClaseForm({ c }: { c?: ClassFull }) {
       for (const r of rows) if (!r.start_time || !r.end_time || r.end_time <= r.start_time) throw new Error('Cada horario debe terminar después de empezar.')
       return saveClass(
         schoolId!, c?.id ?? null,
-        { name: name.trim(), specialty_id: specialtyId || null, teacher_id: teacherId || null, room: room.trim() || null, capacity: cap, level, color, description: description.trim() || null, notes: notes.trim() || null, active },
+        { name: name.trim(), art_id: artId || null, teacher_id: teacherId || null, room: room.trim() || null, capacity: cap, level, color, description: description.trim() || null, notes: notes.trim() || null, active },
         tagIds, rows.map(({ weekday, start_time, end_time }) => ({ weekday, start_time, end_time })),
       )
     },
@@ -114,10 +115,10 @@ function ClaseForm({ c }: { c?: ClassFull }) {
               <input id="c-name" className="input" maxLength={80} value={name} onChange={(e) => { setName(e.target.value); touch() }} placeholder="Ej: BJJ Fundamentos" autoComplete="off" />
             </div>
             <div className="field">
-              <label htmlFor="c-sp">Disciplina</label>
-              <select id="c-sp" className="input" value={specialtyId} onChange={(e) => { setSpecialtyId(e.target.value); touch() }}>
+              <label htmlFor="c-sp">Arte marcial</label>
+              <select id="c-sp" className="input" value={artId} onChange={(e) => { setArtId(e.target.value); touch() }}>
                 <option value="">Sin especificar</option>
-                {(specialties.data ?? []).filter((s) => s.active || s.id === specialtyId).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {(arts.data ?? []).filter((a) => a.active || a.id === artId).map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
             </div>
             <div className="field">

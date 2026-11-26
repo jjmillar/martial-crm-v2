@@ -633,6 +633,7 @@ export type Database = {
       };
       classes: {
         Row: {
+          art_id: string | null;
           active: boolean;
           capacity: number | null;
           color: string;
@@ -650,6 +651,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          art_id?: string | null;
           active?: boolean;
           capacity?: number | null;
           color?: string;
@@ -666,6 +668,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          art_id?: string | null;
           active?: boolean;
           capacity?: number | null;
           color?: string;
@@ -682,6 +685,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "classes_art_fkey";
+            columns: ["art_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "school_arts";
+            referencedColumns: ["id", "school_id"];
+          },
           {
             foreignKeyName: "classes_school_id_fkey";
             columns: ["school_id"];
@@ -1177,6 +1187,7 @@ export type Database = {
       };
       plans: {
         Row: {
+          art_id: string | null;
           active: boolean;
           billing_cycle: Database["public"]["Enums"]["billing_cycle"];
           class_count: number | null;
@@ -1196,6 +1207,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          art_id?: string | null;
           active?: boolean;
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"];
           class_count?: number | null;
@@ -1214,6 +1226,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          art_id?: string | null;
           active?: boolean;
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"];
           class_count?: number | null;
@@ -1232,6 +1245,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "plans_art_fkey";
+            columns: ["art_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "school_arts";
+            referencedColumns: ["id", "school_id"];
+          },
           {
             foreignKeyName: "plans_school_id_fkey";
             columns: ["school_id"];
@@ -2501,6 +2521,47 @@ export type Database = {
           },
         ];
       };
+      teacher_arts: {
+        Row: {
+          art_id: string;
+          school_id: string;
+          teacher_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          art_id: string;
+          school_id: string;
+          teacher_id: string;
+        };
+        Update: {
+          art_id?: string;
+          school_id?: string;
+          teacher_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "teacher_arts_art_id_school_id_fkey";
+            columns: ["art_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "school_arts";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "teacher_arts_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "teacher_arts_teacher_id_school_id_fkey";
+            columns: ["teacher_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "teachers";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
       teacher_specialties: {
         Row: {
           school_id: string;
@@ -3253,6 +3314,10 @@ export type Database = {
       };
       set_session_not_held: {
         Args: { p_not_held: boolean; p_session_id: string };
+        Returns: undefined;
+      };
+      set_teacher_arts: {
+        Args: { p_art_ids: string[]; p_teacher_id: string };
         Returns: undefined;
       };
       set_teacher_specialties: {

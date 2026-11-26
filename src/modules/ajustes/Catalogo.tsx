@@ -5,7 +5,7 @@ import { Icon } from '../../ui/Icon'
 import { Modal } from '../../ui/Modal'
 import { catalogQuery, type CatalogTable, type Item } from './catalogApi'
 
-// One component for every simple per-school catalog (S6): specialties, skills (table "tags"), school badges...
+// One component for every simple per-school catalog (S6): skills (table "tags") and school badges...
 // Each item is a chip. Desktop: hovering shows colored edit / delete icons. Phone: a long press opens a pop-up to
 // edit or delete it.
 
@@ -42,16 +42,14 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
   const [sheetError, setSheetError] = useState<string | null>(null)
   const press = useRef<{ timer: number; x: number; y: number } | null>(null)
 
-  const noun = table === 'tags' ? 'skill' : table === 'school_badges' ? 'insignia' : 'especialidad'
-  const deleteWarning = table === 'tags' ? 'Sale de las clases y del progreso de los alumnos.'
-    : table === 'school_badges' ? 'Los alumnos que la recibieron conservan el logro.' : 'Sale de profesores, clases y planes.'
-  const withIconCol = table !== 'specialties'
+  const noun = table === 'tags' ? 'skill' : 'insignia'
+  const deleteWarning = table === 'tags' ? 'Sale de las clases y del progreso de los alumnos.' : 'Los alumnos que la recibieron conservan el logro.'
   const done = () => { onChange?.(); return qc.invalidateQueries({ queryKey: key }) }
 
   const add = useMutation({
     mutationFn: async () => {
       const row = table === 'tags' ? { school_id: schoolId, label: text.trim(), icon: icon.trim() || null }
-        : withIconCol ? { school_id: schoolId, name: text.trim(), icon: icon.trim() || null } : { school_id: schoolId, name: text.trim() }
+        : { school_id: schoolId, name: text.trim(), icon: icon.trim() || null }
       const { error } = await supabase.from(table).insert(row as never)
       if (error) throw new Error(friendly(error.message))
     },
@@ -73,8 +71,7 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
   const rename = useMutation({
     mutationFn: async (v: Draft) => {
       if (!v.text.trim()) throw new Error('Escribe un nombre.')
-      const patch = table === 'tags' ? { label: v.text.trim(), icon: v.icon.trim() || null }
-        : withIconCol ? { name: v.text.trim(), icon: v.icon.trim() || null } : { name: v.text.trim() }
+      const patch = table === 'tags' ? { label: v.text.trim(), icon: v.icon.trim() || null } : { name: v.text.trim(), icon: v.icon.trim() || null }
       const { error } = await supabase.from(table).update(patch as never).eq('id', v.id)
       if (error) throw new Error(friendly(error.message))
     },
@@ -171,7 +168,7 @@ export function Catalogo({ table, schoolId, title, description, placeholder, wit
         {sheet && (
           <>
             <div className="modal__head">
-              <span className="eyebrow">{noun === 'skill' ? 'Skill' : noun === 'insignia' ? 'Insignia' : 'Especialidad'}</span>
+              <h2 className="modal__title">{noun === 'skill' ? 'Editar skill' : 'Editar insignia'}</h2>
               <button type="button" className="icon-btn" onClick={() => setSheetOpen(false)} aria-label="Cerrar"><Icon name="close" /></button>
             </div>
             <form className="cat-sheet" onSubmit={(e) => { e.preventDefault(); setSheetError(null); rename.mutate(sheet) }} noValidate>

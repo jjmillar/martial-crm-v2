@@ -98,7 +98,7 @@ export function SchoolMapPicker({ school, open, onClose, onSaved }: { school: Sc
   return (
     <Modal open={open} onClose={onClose} wide label="Ubicación de la escuela">
       <div className="modal__head">
-        <span className="eyebrow">Ubicación de la escuela</span>
+        <h2 className="modal__title">Ubicación de la escuela</h2>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
       </div>
       <div className="map-picker">

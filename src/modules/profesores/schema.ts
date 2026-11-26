@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { formatRut, normalizeRut } from '../../lib/rut'
-import type { TeacherWithSpecialties, TeacherPayload } from './api'
+import type { TeacherWithArts, TeacherPayload } from './api'
 
 export type TeacherForm = {
   first_name: string
@@ -22,7 +22,7 @@ export const emptyTeacher: TeacherForm = {
   belt: '', belt_id: '', belt_degree: '', bio: '', user_id: '', active: true,
 }
 
-export const formFromTeacher = (t: TeacherWithSpecialties): TeacherForm => ({
+export const formFromTeacher = (t: TeacherWithArts): TeacherForm => ({
   first_name: t.first_name, first_last_name: t.first_last_name, second_last_name: t.second_last_name ?? '',
   rut: formatRut(t.rut), email: t.email ?? '', phone: t.phone ?? '', belt: t.belt ?? '', belt_id: t.belt_id ?? '',
   belt_degree: t.belt_degree?.toString() ?? '', bio: t.bio ?? '', user_id: t.user_id ?? '', active: t.active,

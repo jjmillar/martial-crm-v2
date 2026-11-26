@@ -5,15 +5,16 @@ export type ClassFull = ClassRow & {
   schedules: Pick<ClassSchedule, 'id' | 'weekday' | 'start_time' | 'end_time'>[]
   tag_ids: string[]
   teacher: { id: string; full_name: string | null } | null
-  specialty: { id: string; name: string } | null
+  /** The school art (Ajustes → Artes marciales) the class teaches; null = not specified. */
+  art: { id: string; name: string } | null
 }
 
 export const classesKey = (schoolId: string | undefined) => ['classes', schoolId] as const
 
 const select =
-  '*, schedules:class_schedules(id, weekday, start_time, end_time), class_tags(tag_id), teacher:teachers(id, full_name), specialty:specialties(id, name)'
+  '*, schedules:class_schedules(id, weekday, start_time, end_time), class_tags(tag_id), teacher:teachers(id, full_name), art:school_arts!classes_art_fkey(id, name)'
 
-type Raw = ClassRow & { schedules: ClassFull['schedules']; class_tags: { tag_id: string }[]; teacher: ClassFull['teacher']; specialty: ClassFull['specialty'] }
+type Raw = ClassRow & { schedules: ClassFull['schedules']; class_tags: { tag_id: string }[]; teacher: ClassFull['teacher']; art: ClassFull['art'] }
 const shape = ({ class_tags, ...c }: Raw): ClassFull => ({
   ...c,
   tag_ids: class_tags.map((t) => t.tag_id),
@@ -47,7 +48,7 @@ function friendly(message: string): string {
 
 export type ClassInput = {
   name: string
-  specialty_id: string | null
+  art_id: string | null
   teacher_id: string | null
   room: string | null
   capacity: number | null

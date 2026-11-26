@@ -6,7 +6,7 @@ import { formatCLP, parseCLP } from '../../lib/money'
 import type { Plan } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
-import { listSpecialties, specialtiesKey } from '../profesores/api'
+import { artsKey, listArts } from '../artes/api'
 import { deletePlan, getPlan, plansKey, savePlan } from './api'
 import { cycleInfo, cycles, planFeatures } from './cycles'
 import { emptyPlan, formFromPlan, parsePlan, type PlanForm as Form } from './schema'
@@ -34,7 +34,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
   const canEdit = role === 'admin' || role === 'ceo'
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
+  const arts = useQuery({ queryKey: artsKey(schoolId), queryFn: () => listArts(schoolId!), enabled: Boolean(schoolId) })
 
   const [form, setForm] = useState<Form>(() => (plan ? formFromPlan(plan) : initial ?? emptyPlan))
   // Once someone edits the duration by hand, changing the cycle stops overwriting it.
@@ -135,12 +135,12 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
             <h2>Plan</h2>
             <div className="form-grid">
               {field('name', 'Nombre *', <input {...inputProps('name')} maxLength={80} placeholder="Ej: Mensual BJJ 3x semana" autoComplete="off" />)}
-              {field('specialty_id', 'Disciplina', (
-                <select id="p-specialty_id" className="input" value={form.specialty_id} onChange={(e) => set('specialty_id', e.target.value)}>
+              {field('art_id', 'Arte marcial', (
+                <select id="p-art_id" className="input" value={form.art_id} onChange={(e) => set('art_id', e.target.value)}>
                   <option value="">Todas / Mixto</option>
-                  {(specialties.data ?? []).filter((s) => s.active || s.id === form.specialty_id).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  {(arts.data ?? []).filter((a) => a.active || a.id === form.art_id).map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
-              ), specialties.data?.length ? undefined : 'Agrega disciplinas en Ajustes → Catálogos.')}
+              ), 'Las artes de la escuela, de Ajustes → Artes marciales.')}
             </div>
           </section>
 
@@ -188,7 +188,7 @@ function PlanForm({ plan, initial }: { plan?: Plan; initial?: Form }) {
           <span className="field__label">Vista previa</span>
           <div className={`card plan-card${form.is_default ? ' is-default' : ''}${form.active ? '' : ' is-off'}`}>
             <div className="plan-card__tags">
-              <span className="eyebrow">{form.specialty_id ? specialties.data?.find((s) => s.id === form.specialty_id)?.name : 'Todas las disciplinas'}</span>
+              <span className="tag">{(form.art_id && arts.data?.find((a) => a.id === form.art_id)?.name) || 'Todas las artes'}</span>
               {form.is_default && <span className="tag tag--accent">Predeterminado</span>}
               {form.is_trial && <span className="tag">Prueba</span>}
             </div>

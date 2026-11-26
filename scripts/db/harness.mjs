@@ -4,7 +4,7 @@ import { btree_gist } from '@electric-sql/pglite/contrib/btree_gist'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-export async function boot(repo) {
+export async function boot(repo, { before } = {}) {
   const db = new PGlite({ extensions: { btree_gist } })
   await db.exec(`
     create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
@@ -24,10 +24,13 @@ export async function boot(repo) {
   `)
   const dir = join(repo, 'supabase', 'migrations')
   for (const f of readdirSync(dir).filter(f => f.endsWith('.sql') && !f.includes('_storage') && !f.includes('_cron')).sort() /* storage schema and pg_cron don't exist in PGlite */) {
+    if (before && f >= before) break
     try { await db.exec(readFileSync(join(dir, f), 'utf8')) } catch (e) { throw new Error(`migration ${f}: ${e.message}`) }
   }
   return db
 }
+
+export async function migrate(db, repo, file) { await db.exec(readFileSync(join(repo, 'supabase', 'migrations', file), 'utf8')) }
 
 let n = 0
 export const uid = () => `00000000-0000-4000-8000-${String(++n).padStart(12, '0')}`

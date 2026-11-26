@@ -8,7 +8,7 @@ import { artsKey, degreeText, listArts } from '../artes/api'
 import { BeltChip } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
-import { listSpecialties, listTeachers, specialtiesKey, teachersKey } from './api'
+import { listTeachers, teachersKey } from './api'
 import { ShowMore } from '../../ui/ShowMore'
 import { useShowMore } from '../../ui/useShowMore'
 
@@ -20,24 +20,24 @@ export function ProfesoresList() {
   const schoolId = activeSchool?.id
   const canEdit = role === 'admin' || role === 'ceo'
   const teachers = useQuery({ queryKey: teachersKey(schoolId), queryFn: () => listTeachers(schoolId!), enabled: Boolean(schoolId) })
-  const specialties = useQuery({ queryKey: specialtiesKey(schoolId), queryFn: () => listSpecialties(schoolId!), enabled: Boolean(schoolId) })
   const arts = useQuery({ queryKey: artsKey(schoolId), queryFn: () => listArts(schoolId!), enabled: Boolean(schoolId) })
   const beltById = useMemo(() => new Map((arts.data ?? []).flatMap((a) => a.belts.map((b) => [b.id, { b, art: a.name }] as const))), [arts.data])
   const [q, setQ] = usePersisted('profesores.q', '', 'session')
-  const [specialty, setSpecialty] = usePersisted('profesores.especialidad', '')
+  const [art, setArt] = usePersisted('profesores.arte', '')
   const [showInactive, setShowInactive] = usePersisted('profesores.inactivos', false)
   const { shown, more } = useShowMore('profesores.mostrar', 10)
 
-  const spName = useMemo(() => new Map((specialties.data ?? []).map((s) => [s.id, s.name])), [specialties.data])
+  const artName = useMemo(() => new Map((arts.data ?? []).map((a) => [a.id, a.name])), [arts.data])
+  const artOptions = (arts.data ?? []).filter((a) => a.active || a.id === art)
 
   const rows = useMemo(() => {
     const needle = normalize(q.trim())
     return (teachers.data ?? []).filter((t) =>
       (showInactive || t.active) &&
-      (!specialty || t.specialty_ids.includes(specialty)) &&
+      (!art || t.art_ids.includes(art)) &&
       (!needle || normalize(t.full_name ?? '').includes(needle) || normalize(t.email ?? '').includes(needle)),
     )
-  }, [teachers.data, q, specialty, showInactive])
+  }, [teachers.data, q, art, showInactive])
 
   if (!activeSchool) return null
 
@@ -52,10 +52,10 @@ export function ProfesoresList() {
             <span className="sr-only">Buscar profesor</span>
             <input className="input" type="search" placeholder="Buscar por nombre o correo" value={q} onChange={(e) => setQ(e.target.value)} />
           </label>
-          {Boolean(specialties.data?.length) && (
-            <select className="input toolbar__select" aria-label="Filtrar por especialidad" value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
-              <option value="">Todas las especialidades</option>
-              {specialties.data!.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {artOptions.length > 1 && (
+            <select className="input toolbar__select" aria-label="Filtrar por arte marcial" value={art} onChange={(e) => setArt(e.target.value)}>
+              <option value="">Todas las artes marciales</option>
+              {artOptions.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           )}
           {inactiveCount > 0 && (
@@ -72,7 +72,7 @@ export function ProfesoresList() {
           <h2>Aún no hay profesores</h2>
           {canEdit ? (
             <>
-              <p className="hint">Agrega a tu equipo con su cinturón y especialidades. Las especialidades se definen en Ajustes → Catálogos.</p>
+              <p className="hint">Agrega a tu equipo con su cinturón y las artes marciales que enseña (las de Ajustes → Artes marciales).</p>
               <Link className="btn" to="/app/profesores/nuevo"><Icon name="plus" size={16} /> Crear profesor</Link>
             </>
           ) : (
@@ -86,7 +86,7 @@ export function ProfesoresList() {
         {rows.slice(0, shown).map((t) => {
           const swatch = beltSwatch(t.belt)
           const real = t.belt_id ? beltById.get(t.belt_id) : undefined
-          const sps = t.specialty_ids.map((id) => spName.get(id)).filter(Boolean)
+          const sps = t.art_ids.map((id) => artName.get(id)).filter(Boolean)
           return (
             <li key={t.id}>
               <Link className={`student-row card${t.active ? '' : ' is-off'}`} to={`/app/profesores/${t.id}`}>

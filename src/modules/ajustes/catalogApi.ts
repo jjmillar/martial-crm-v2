@@ -1,10 +1,11 @@
 import { supabase } from '../../lib/supabase'
 
-// Data for the per-school catalogs (specialties, tags, school badges) edited by <Catalogo>.
-export type CatalogTable = 'specialties' | 'tags' | 'school_badges'
+// Data for the per-school catalogs (skills = table "tags", school badges) edited by <Catalogo>. The disciplines are the
+// school's martial arts (Ajustes → Artes marciales), not a catalog.
+export type CatalogTable = 'tags' | 'school_badges'
 export type Item = { id: string; text: string; icon: string | null; active: boolean }
 
-export const textCol = { specialties: 'name', tags: 'label', school_badges: 'name' } as const
+export const textCol = { tags: 'label', school_badges: 'name' } as const
 
 export const catalogQuery = (table: CatalogTable, schoolId: string) => ({ queryKey: ['catalog', table, schoolId], queryFn: () => listItems(table, schoolId) })
 

@@ -12,7 +12,7 @@ describe('plan schema', () => {
       expect(r.data.enrollment_fee).toBe(0)
       expect(r.data.sessions_per_week).toBe(3)
       expect(r.data.class_count).toBeNull()
-      expect(r.data.specialty_id).toBeNull()
+      expect(r.data.art_id).toBeNull()
     }
   })
   it('accepts a free plan but requires a price', () => {
