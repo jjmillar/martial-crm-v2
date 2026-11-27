@@ -3355,7 +3355,7 @@ export type Database = {
       };
       platform_whoami: { Args: Record<PropertyKey, never>; Returns: Json };
       public_plans: {
-        Args: never;
+        Args: Record<PropertyKey, never>;
         Returns: {
           id: string;
           max_schools: number;
