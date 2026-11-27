@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { NavLink } from '../lib/nav'
+import { Link, NavLink } from '../lib/nav'
 import { PageMotion } from '../ui/PageMotion'
 import { useAuth } from '../lib/auth'
 import { useSchool } from '../lib/school'
@@ -15,21 +15,34 @@ import { PendingSignup } from '../modules/portal/PendingSignup'
 import { PersonSwitcher } from '../modules/portal/PersonSwitcher'
 import { usePendingCount } from '../modules/tareas/api'
 
+/** 'Academia Norte Jiu-jitsu' → 'AN' */
+const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
+
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile, user, signOut } = useAuth()
-  const { role, loading } = useSchool()
+  const { role, loading, activeSchool } = useSchool()
   const nav = modulesFor(role)
   const pending = usePendingCount()
   const year = new Date().getFullYear()
 
   return (
     <div className="shell">
-      <aside className="sidebar">
+      <aside className="sidebar sidebar--school">
         <div className="sidebar__top">
+          {/* Mobile top bar: the CRM wordmark with the school under it */}
           <div className="brand">
             <Wordmark to="/app" />
             <SchoolSwitcher />
           </div>
+          {/* Desktop: the school's logo, then its name (a dropdown with several schools) */}
+          {activeSchool && (
+            <div className="sidebar__school">
+              <Link to="/app" className="school-mark" aria-label={`${activeSchool.name}, inicio`}>
+                {activeSchool.logo_url ? <img src={activeSchool.logo_url} alt="" /> : <span aria-hidden="true">{initials(activeSchool.name)}</span>}
+              </Link>
+              <SchoolSwitcher />
+            </div>
+          )}
         </div>
 
         <nav className="nav" aria-label="Secciones">
@@ -42,17 +55,21 @@ export function AppLayout({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <div className="sidebar__user">
-          <div className="sidebar__who">
-            <strong>{profile?.full_name || user?.email}</strong>
-            <span className="hint">{role ? roleLabel[role] : 'Sin rol asignado'}</span>
+        <div className="sidebar__end">
+          <div className="sidebar__user">
+            <div className="sidebar__who">
+              <strong>{profile?.full_name || user?.email}</strong>
+              <span className="hint">{role ? roleLabel[role] : 'Sin rol asignado'}</span>
+            </div>
+            <div className="sidebar__actions">
+              <ThemeToggle />
+              <button type="button" className="icon-btn" onClick={signOut} aria-label="Cerrar sesión" title="Cerrar sesión">
+                <Icon name="logout" />
+              </button>
+            </div>
           </div>
-          <div className="sidebar__actions">
-            <ThemeToggle />
-            <button type="button" className="icon-btn" onClick={signOut} aria-label="Cerrar sesión" title="Cerrar sesión">
-              <Icon name="logout" />
-            </button>
-          </div>
+          {/* Desktop: the CRM's name at the foot of the bar */}
+          <div className="sidebar__crm"><Wordmark to="/app" /></div>
         </div>
       </aside>
 

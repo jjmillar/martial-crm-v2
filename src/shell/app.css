@@ -443,3 +443,116 @@
   right: 6px;
   margin: 0;
 }
+
+/* ---------- Desktop sidebar of a school: school on top, menu centred, CRM name at the foot ---------- */
+.sidebar__school,
+.sidebar__crm {
+  display: none;
+}
+@media (min-width: 761px) {
+  .sidebar--school {
+    display: grid;
+    grid-template-rows: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+    gap: 24px;
+  }
+  .sidebar--school .sidebar__top {
+    align-self: start;
+  }
+  .sidebar--school .brand {
+    display: none;
+  }
+  /* Without a school yet the CRM's own wordmark stays on top */
+  .sidebar--school .sidebar__top:not(:has(.sidebar__school)) .brand {
+    display: grid;
+  }
+  .sidebar--school .sidebar__top:not(:has(.sidebar__school)) ~ .sidebar__end .sidebar__crm {
+    display: none;
+  }
+  .sidebar--school > .nav {
+    align-self: center;
+  }
+  .sidebar--school .sidebar__end {
+    display: grid;
+    align-self: end;
+    gap: 14px;
+  }
+  .sidebar--school .sidebar__end .sidebar__user {
+    margin-top: 0;
+  }
+
+  .sidebar__school {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 0 10px; /* same left edge as the menu icons */
+  }
+  .school-mark {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+  .school-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .school-mark:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .sidebar__school .school-switch {
+    margin-left: 0;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+  .sidebar__school .school-switch--one {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+  }
+  .sidebar__school .school-switch:not(.school-switch--one) {
+    min-width: 0;
+    margin-left: -8px;
+  }
+
+  .sidebar__crm {
+    display: block;
+    padding: 0 10px;
+  }
+  .sidebar--school .sidebar__who {
+    padding-left: 10px;
+  }
+  .sidebar__crm .wordmark {
+    color: var(--muted);
+    font-size: 13px;
+    gap: 8px;
+  }
+  .sidebar__crm .wordmark svg {
+    width: 20px;
+    height: 20px;
+  }
+  .sidebar__crm .wordmark:hover {
+    color: var(--text);
+  }
+}
+@media (max-width: 760px) {
+  .sidebar__end {
+    display: none;
+  }
+}
