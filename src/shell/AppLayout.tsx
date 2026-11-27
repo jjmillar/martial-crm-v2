@@ -58,6 +58,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
 
         <div className="sidebar__end">
+          {/* Desktop: the CRM's name, a quiet signature just above the line over the user (not a link) */}
+          <div className="sidebar__crm"><Wordmark plain /></div>
           <div className="sidebar__user">
             <span className="sidebar__avatar" aria-hidden="true">{initials(profile?.full_name || user?.email || '?')}</span>
             <div className="sidebar__who">
@@ -71,8 +73,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
             </div>
           </div>
-          {/* Desktop: the CRM's name, a quiet signature at the foot of the bar (not a link) */}
-          <div className="sidebar__crm"><Wordmark plain /></div>
         </div>
       </aside>
 

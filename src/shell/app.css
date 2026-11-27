@@ -575,10 +575,10 @@
     margin-left: auto;
   }
 
-  /* CRM name: a quiet signature at the very bottom, on the avatar's left edge */
+  /* CRM name: a quiet signature just above the line over the user, on the menu icons' left edge */
   .sidebar__crm {
     display: block;
-    padding: 14px 6px 0;
+    padding: 0 14px 14px;
   }
   .sidebar__crm .wordmark {
     gap: 8px;
