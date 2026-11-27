@@ -40,8 +40,8 @@ export function StudentProfilePage({ p }: { p: StudentProfile | null }) {
         <section className="sprof__hero rise" aria-label="Perfil">
           <span className="sprof__avatar" aria-hidden="true">{p.initials}</span>
           <div className="sprof__id">
-            <span className="sp-eyebrow">Alumno · {s.name}</span>
             <h1>{p.name}</h1>
+            <p className="sp-meta">Alumno · {s.name}</p>
             {p.headline && <p className="sprof__headline">{p.headline}</p>}
             <div className="sprof__chips">
               {p.belt && !p.arts?.length && <span className="sp-chip">Cinturón {p.belt.toLowerCase()}{p.belt_degree ? ` · ${p.belt_degree}° grado` : ''}</span>}

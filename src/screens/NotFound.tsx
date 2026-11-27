@@ -4,8 +4,8 @@ export function NotFound() {
   return (
     <main className="center-screen">
       <div style={{ display: 'grid', gap: 16, justifyItems: 'center', textAlign: 'center' }}>
-        <span className="eyebrow">Error 404</span>
         <h1 style={{ color: 'var(--text)', fontSize: 32 }}>No encontrado</h1>
+        <p className="hint">Error 404: esta página no existe o se movió.</p>
         <Link className="btn" to="/">Volver al inicio</Link>
       </div>
     </main>

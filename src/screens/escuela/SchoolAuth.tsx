@@ -51,8 +51,8 @@ export function SchoolSignup() {
         loginTo={`/e/${s.slug}/ingresar`}
         head={
           <>
-            <span className="eyebrow">Alumnos · {s.name}</span>
             <h1>Crea tu cuenta</h1>
+            <p className="auth__school">Alumnos · {s.name}</p>
             <p className="hint">La escuela revisa y aprueba tu cuenta. Después podrás completar tu ficha, marcar asistencia y ver tu nivel.</p>
           </>
         }
@@ -92,8 +92,8 @@ export function SchoolLogin() {
     <Shell s={s}>
       <form className="auth__card card rise" onSubmit={onSubmit} noValidate>
         <div className="auth__head">
-          <span className="eyebrow">{s.name}</span>
           <h1>Ingresa a tu cuenta</h1>
+          <p className="auth__school">{s.name}</p>
         </div>
         <div className="field">
           <label htmlFor="sl-email">Correo</label>

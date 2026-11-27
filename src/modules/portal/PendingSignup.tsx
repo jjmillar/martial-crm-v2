@@ -41,8 +41,8 @@ export function PendingSignup() {
     return (
       <div className="bento">
         <section className="tile tile--hero tile--full rise">
-          <span className="eyebrow">{cancelled ? 'Suscripción cancelada' : 'Suscripción suspendida'}</span>
           <h1>Hola{first ? `, ${first}` : ''}.</h1>
+          <p className="tile__status">{cancelled ? 'Suscripción cancelada' : 'Suscripción suspendida'}</p>
           <p className="tile__lead">
             El acceso a {names} está pausado porque la suscripción a Martial CRM {cancelled ? 'fue cancelada' : 'está suspendida'}. Tus datos siguen guardados: cuando se reactive, todo vuelve a estar como lo dejaste.
           </p>
@@ -62,8 +62,8 @@ export function PendingSignup() {
   return (
     <div className="bento">
       <section className="tile tile--hero tile--full rise">
-        <span className="eyebrow">{s === 'pendiente' ? 'Cuenta en revisión' : s === 'rechazada' ? 'Solicitud no aprobada' : 'Sin acceso todavía'}</span>
         <h1>Hola{first ? `, ${first}` : ''}.</h1>
+        <p className="tile__status">{s === 'pendiente' ? 'Cuenta en revisión' : s === 'rechazada' ? 'Solicitud no aprobada' : 'Sin acceso todavía'}</p>
         <p className="tile__lead">
           {s === 'pendiente' && (asStudent
             ? 'Tu cuenta de alumno está esperando aprobación. Cuando la aprueben vas a poder completar tu perfil, ver tu nivel y marcar asistencia.'
@@ -89,7 +89,7 @@ function ClaimCode({ onDone }: { onDone: () => void }) {
   function submit(e: FormEvent) { e.preventDefault(); if (code.replace(/-/g, '').length === 12) claim.mutate(code) }
   return (
     <form className="tile tile--full rise claim-tile" onSubmit={submit} noValidate>
-      <span className="eyebrow">¿Tu apoderado te dio un código?</span>
+      <h2 className="tile__title">¿Tu apoderado te dio un código?</h2>
       <p className="hint">Escríbelo para recibir tu ficha de alumno con tus asistencias, nivel y pagos.</p>
       <div className="claim-tile__row">
         <input className="input claim-code" aria-label="Código de tu apoderado" placeholder="1A2B-3C4D-5E6F" autoCapitalize="characters" spellCheck={false} value={code} onChange={(e) => { setCode(formatClaimCode(e.target.value)); claim.reset() }} />

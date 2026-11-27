@@ -70,7 +70,6 @@ export function PlatformShell() {
             ) : (
               <div className="plataforma">
                 <header className="page-head">
-                  <span className="eyebrow">Plataforma</span>
                   <h1>Activa la verificación en dos pasos</h1>
                   <p className="hint">Esta cuenta controla todas las suscripciones de Martial CRM, así que siempre pide un código además de la contraseña. Configúrala una sola vez con tu app de autenticación; al confirmarla entras a la consola.</p>
                 </header>

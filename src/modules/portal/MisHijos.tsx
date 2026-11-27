@@ -157,7 +157,7 @@ function ChildForm({ schoolId, onCancel, onSent }: { schoolId: string; onCancel:
   return (
     <form className="sub-form" onSubmit={submit} noValidate>
       <div className="modal__head">
-        <div><span className="eyebrow">Apoderado</span><h2 id="kid-new-h">Agregar hijo</h2></div>
+        <h2 id="kid-new-h">Agregar hijo</h2>
         <button type="button" className="icon-btn" onClick={onCancel} aria-label="Cerrar"><Icon name="close" /></button>
       </div>
       <p className="hint">Los mismos datos que cualquier alumno. La escuela revisa y aprueba la solicitud.</p>

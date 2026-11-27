@@ -64,7 +64,7 @@ export function PayDialog({ paymentId, open, onClose, more = true }: { paymentId
       {p && (
         <>
           <div className="modal__head">
-            <span className="eyebrow">Pagar</span>
+            <h2 className="modal__title">Pagar</h2>
             <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
           </div>
           <div className="checkout checkout--dialog">

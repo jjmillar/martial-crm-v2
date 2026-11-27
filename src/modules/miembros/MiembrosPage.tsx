@@ -217,7 +217,7 @@ function Administrativos({ schoolId }: { schoolId: string }) {
 
       <Modal open={inviting} onClose={closeInvite} label="Invitar administrativo">
         <div className="modal__head">
-          <span className="eyebrow">Invitar administrativo</span>
+          <h2 className="modal__title">Invitar administrativo</h2>
           <button type="button" className="icon-btn" onClick={closeInvite} aria-label="Cerrar"><Icon name="close" /></button>
         </div>
         <form className="miembros__form" onSubmit={onSubmit} noValidate>

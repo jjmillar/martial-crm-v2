@@ -83,7 +83,7 @@ function StaffHome() {
 
       {pending > 0 && (
         <Link className="tile tile--wide tile--link tile--alert rise" to="/app/tareas">
-          <span className="eyebrow">Aprobaciones</span>
+          <h2 className="tile__title">Aprobaciones</h2>
           <p className="tile__big tile__big--sm">{pending} {pending === 1 ? 'cuenta nueva por aprobar' : 'cuentas nuevas por aprobar'}</p>
           <p className="hint">Personas que se registraron en la página. Revísalas para darles acceso.</p>
         </Link>
@@ -92,26 +92,26 @@ function StaffHome() {
       {activeSchool && (
         <>
           <Link className="tile tile--link rise" to="/app/miembros#alumnos" style={{ animationDelay: '40ms' }}>
-            <span className="eyebrow">Alumnos activos</span>
+            <h2 className="tile__label">Alumnos activos</h2>
             <p className="tile__big">{d.activeStudents}</p>
             <p className="hint">{d.newThisMonth ? `+${d.newThisMonth} inscritos este mes` : 'Sin inscripciones nuevas este mes'}</p>
           </Link>
 
           <Link className="tile tile--link rise" to="/app/contabilidad#inscripciones" style={{ animationDelay: '80ms' }}>
-            <span className="eyebrow">Inscripciones vigentes</span>
+            <h2 className="tile__label">Inscripciones vigentes</h2>
             <p className="tile__big">{d.current}</p>
             <p className="hint">{d.expired ? `${d.expired} vencidas por renovar` : 'Ninguna vencida'}</p>
           </Link>
 
           <Link className="tile tile--link rise" to="/app/escuelas#asistencia" style={{ animationDelay: '120ms' }}>
-            <span className="eyebrow">Asistencias esta semana</span>
+            <h2 className="tile__label">Asistencias esta semana</h2>
             <p className="tile__big">{attendance.data ?? '—'}</p>
             <p className="hint">Desde el lunes {formatDate(weekStart)}</p>
           </Link>
 
           {isAdmin && (
             <Link className="tile tile--link rise" to="/app/contabilidad#pagos" style={{ animationDelay: '160ms' }}>
-              <span className="eyebrow">Recaudado · {monthTitle(today)}</span>
+              <h2 className="tile__label">Recaudado · {monthTitle(today)}</h2>
               <p className="tile__big">{formatCLP(d.collected)}</p>
               <p className="hint">{d.pendingCount ? `${formatCLP(d.pendingAmount)} por confirmar (${d.pendingCount})` : 'Sin pagos por confirmar'}</p>
             </Link>
@@ -119,7 +119,7 @@ function StaffHome() {
 
           <section className="tile tile--wide rise" style={{ animationDelay: '200ms' }}>
             <div className="tile__head">
-              <span className="eyebrow">Clases de hoy</span>
+              <h2 className="tile__title">Clases de hoy</h2>
               <Link className="link-btn" to="/app/calendario">Calendario</Link>
             </div>
             {d.todays.length === 0 ? (
@@ -139,7 +139,7 @@ function StaffHome() {
 
           <section className="tile tile--wide rise" style={{ animationDelay: '240ms' }}>
             <div className="tile__head">
-              <span className="eyebrow">Por vencer (7 días)</span>
+              <h2 className="tile__title">Por vencer (7 días)</h2>
               <Link className="link-btn" to="/app/contabilidad#inscripciones">Inscripciones</Link>
             </div>
             {d.expiring.length === 0 ? (

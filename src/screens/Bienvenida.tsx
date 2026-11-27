@@ -54,7 +54,6 @@ export function Bienvenida() {
         ) : !session ? (
           <div className="auth__card card">
             <div className="auth__head">
-              <span className="eyebrow">Enlace no válido</span>
               <h1>Este enlace expiró o ya se usó</h1>
             </div>
             <p className="hint">Pide una invitación nueva o restablece tu contraseña desde el ingreso.</p>
@@ -63,7 +62,6 @@ export function Bienvenida() {
         ) : (
           <form className="auth__card card rise" onSubmit={onSubmit} noValidate>
             <div className="auth__head">
-              <span className="eyebrow">Bienvenida</span>
               <h1>{profile?.full_name ? `Hola, ${profile.full_name.split(' ')[0]}` : 'Crea tu contraseña'}</h1>
               <p className="hint">Elige una contraseña para entrar a Martial CRM.</p>
             </div>

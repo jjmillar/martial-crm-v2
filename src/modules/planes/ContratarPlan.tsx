@@ -85,7 +85,7 @@ export function PlanActions({ plan, mine, studentId, schoolId }: Props) {
 
       <Modal open={confirm} onClose={() => setConfirm(false)} label={`Contratar ${plan.name}`}>
         <div className="modal__head">
-          <span className="eyebrow">Contratar plan</span>
+          <h2 className="modal__title">Contratar plan</h2>
           <button type="button" className="icon-btn" onClick={() => setConfirm(false)} aria-label="Cerrar"><Icon name="close" /></button>
         </div>
         <div className="contract">

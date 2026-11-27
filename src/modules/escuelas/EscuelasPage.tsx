@@ -122,7 +122,7 @@ export function EscuelasSection() {
         {editingSchool && (
           <>
             <div className="modal__head">
-              <span className="eyebrow">Ajustes de la escuela</span>
+              <h2 className="modal__title">Ajustes de la escuela</h2>
               <button type="button" className="icon-btn" onClick={() => setEditOpen(false)} aria-label="Cerrar"><Icon name="close" /></button>
             </div>
             <EscuelaPerfil key={editingSchool.id} school={editingSchool} embedded />

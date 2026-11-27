@@ -47,8 +47,8 @@ export function MfaGate({ children }: { children: ReactNode }) {
       <main className="auth__main">
         <form className="auth__card card rise" onSubmit={verify} noValidate>
           <div className="auth__head">
-            <span className="eyebrow">Verificación en dos pasos</span>
             <h1>Ingresa tu código</h1>
+            <p className="auth__school">Verificación en dos pasos</p>
             <p className="hint">Abre tu app de autenticación (Google Authenticator, Microsoft Authenticator, 1Password…) y escribe el código de Martial CRM.</p>
           </div>
           <div className="field">

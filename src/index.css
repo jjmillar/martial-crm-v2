@@ -104,24 +104,34 @@ a {
   outline-offset: 2px;
 }
 
-/* Eyebrow: dot + label */
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
+/* Text that used to sit above titles as a dotted "eyebrow" (banned, Impeccable craft-floor): it now goes under them */
+.modal__meta {
+  margin: 0;
   color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
 }
-
-.eyebrow::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
+.tile__label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
 }
-
+.tile__status {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+.auth__school {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+.artes__label {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
 /* Buttons */
 .btn {
   display: inline-flex;

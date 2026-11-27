@@ -43,7 +43,6 @@ export function MisPagos() {
           </div>
           {owed.length === 0 ? (
             <div className="card plan-card pay-card pay-card--ok">
-              <span className="eyebrow">Sin pagos pendientes</span>
               <h3 className="plan-card__name">Estás al día</h3>
               <p className="hint">Cuando tu escuela registre un cobro aparecerá aquí, listo para pagar.</p>
             </div>
@@ -57,7 +56,7 @@ export function MisPagos() {
                   <li key={p.id}>
                     <article className={`card plan-card pay-card${review ? ' is-review' : ''}${rejected ? ' is-rejected' : ''}`}>
                       <div className="plan-card__tags">
-                        <span className="eyebrow">{p.due_date ? `Vence el ${formatDate(p.due_date)}` : 'Sin vencimiento'}</span>
+                        <span className="hint">{p.due_date ? `Vence el ${formatDate(p.due_date)}` : 'Sin vencimiento'}</span>
                         {review && <span className="tag tag--review">Por confirmar</span>}
                         {rejected && <span className="tag tag--pay-fallido">Rechazado</span>}
                       </div>

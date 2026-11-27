@@ -148,8 +148,8 @@ function Hero({ s }: { s: Landing }) {
         </div>
       )}
       <div className="sp-hero__text">
-        {s.city && <span className="sp-eyebrow"><Icon name="pin" size={14} /> {s.city}</span>}
         <h1>{s.name}</h1>
+        {s.city && <p className="sp-meta"><Icon name="pin" size={14} /> {s.city}</p>}
         {s.tagline && <p className="sp-tagline">{s.tagline}</p>}
         <div className="sp-hero__actions">
           {s.trial ? <a className="sp-btn sp-btn--lg" href="#prueba">Clase de prueba gratis</a> : <Link className="sp-btn sp-btn--lg" to={`/e/${s.slug}/registro`}>Únete</Link>}

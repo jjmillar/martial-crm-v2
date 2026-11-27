@@ -50,7 +50,7 @@ export function ArtesMarciales({ schoolId }: { schoolId: string }) {
 
       {available.length > 0 && (
         <div className="artes__add">
-          <span className="eyebrow">Agregar del catálogo</span>
+          <h3 className="artes__label">Agregar del catálogo</h3>
           <div className="pick-chips">
             {available.map((t) => (
               <button key={t.key} type="button" className="pick-chip" disabled={add.isPending} onClick={() => add.mutate(t.key)}>
@@ -146,7 +146,7 @@ function ArtCard({ art, templateName, onChange, last }: { art: Art; templateName
         const belts = art.belts.filter((b) => b.track === t.id)
         return (
           <section key={t.id} className="belt-track" aria-label={`Cinturones ${t.label}`}>
-            <span className="eyebrow">{t.label} · {belts.length}</span>
+            <h3 className="artes__label">{t.label} <span className="hint">· {belts.length}</span></h3>
             <ul className="belt-chips">
               {belts.map((b) => (
                 <li key={b.id}>
@@ -201,7 +201,7 @@ function BeltForm({ art, edit, onDone, onClose }: { art: Art; edit: BeltEdit; on
   return (
     <>
       <div className="modal__head">
-        <span className="eyebrow">{art.name} · {TRACKS.find((t) => t.id === d.track)?.label}</span>
+        <h2 className="modal__title">{art.name} · {TRACKS.find((t) => t.id === d.track)?.label}</h2>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
       </div>
       <div className="belt-preview">

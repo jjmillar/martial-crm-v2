@@ -50,8 +50,8 @@ export function ClaimForm({ school, initialCode, onCancel }: { school: { id: str
   return (
     <form className="auth__card card rise" onSubmit={onSubmit} noValidate>
       <div className="auth__head">
-        <span className="eyebrow">Alumnos · {school.name}</span>
         <h1>Activa tu propia cuenta</h1>
+        <p className="auth__school">Alumnos · {school.name}</p>
         <p className="hint">Tu apoderado te dio un código. Con él creas tu cuenta y mantienes todo: asistencias, nivel, experiencia y pagos.</p>
       </div>
       <div className="field">

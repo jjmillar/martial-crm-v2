@@ -206,14 +206,14 @@
   letter-spacing: -0.03em;
 }
 
-.sp-eyebrow {
+/* Meta line under the school / student name (city, school): it used to be an uppercase eyebrow above it */
+.sp-meta {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
   opacity: 0.9;
 }
 

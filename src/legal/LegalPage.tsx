@@ -22,7 +22,6 @@ export function LegalPage({ kind }: { kind: LegalKind }) {
         <Link className="link-btn" to={`/${other}`}>{LEGAL_TITLE[other]}</Link>
       </header>
       <main className="legal-page">
-        <span className="eyebrow">Martial CRM</span>
         <h1>{LEGAL_TITLE[kind]}</h1>
         <LegalBody kind={kind} />
       </main>

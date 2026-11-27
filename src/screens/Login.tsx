@@ -58,7 +58,6 @@ export function Login() {
       <main className="auth__main">
         <form className="auth__card card rise" onSubmit={onSubmit} noValidate>
           <div className="auth__head">
-            <span className="eyebrow">{mode === 'login' ? 'Acceso' : 'Recuperar acceso'}</span>
             <h1>{mode === 'login' ? 'Ingresa a tu cuenta' : 'Restablecer contraseña'}</h1>
           </div>
 

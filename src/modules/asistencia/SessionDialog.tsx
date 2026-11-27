@@ -46,7 +46,7 @@ function SessionBody({ session, trials, onClose }: { session: Session; trials: T
   return (
     <>
       <div className="modal__head">
-        <span className="eyebrow">{v.number ? `Clase N° ${v.number} · ` : ''}{longDate(date)} · {hhmm(session.start_time)}–{hhmm(session.end_time)}</span>
+        <p className="modal__meta">{v.number ? `Clase N° ${v.number} · ` : ''}{longDate(date)} · {hhmm(session.start_time)}–{hhmm(session.end_time)}</p>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar"><Icon name="close" /></button>
       </div>
       <div className="sess-title" style={{ ['--class-color' as string]: v.color }}>

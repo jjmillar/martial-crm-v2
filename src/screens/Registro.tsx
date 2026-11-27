@@ -17,7 +17,6 @@ export function Registro() {
           loginTo="/login"
           head={
             <>
-              <span className="eyebrow">Para academias</span>
               <h1>Crea tu cuenta de CEO</h1>
               <p className="hint">Administra una o varias escuelas: alumnos, clases, asistencia, pagos y una página pública para cada una. ¿Eres alumno? Regístrate desde la página de tu escuela.</p>
             </>

@@ -48,7 +48,7 @@ a.plan-card:focus-visible {
   min-height: 24px; /* same header height whether the plan has a tag or not */
 }
 
-.plan-card__tags .eyebrow {
+.plan-card__tags .hint {
   margin-right: auto;
 }
 
