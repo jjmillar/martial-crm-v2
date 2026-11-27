@@ -850,3 +850,61 @@ button.date-pick__day:hover {
     font-size: 24px;
   }
 }
+
+/* ---------- Touch: 44 px targets on phones and touch screens (Impeccable adapt, audit 2026-11-27) ---------- */
+@media (max-width: 760px), (pointer: coarse) {
+  .btn,
+  .input,
+  select.input {
+    min-height: 44px;
+  }
+  /* 16 px keeps iOS from zooming into a field on focus */
+  .input,
+  select.input,
+  textarea.input {
+    font-size: 16px;
+  }
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .segmented button {
+    min-height: 44px;
+  }
+  .date-nav__arrow {
+    width: 44px;
+    height: 44px;
+  }
+  .belt-pick,
+  .pick-chip {
+    min-height: 44px;
+  }
+  /* Text actions keep their look but get a full-height tap area */
+  .link-btn,
+  .date-nav__open,
+  .date-nav__today {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .landing__legal a,
+  .auth a,
+  .app-footer a {
+    display: inline-block;
+    padding-block: 12px;
+  }
+}
+@media (max-width: 760px), (pointer: coarse) {
+  /* Components that pinned 40 px for desktop density */
+  .input.member-row__role,
+  .bento--student .today-list .btn,
+  .checkin-list .btn,
+  .portal-att .checkin-list .btn,
+  .task__move {
+    min-height: 44px;
+  }
+  .password__toggle {
+    width: 44px;
+    height: 44px;
+  }
+}
