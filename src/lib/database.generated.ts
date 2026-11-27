@@ -3017,6 +3017,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      avatar_access: {
+        Args: { p_name: string; p_write: boolean };
+        Returns: boolean;
+      };
       billing_owner_ok: { Args: Record<PropertyKey, never>; Returns: boolean };
       book_trial: {
         Args: {
@@ -3526,12 +3530,12 @@ export type Database = {
         Args: { p_blocks: Json; p_class_id: string; p_tag_ids: string[] };
         Returns: undefined;
       };
-      set_session_not_held: {
-        Args: { p_not_held: boolean; p_session_id: string };
-        Returns: undefined;
-      };
       set_my_student_photo: {
         Args: { p_path: string; p_student_id: string };
+        Returns: undefined;
+      };
+      set_session_not_held: {
+        Args: { p_not_held: boolean; p_session_id: string };
         Returns: undefined;
       };
       set_teacher_arts: {
