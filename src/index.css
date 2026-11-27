@@ -225,7 +225,7 @@ a {
   background: var(--bg);
   color: var(--text);
   font: inherit;
-  transition: border-color var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
 
 .input:hover {
@@ -235,6 +235,15 @@ a {
 .input:focus {
   outline: none;
   border-color: var(--text);
+  /* A 2 px ring at full text contrast (WCAG 2.4.7 / 2.4.11): border + a matching inner shadow */
+  box-shadow: 0 0 0 1px var(--text);
+}
+.input[aria-invalid='true'],
+.input[aria-invalid='true']:focus {
+  border-color: var(--danger);
+}
+.input[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 1px var(--danger);
 }
 
 .hint {
