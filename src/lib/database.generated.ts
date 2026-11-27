@@ -2805,6 +2805,7 @@ export type Database = {
       teachers: {
         Row: {
           active: boolean;
+          avatar_url: string | null;
           belt: string | null;
           belt_degree: number | null;
           belt_id: string | null;
@@ -2826,6 +2827,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           active?: boolean;
+          avatar_url?: string | null;
           belt?: string | null;
           belt_degree?: number | null;
           belt_id?: string | null;
@@ -2846,6 +2848,7 @@ export type Database = {
         };
         Update: {
           active?: boolean;
+          avatar_url?: string | null;
           belt?: string | null;
           belt_degree?: number | null;
           belt_id?: string | null;
@@ -3525,6 +3528,10 @@ export type Database = {
       };
       set_session_not_held: {
         Args: { p_not_held: boolean; p_session_id: string };
+        Returns: undefined;
+      };
+      set_my_student_photo: {
+        Args: { p_path: string; p_student_id: string };
         Returns: undefined;
       };
       set_teacher_arts: {

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
+import { PhotoPicker } from '../../ui/PhotoPicker'
+import { avatarFolder, savePhoto } from '../../lib/avatars'
 
 // Students complete their own record after their account is approved (contact, emergency, health).
 // Everything else (plan, belt, payments) stays in the school's hands.
@@ -21,6 +23,20 @@ export function MiFicha() {
   })
   if (!q.data) return null
   return <FichaForm key={q.data.id} me={q.data} />
+}
+
+/** A guardian sets the photo of the child they are looking at (their own photo lives in Perfil). */
+function ChildPhoto() {
+  const { student, myStudent, reload } = useSchool()
+  if (!student || student.id === myStudent?.id) return null
+  const change = async (photo: Blob | null) => {
+    await savePhoto({ folder: avatarFolder.student(student.school_id, student.id), photo, old: student.avatar_url, apply: async (p) => {
+      const { error } = await supabase.rpc('set_my_student_photo', { p_student_id: student.id, p_path: p as string })
+      if (error) throw new Error('No se pudo guardar la foto.')
+    } })
+    await reload()
+  }
+  return <PhotoPicker path={student.avatar_url} name={student.full_name ?? ''} onChange={change} hint="Se recorta cuadrada. La ven ustedes y la escuela." />
 }
 
 function FichaForm({ me }: { me: Me }) {
@@ -50,6 +66,7 @@ function FichaForm({ me }: { me: Me }) {
   return (
     <form className="card form-section" onSubmit={(e) => { e.preventDefault(); save.mutate() }} noValidate id="ficha">
       <h2>Mi ficha de alumno</h2>
+      <ChildPhoto />
       <p className="hint">{missing ? 'Completa tus datos: tu escuela los necesita, sobre todo el contacto de emergencia.' : 'Tus datos de contacto y salud para la escuela.'}</p>
       <div className="form-grid">
         <div className="field"><label htmlFor="mf-phone">Teléfono</label><input id="mf-phone" className="input" type="tel" autoComplete="tel" value={f.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+56 9 1234 5678" /></div>

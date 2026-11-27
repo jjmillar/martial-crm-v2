@@ -19,7 +19,7 @@ export type ChildRequest = {
   created_at: string
   decided_at: string | null
 }
-export type Ward = { id: string; full_name: string | null; first_name: string; rut: string | null; email: string | null; birth_date: string | null; address: string | null; phone: string | null; belt: string | null }
+export type Ward = { id: string; full_name: string | null; first_name: string; rut: string | null; email: string | null; birth_date: string | null; address: string | null; phone: string | null; belt: string | null; avatar_url: string | null }
 
 export const childRequestsKey = (schoolId: string | undefined) => ['child-requests', schoolId] as const
 export const wardsKey = (schoolId: string | undefined) => ['wards', schoolId] as const
@@ -33,7 +33,7 @@ export async function myChildRequests(schoolId: string): Promise<ChildRequest[]>
 
 export async function myWards(ids: string[]): Promise<Ward[]> {
   if (!ids.length) return []
-  const { data, error } = await supabase.from('students').select('id, full_name, first_name, rut, email, birth_date, address, phone, belt').in('id', ids).order('first_name')
+  const { data, error } = await supabase.from('students').select('id, full_name, first_name, rut, email, birth_date, address, phone, belt, avatar_url').in('id', ids).order('first_name')
   if (error) throw error
   return data as Ward[]
 }

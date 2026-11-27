@@ -8,6 +8,7 @@ import { modulesFor } from '../modules/registry'
 import { Icon } from '../ui/Icon'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import { Wordmark } from '../ui/Wordmark'
+import { Avatar } from '../ui/Avatar'
 import { Flash } from '../ui/Flash'
 import { MobileMenu } from './MobileMenu'
 import { SchoolSwitcher } from './SchoolSwitcher'
@@ -20,16 +21,24 @@ const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2)
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile, user, signOut } = useAuth()
-  const { role, loading, activeSchool } = useSchool()
+  const { role, loading, activeSchool, myStudent } = useSchool()
   const nav = modulesFor(role)
   const pending = usePendingCount()
   const year = new Date().getFullYear()
+  // My photo: a student's is the one on their student record; everyone else's is on their account.
+  const me = role === 'alumno' && myStudent
+    ? { path: myStudent.avatar_url ?? null, name: myStudent.full_name ?? profile?.full_name ?? '', to: '/app/ajustes#perfil' }
+    : { path: profile?.avatar_url ?? null, name: profile?.full_name || user?.email || '', to: '/app/ajustes#perfil' }
 
   return (
     <div className="shell">
       <aside className="sidebar sidebar--school">
         <div className="sidebar__top">
-          {/* Mobile top bar: the CRM wordmark with the school under it */}
+          {/* Mobile: my photo, top left (opens my profile) */}
+          <Link to={me.to} className="me-chip" aria-label="Mi perfil">
+            <Avatar path={me.path} name={me.name} size={44} />
+          </Link>
+          {/* Desktop without a school yet: the CRM wordmark */}
           <div className="brand">
             <Wordmark to="/app" />
             <SchoolSwitcher />
@@ -61,7 +70,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {/* Desktop: the CRM's name, a quiet signature just above the line over the user (not a link) */}
           <div className="sidebar__crm"><Wordmark plain /></div>
           <div className="sidebar__user">
-            <span className="sidebar__avatar" aria-hidden="true">{initials(profile?.full_name || user?.email || '?')}</span>
+            <Avatar path={me.path} name={me.name} size={36} className="sidebar__avatar" />
             <div className="sidebar__who">
               <strong>{profile?.full_name || user?.email}</strong>
               <span className="hint">{role ? roleLabel[role] : 'Sin rol asignado'}</span>

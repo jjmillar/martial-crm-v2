@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Link } from '../../lib/nav'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import { usePersisted } from '../../lib/persist'
+import { Avatar } from '../../ui/Avatar'
+import { mergeProgress } from './multi'
 import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
 import { supabase } from '../../lib/supabase'
@@ -141,11 +144,47 @@ function AttendanceHistory({ rows, child = false }: { rows: MyAttendance[]; chil
   )
 }
 
-/** Inicio for students: level, XP, skills, today's check-in, plan and pending payments. */
+/**
+ * The school line over the greeting. A student in several schools of the platform picks one there, or "Todas mis
+ * escuelas" to see all their XP, skills, belts and achievements together.
+ */
+function SchoolLine({ all, setAll }: { all: boolean; setAll: (v: boolean) => void }) {
+  const { schools, studentLinks, activeSchool, setActiveSchool } = useSchool()
+  const mine = studentLinks.map((l) => ({ id: l.school_id, name: schools.find((s) => s.id === l.school_id)?.name ?? 'Escuela' }))
+  const today = longDate(todayIso())
+  if (mine.length < 2) return <p className="st-hero__meta">{activeSchool?.name ?? ''} · {today}</p>
+  return (
+    <p className="st-hero__meta">
+      <label className="school-switch st-hero__school">
+        <span className="sr-only">Escuela que ves</span>
+        <span className="school-switch__name" aria-hidden="true">{all ? 'Todas mis escuelas' : activeSchool?.name}</span>
+        <select value={all ? 'all' : activeSchool?.id ?? ''} onChange={(e) => {
+          if (e.target.value === 'all') { setAll(true); return }
+          setAll(false); setActiveSchool(e.target.value)
+        }}>
+          {mine.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+          <option value="all">Todas mis escuelas</option>
+        </select>
+        <Icon name="down" size={14} />
+      </label>
+      <span>· {today}</span>
+    </p>
+  )
+}
+
+/** Inicio for students: one school (level, XP, skills, check-in, plan, payments) or all of them added up. */
 export function StudentHome() {
+  const { studentLinks } = useSchool()
+  const { child } = useMe()
+  const [allPref, setAll] = usePersisted('portal.todas', false)
+  const all = allPref && !child && studentLinks.length > 1
+  return all ? <AllSchoolsHome setAll={setAll} /> : <SchoolHome setAll={setAll} />
+}
+
+function SchoolHome({ setAll }: { setAll: (v: boolean) => void }) {
   const { profile } = useAuth()
+  const { student } = useSchool()
   const { school, studentId, name, child } = useMe()
-  const today = todayIso()
   const progress = useQuery({ queryKey: progressKey(studentId), queryFn: () => studentProgress(studentId!), enabled: Boolean(studentId) })
   const att = useQuery({ queryKey: myAttendanceKey(studentId), queryFn: () => myAttendance(studentId!), enabled: Boolean(studentId) })
   const enr = useQuery({ queryKey: ['my-enrollments', studentId], queryFn: () => myEnrollments(studentId!), enabled: Boolean(studentId) })
@@ -171,9 +210,12 @@ export function StudentHome() {
   return (
     <div className="bento bento--student">
       <header className="st-hero rise">
-        <p className="st-hero__meta">{child ? `Perfil de tu hijo · ${school?.name ?? ''}` : `${school?.name ?? ''} · ${longDate(today)}`}</p>
-        <h1>{child ? firstName : <>Hola{firstName ? `, ${firstName}` : ''}</>}</h1>
-        {child && <p className="hint">Como apoderado ves su nivel, su plan y sus pagos, y marcas su asistencia.</p>}
+        <Avatar path={student?.avatar_url} name={name} size={64} className="st-hero__photo" />
+        <div className="st-hero__text">
+          {child ? <p className="st-hero__meta">Perfil de tu hijo · {school?.name ?? ''}</p> : <SchoolLine all={false} setAll={setAll} />}
+          <h1>{child ? firstName : <>Hola{firstName ? `, ${firstName}` : ''}</>}</h1>
+          {child && <p className="hint">Como apoderado ves su nivel, su plan y sus pagos, y marcas su asistencia.</p>}
+        </div>
       </header>
 
 
@@ -251,6 +293,86 @@ export function StudentHome() {
         <AttendanceHistory rows={(att.data ?? []).slice(0, 3)} child={child} />
       </section>
       <PayDialog paymentId={paying} open={payOpen} onClose={() => setPayOpen(false)} />
+    </div>
+  )
+}
+
+/** "Todas mis escuelas": level, XP and skills added up, and each school's belts and achievements. */
+function AllSchoolsHome({ setAll }: { setAll: (v: boolean) => void }) {
+  const { profile } = useAuth()
+  const { studentLinks, schools, myStudent } = useSchool()
+  const progress = useQueries({ queries: studentLinks.map((l) => ({ queryKey: progressKey(l.id), queryFn: () => studentProgress(l.id) })) })
+  const atts = useQueries({ queries: studentLinks.map((l) => ({ queryKey: myAttendanceKey(l.id), queryFn: () => myAttendance(l.id) })) })
+  const schoolName = (id: string) => schools.find((s) => s.id === id)?.name ?? 'Escuela'
+  const ready = progress.length > 0 && progress.every((q) => q.isSuccess)
+  const p = ready ? mergeProgress(progress.map((q) => q.data!)) : null
+  const pct = p ? Math.round((p.level_xp / p.next_level_xp) * 100) : 0
+  const recent = studentLinks
+    .flatMap((l, i) => (atts[i]?.data ?? []).map((a) => ({ ...a, school: schoolName(l.school_id) })))
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5)
+  const firstName = (profile?.full_name || myStudent?.full_name || '').split(' ')[0]
+
+  return (
+    <div className="bento bento--student">
+      <header className="st-hero rise">
+        <Avatar path={myStudent?.avatar_url} name={profile?.full_name || myStudent?.full_name} size={64} className="st-hero__photo" />
+        <div className="st-hero__text">
+          <SchoolLine all setAll={setAll} />
+          <h1>Hola{firstName ? `, ${firstName}` : ''}</h1>
+        </div>
+      </header>
+
+      <section className="tile level-card rise" aria-label="Tu nivel en todas tus escuelas">
+        <div className="lvl"><span>Nivel</span><strong>{p?.level ?? '—'}</strong></div>
+        <div className="xp">
+          <div className="xp__bar" role="progressbar" aria-valuemin={0} aria-valuemax={p?.next_level_xp ?? 100} aria-valuenow={p?.level_xp ?? 0} aria-label="Experiencia para el siguiente nivel">
+            <span style={{ width: `${pct}%` }} />
+          </div>
+          <p className="xp__text">{p ? <><b>{p.level_xp}</b> / {p.next_level_xp} XP</> : 'Cargando…'}</p>
+        </div>
+      </section>
+
+      <section className="tile tile--wide rise" aria-label="Tus escuelas">
+        <h2 className="tile__title">Tus {studentLinks.length} escuelas, juntas</h2>
+        <p className="hint">Aquí se suman tu experiencia, tus skills y tus clases. Para marcar asistencia, ver tu plan o pagar, elige una escuela arriba.</p>
+      </section>
+
+      <section className="tile tile--wide rise" aria-label="Skills">
+        {p ? <SkillsBreakdown skills={p.skills} own emptyText="Tus skills aparecen cuando asistas a clases con skills (por ejemplo Gi, NoGi o Guardia)." /> : <p className="hint">Cargando…</p>}
+      </section>
+
+      <section className="tile tile--wide rise" aria-label="Cinturones">
+        <h2 className="tile__title">Mis cinturones</h2>
+        {studentLinks.map((l) => (
+          <div key={l.id} className="st-school">
+            <h3 className="st-school__name">{schoolName(l.school_id)}</h3>
+            <MisCinturones studentId={l.id} child={false} />
+          </div>
+        ))}
+      </section>
+
+      {studentLinks.map((l) => (
+        <section key={l.id} className="tile tile--wide rise" aria-label={`Logros en ${schoolName(l.school_id)}`}>
+          <p className="st-school__name">{schoolName(l.school_id)}</p>
+          <MisLogros studentId={l.id} schoolId={l.school_id} child={false} />
+        </section>
+      ))}
+
+      <section className="tile tile--wide tile--history rise">
+        <div className="tile__head"><h2 className="tile__title">Últimas clases</h2></div>
+        {recent.length === 0 ? <p className="hint">Todavía no tienes asistencias registradas.</p> : (
+          <ul className="today-list">
+            {recent.map((a) => (
+              <li key={a.id} style={{ ['--class-color' as string]: a.class?.color }}>
+                <span className="today-list__time">{formatDate(a.date).slice(0, 5)}</span>
+                <span className="today-list__name"><strong>{a.class?.name ?? 'Clase'}</strong><span className="hint">{a.school}</span></span>
+                {a.confirmed_at ? <span className="tag tag--ok">+{XP_PER_CLASS} XP</span> : <span className="tag tag--wait">Por aprobar</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   )
 }

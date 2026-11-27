@@ -6,6 +6,8 @@ import { useAuth } from '../../lib/auth'
 import { useSchool } from '../../lib/school'
 import { roleLabel } from '../../lib/roles'
 import { Acc } from '../../ui/Accordion'
+import { PhotoPicker } from '../../ui/PhotoPicker'
+import { avatarFolder, savePhoto } from '../../lib/avatars'
 import { MiFicha } from './MiFicha'
 import { Seguridad } from './Seguridad'
 import { PerfilPublico } from './PerfilPublico'
@@ -22,7 +24,7 @@ export function CuentaPage() {
 // Personal settings for every role (S6 "personal profile"), as accordions inside Ajustes.
 export function CuentaSections() {
   const { user, profile, reloadProfile, updatePassword } = useAuth()
-  const { role, schools, memberships, wards, student, myStudent } = useSchool()
+  const { role, schools, memberships, wards, student, myStudent, reload } = useSchool()
   // Guardian looking at a child: the record and public profile sections act for that child.
   const kid = student && student.id !== myStudent?.id ? (student.full_name ?? '').split(' ')[0] : null
   const [name, setName] = useState(profile?.full_name ?? '')
@@ -56,6 +58,24 @@ export function CuentaSections() {
     onError: (e: Error) => setPwMsg({ ok: false, text: e.message }),
   })
 
+  // Photo: a student's is the one on their student record (what the school sees); everyone else's is on the account.
+  const ownRecord = role === 'alumno' ? myStudent : null
+  const changePhoto = async (photo: Blob | null) => {
+    if (ownRecord) {
+      await savePhoto({ folder: avatarFolder.student(ownRecord.school_id, ownRecord.id), photo, old: ownRecord.avatar_url, apply: async (p) => {
+        const { error } = await supabase.rpc('set_my_student_photo', { p_student_id: ownRecord.id, p_path: p as string })
+        if (error) throw new Error('No se pudo guardar la foto.')
+      } })
+      await reload()
+    } else {
+      await savePhoto({ folder: avatarFolder.user(user!.id), photo, old: profile?.avatar_url, apply: async (p) => {
+        const { error } = await supabase.from('profiles').update({ avatar_url: p }).eq('id', user!.id)
+        if (error) throw new Error('No se pudo guardar la foto.')
+      } })
+      await reloadProfile()
+    }
+  }
+
   const onProfile = (e: FormEvent) => { e.preventDefault(); setProfileMsg(null); saveProfile.mutate() }
   const onPw = (e: FormEvent) => { e.preventDefault(); setPwMsg(null); savePw.mutate() }
 
@@ -65,6 +85,8 @@ export function CuentaSections() {
       <Acc id="perfil" icon="user" title="Perfil" hint={`${user?.email ?? ''}${role ? ` · ${roleLabel[role]}` : ''}`}>
       <form className="card form-section" onSubmit={onProfile} noValidate>
         <h2>Perfil</h2>
+        <PhotoPicker path={ownRecord ? ownRecord.avatar_url : profile?.avatar_url} name={name || user?.email || ''} onChange={changePhoto}
+          hint={ownRecord ? 'Se recorta cuadrada. La ven tú y tu escuela.' : 'Se recorta cuadrada. La ven tú y tu equipo.'} />
         <div className="form-grid">
           <div className="field">
             <label htmlFor="me-name">Nombre</label>

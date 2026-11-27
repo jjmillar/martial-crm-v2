@@ -145,3 +145,12 @@ aunque la funcionalidad esté lista.
 - Audit log: expense paid, cancelled, back to pending, amount changed after paid, deleted.
 - Period paid (`period_from`/`period_to`, migration 20261127000003): both or neither, end ≥ start; a generated expense always covers its month (set by the guard).
 - Tests: `scripts/db/expenses.check.mjs` (46 checks).
+
+## Fotos de perfil (2026-11-27, migrations 20261127000004 / 20261127000005)
+- Bucket `avatars` **privado** (2 MB, JPEG/PNG/WebP). Se muestran con URLs firmadas de 1 h; nunca enlaces públicos (muchos alumnos son menores).
+- La app recorta y re-codifica cada foto (512 px JPEG) antes de subirla: se pierden los metadatos EXIF (cámara, GPS).
+- Rutas por dueño, con nombre aleatorio: `<escuela>/students/<alumno>/…`, `<escuela>/teachers/<profesor>/…`, `users/<usuario>/…`. Restricciones CHECK impiden apuntar a la foto de otro o a un enlace externo.
+- `avatar_access(path, write)` (security definer, solo `authenticated`) decide lectura/escritura en las políticas de storage: alumno → miembros de la escuela, el alumno y sus apoderados; profesor → miembros leen, admins escriben; cuenta → el usuario escribe, quienes comparten escuela leen.
+- `set_my_student_photo(uuid, text)`: el alumno o su apoderado cambian la foto de su ficha (solo sus propios registros).
+- `Permissions-Policy`: `camera=(self)` (antes `camera=()`) para tomar la foto con la webcam; solo páginas propias.
+- Tests: `scripts/db/avatars.check.mjs` (28 checks).

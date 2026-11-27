@@ -597,3 +597,49 @@
 .portal-att .checkin-sub {
   margin-top: 14px;
 }
+
+/* Hero: my photo beside the greeting (on phones the photo sits top left in the bar instead) */
+.bento--student > .st-hero {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 18px;
+}
+.st-hero__text {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.st-hero__photo {
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+/* The school line is a selector for a student in several schools ("Todas mis escuelas" adds them up) */
+.st-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
+}
+.st-hero__meta .school-switch.st-hero__school {
+  margin-left: -8px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+.st-school + .st-school {
+  margin-top: 14px;
+}
+.st-school__name {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+@media (max-width: 760px) {
+  .bento--student > .st-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .st-hero .st-hero__photo {
+    display: none;
+  }
+}

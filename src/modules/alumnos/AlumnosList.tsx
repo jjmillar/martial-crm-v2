@@ -6,6 +6,8 @@ import { useSchool } from '../../lib/school'
 import { formatRut } from '../../lib/rut'
 import { yearsSince } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
+import { Avatar } from '../../ui/Avatar'
+import { useAvatarUrls } from '../../lib/avatars'
 import { listStudents, studentsKey } from './api'
 import { beltSwatch } from '../../lib/belts'
 import { ShowMore } from '../../ui/ShowMore'
@@ -16,7 +18,6 @@ import { BeltChip } from '../artes/Belt'
 type Filter = 'activos' | 'inactivos' | 'todos'
 
 const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
-const initials = (a: string, b: string) => `${a[0] ?? ''}${b[0] ?? ''}`.toUpperCase()
 
 /** Students directory: the "Alumnos" accordion in Miembros. First 10, then "Mostrar más". */
 export function AlumnosList() {
@@ -48,6 +49,8 @@ export function AlumnosList() {
     const active = all.filter((s) => s.active).length
     return { activos: active, inactivos: all.length - active, todos: all.length }
   }, [students.data])
+
+  const photos = useAvatarUrls(rows.slice(0, shown).map((s) => s.avatar_url))
 
   if (!activeSchool) return null
 
@@ -90,7 +93,7 @@ export function AlumnosList() {
           return (
             <li key={s.id}>
               <Link className="student-row card" to={`/app/alumnos/${s.id}`}>
-                <span className="avatar" aria-hidden="true">{initials(s.first_name, s.first_last_name)}</span>
+                <Avatar url={photos.get(s.avatar_url ?? '') ?? null} name={`${s.first_name} ${s.first_last_name}`} />
                 <span className="student-row__main">
                   <strong>{s.full_name}</strong>
                   <span className="hint">{[s.rut && formatRut(s.rut), age !== null && `${age} años`, s.phone].filter(Boolean).join(' · ') || 'Sin datos de contacto'}</span>

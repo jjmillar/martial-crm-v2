@@ -7,6 +7,8 @@ import { formatRut } from '../../lib/rut'
 import type { Student } from '../../lib/database.types'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
+import { PhotoPicker } from '../../ui/PhotoPicker'
+import { avatarFolder, savePhoto } from '../../lib/avatars'
 import { createStudent, deleteStudent, getStudent, studentsKey, updateStudent } from './api'
 import { emptyForm, formFromStudent, parseStudent, type StudentForm } from './schema'
 import { Family } from './Family'
@@ -46,6 +48,16 @@ function AlumnoForm({ student, studentArts = [] }: { student?: Student; studentA
   const schoolArts = useQuery({ queryKey: artsKey(activeSchool?.id), queryFn: () => listArts(activeSchool!.id), enabled: Boolean(activeSchool) })
   const [artRows, setArtRows] = useState<ArtRow[]>(() => studentArts.map(rowFrom))
   const [artsError, setArtsError] = useState<string | null>(null)
+  // A new student's photo waits for the record to exist; an existing one is saved right away.
+  const [staged, setStaged] = useState<Blob | null>(null)
+  const [photoPath, setPhotoPath] = useState<string | null>(student?.avatar_url ?? null)
+  const changePhoto = async (photo: Blob | null) => {
+    if (!student) { setStaged(photo); return }
+    const path = await savePhoto({ folder: avatarFolder.student(student.school_id, student.id), photo, old: photoPath, apply: (p) => updateStudent(student.id, { avatar_url: p }) })
+    setPhotoPath(path)
+    qc.setQueryData(['student', student.id], { ...student, avatar_url: path })
+    qc.invalidateQueries({ queryKey: studentsKey(activeSchool?.id) })
+  }
 
   const set = <K extends keyof StudentForm>(k: K, v: StudentForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }))
@@ -55,6 +67,9 @@ function AlumnoForm({ student, studentArts = [] }: { student?: Student; studentA
   const save = useMutation({
     mutationFn: async (payload: Parameters<typeof updateStudent>[1]) => {
       const s = student ? await updateStudent(student.id, payload) : await createStudent({ ...payload, school_id: activeSchool!.id, first_name: payload.first_name!, first_last_name: payload.first_last_name! })
+      if (!student && staged) {
+        try { await savePhoto({ folder: avatarFolder.student(s.school_id, s.id), photo: staged, apply: (p) => updateStudent(s.id, { avatar_url: p }) }) } catch { /* the student is saved; the photo can be added again */ }
+      }
       let artsFailed: string | null = null
       try { await saveStudentArts(s.school_id, s.id, artRows, studentArts) } catch (e) { artsFailed = (e as Error).message }
       return { s, artsFailed }
@@ -129,6 +144,8 @@ function AlumnoForm({ student, studentArts = [] }: { student?: Student; studentA
         <div>
           <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Alumnos</Link>
           <h1>{student ? student.full_name : 'Nuevo alumno'}</h1>
+          <PhotoPicker path={photoPath} preview={staged} name={`${form.first_name} ${form.first_last_name}`} onChange={changePhoto}
+            hint={student ? undefined : 'Se guarda junto con el alumno.'} />
           <p className="hint">Los campos con * son obligatorios.</p>
           {student && (
             <p className="hint">

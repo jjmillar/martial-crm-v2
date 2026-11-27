@@ -5,6 +5,7 @@ import { useSchool } from '../../lib/school'
 import { formatDate, santiagoDate, todayIso, yearsSince } from '../../lib/dates'
 import { formatRut, normalizeRut } from '../../lib/rut'
 import { Icon } from '../../ui/Icon'
+import { Avatar } from '../../ui/Avatar'
 import { Modal } from '../../ui/Modal'
 import {
   cancelChildRequest, childRequestsKey, createClaim, myChildRequests, myWards, requestChild, wardsKey,
@@ -95,7 +96,7 @@ function KidCard({ k, onHandedOver }: { k: Ward; onHandedOver: () => Promise<voi
   return (
     <article className="card kid">
       <div className="kid__head">
-        <span className="avatar" aria-hidden="true">{(k.first_name[0] ?? '?').toUpperCase()}</span>
+        <Avatar path={k.avatar_url} name={k.full_name} />
         <span className="kid__name"><strong>{k.full_name}</strong><span className="hint">{[age !== null ? `${age} años` : null, k.belt ? `Cinturón ${k.belt}` : null].filter(Boolean).join(' · ') || 'Alumno'}</span></span>
       </div>
       <dl className="kid__facts">

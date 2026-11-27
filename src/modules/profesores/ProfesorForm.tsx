@@ -7,6 +7,9 @@ import { beltSuggestions } from '../../lib/belts'
 import { artsKey, degreeText, listArts } from '../artes/api'
 import { BeltBar } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
+import { PhotoPicker } from '../../ui/PhotoPicker'
+import { avatarFolder, savePhoto } from '../../lib/avatars'
+import { supabase } from '../../lib/supabase'
 import { Toggle } from '../../ui/Toggle'
 import { listMembers } from '../miembros/api'
 import { deleteTeacher, getTeacher, listTeachers, saveTeacher, teachersKey, type TeacherWithArts } from './api'
@@ -45,6 +48,20 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithArts }) {
   const [errors, setErrors] = useState<Errors>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // A new teacher's photo waits for the record to exist; an existing one is saved right away.
+  const [staged, setStaged] = useState<Blob | null>(null)
+  const [photoPath, setPhotoPath] = useState<string | null>(teacher?.avatar_url ?? null)
+  const setTeacherPhoto = async (id: string, p: string | null) => {
+    const { error } = await supabase.from('teachers').update({ avatar_url: p }).eq('id', id)
+    if (error) throw new Error('No se pudo guardar la foto.')
+  }
+  const changePhoto = async (photo: Blob | null) => {
+    if (!teacher) { setStaged(photo); return }
+    const path = await savePhoto({ folder: avatarFolder.teacher(teacher.school_id, teacher.id), photo, old: photoPath, apply: (p) => setTeacherPhoto(teacher.id, p) })
+    setPhotoPath(path)
+    qc.invalidateQueries({ queryKey: teachersKey(schoolId) })
+    qc.invalidateQueries({ queryKey: ['teacher', teacher.id] })
+  }
 
   // Accounts already linked to another teacher are not offered again.
   const taken = new Set((teachers.data ?? []).filter((t) => t.id !== teacher?.id && t.user_id).map((t) => t.user_id))
@@ -72,7 +89,13 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithArts }) {
   }
 
   const save = useMutation({
-    mutationFn: (payload: Parameters<typeof saveTeacher>[2]) => saveTeacher(schoolId!, teacher?.id ?? null, payload, picked),
+    mutationFn: async (payload: Parameters<typeof saveTeacher>[2]) => {
+      const t = await saveTeacher(schoolId!, teacher?.id ?? null, payload, picked)
+      if (!teacher && staged) {
+        try { await savePhoto({ folder: avatarFolder.teacher(t.school_id, t.id), photo: staged, apply: (p) => setTeacherPhoto(t.id, p) }) } catch { /* the teacher is saved; the photo can be added again */ }
+      }
+      return t
+    },
     onSuccess: async (t) => {
       await qc.invalidateQueries({ queryKey: teachersKey(schoolId) })
       await qc.invalidateQueries({ queryKey: ['teacher', t.id] })
@@ -128,6 +151,10 @@ function ProfesorForm({ teacher }: { teacher?: TeacherWithArts }) {
       <header className="page-head">
         <Link className="link-btn back-link" to={BACK}><Icon name="back" size={16} /> Profesores</Link>
         <h1>{teacher ? teacher.full_name : 'Nuevo profesor'}</h1>
+        {canEdit && (
+          <PhotoPicker path={photoPath} preview={staged} name={`${form.first_name} ${form.first_last_name}`} onChange={changePhoto}
+            hint={teacher ? undefined : 'Se guarda junto con el profesor.'} />
+        )}
         {!canEdit && <p className="hint">Solo lectura: los administradores editan los profesores.</p>}
       </header>
 

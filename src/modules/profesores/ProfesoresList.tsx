@@ -7,6 +7,8 @@ import { beltSwatch } from '../../lib/belts'
 import { artsKey, degreeText, listArts } from '../artes/api'
 import { BeltChip } from '../artes/Belt'
 import { Icon } from '../../ui/Icon'
+import { Avatar } from '../../ui/Avatar'
+import { useAvatarUrls } from '../../lib/avatars'
 import { Toggle } from '../../ui/Toggle'
 import { listTeachers, teachersKey } from './api'
 import { ShowMore } from '../../ui/ShowMore'
@@ -38,6 +40,8 @@ export function ProfesoresList() {
       (!needle || normalize(t.full_name ?? '').includes(needle) || normalize(t.email ?? '').includes(needle)),
     )
   }, [teachers.data, q, art, showInactive])
+
+  const photos = useAvatarUrls(rows.slice(0, shown).map((t) => t.avatar_url))
 
   if (!activeSchool) return null
 
@@ -90,7 +94,7 @@ export function ProfesoresList() {
           return (
             <li key={t.id}>
               <Link className={`student-row card${t.active ? '' : ' is-off'}`} to={`/app/profesores/${t.id}`}>
-                <span className="avatar" aria-hidden="true">{`${t.first_name[0] ?? ''}${t.first_last_name[0] ?? ''}`.toUpperCase()}</span>
+                <Avatar url={photos.get(t.avatar_url ?? '') ?? null} name={`${t.first_name} ${t.first_last_name}`} />
                 <span className="student-row__main">
                   <strong>{t.full_name}</strong>
                   <span className="hint">{[sps.join(', '), t.phone, t.email].filter(Boolean).join(' · ') || 'Sin datos de contacto'}</span>

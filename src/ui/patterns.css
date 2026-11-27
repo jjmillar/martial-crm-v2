@@ -780,3 +780,70 @@ button.date-pick__day:hover {
   align-items: center;
   gap: 12px;
 }
+
+/* A photo inside the avatar circle */
+.avatar--photo {
+  overflow: hidden;
+  padding: 0;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+/* Profile photo: current photo + upload / take / remove */
+.photo-picker {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 4px 0 8px;
+}
+.photo-picker__img {
+  width: 88px;
+  height: 88px;
+  font-size: 30px;
+  border: 1px solid var(--line);
+}
+.photo-picker__side {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.photo-picker__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.camera__frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 420px);
+  aspect-ratio: 1;
+  margin: 0 auto 4px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--surface-2);
+}
+.camera__frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* a mirror, like every selfie camera (the photo itself is not mirrored) */
+}
+.camera__wait {
+  position: absolute;
+}
+@media (max-width: 480px) {
+  .photo-picker {
+    align-items: flex-start;
+  }
+  .photo-picker__img {
+    width: 72px;
+    height: 72px;
+    font-size: 24px;
+  }
+}

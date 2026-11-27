@@ -8,7 +8,8 @@ const supabaseWs = supabaseUrl.replace(/^https:/, 'wss:')
 // Security headers (OWASP Secure Headers / ASVS 5.0 V3, see docs/security.md). CSP: Next.js inlines its bootstrap
 // scripts, so scripts allow 'unsafe-inline' but never 'unsafe-eval' or other hosts; data only goes to our Supabase
 // project (plus the OpenStreetMap geocoder for the school's own address); nothing may frame the app (clickjacking).
-// Geolocation only for our own pages (QR check-in checks the student is at the school).
+// Geolocation only for our own pages (QR check-in checks the student is at the school); the camera too, only for our
+// own pages (taking a profile photo).
 const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
@@ -28,7 +29,7 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), payment=(), usb=()' },
+  { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=(self), payment=(), usb=()' },
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
 ]
 

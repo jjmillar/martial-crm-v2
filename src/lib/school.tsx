@@ -6,7 +6,7 @@ import type { AppRole } from '../modules/types'
 import { readPersisted, writePersisted } from './persist'
 
 // The signed-in user's own student records (student portal), one per school at most.
-export type StudentLink = { id: string; school_id: string; full_name: string | null }
+export type StudentLink = { id: string; school_id: string; full_name: string | null; avatar_url?: string | null }
 
 interface SchoolContextType {
   schools: School[]
@@ -64,8 +64,8 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const [schoolsRes, membershipsRes, studentsRes, wardsRes] = await Promise.all([
         supabase.from('schools').select('*').order('name'),
         supabase.from('school_members').select('*').eq('user_id', userId),
-        supabase.from('students').select('id, school_id, full_name').eq('user_id', userId).eq('active', true),
-        supabase.from('student_guardians').select('student:students(id, school_id, full_name, active)').eq('guardian_id', userId),
+        supabase.from('students').select('id, school_id, full_name, avatar_url').eq('user_id', userId).eq('active', true),
+        supabase.from('student_guardians').select('student:students(id, school_id, full_name, active, avatar_url)').eq('guardian_id', userId),
       ])
 
       const fetchedSchools = schoolsRes.data || []
@@ -75,7 +75,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setMemberships(fetchedMemberships)
       setStudentLinks(studentsRes.data || [])
       type WardRow = { student: (StudentLink & { active: boolean }) | null }
-      setWardLinks(((wardsRes.data ?? []) as unknown as WardRow[]).flatMap((w) => (w.student?.active ? [{ id: w.student.id, school_id: w.student.school_id, full_name: w.student.full_name }] : [])))
+      setWardLinks(((wardsRes.data ?? []) as unknown as WardRow[]).flatMap((w) => (w.student?.active ? [{ id: w.student.id, school_id: w.student.school_id, full_name: w.student.full_name, avatar_url: w.student.avatar_url }] : [])))
 
       setActiveSchoolId((currentId) => {
         let storedId = currentId

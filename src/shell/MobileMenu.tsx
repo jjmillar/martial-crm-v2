@@ -4,6 +4,8 @@ import type { ModuleManifest } from '../modules/types'
 import { Icon } from '../ui/Icon'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import { closeDialog } from '../ui/motion'
+import { SchoolSwitcher } from './SchoolSwitcher'
+import { useSchool } from '../lib/school'
 
 // Mobile navigation (S4): a draggable floating hamburger button that opens a sheet with every module,
 // plus account and logout. Released, it snaps to the nearest side edge; the position is remembered per device.
@@ -55,6 +57,7 @@ function spotToXY(s: Spot) {
 
 export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props) {
   const sheet = useRef<HTMLDialogElement>(null)
+  const { schools } = useSchool()
   const { pathname } = useLocation()
   const [spot, setSpot] = useState<Spot>(loadSpot)
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null)
@@ -170,7 +173,8 @@ export function MobileMenu({ nav, who, roleText, onSignOut, pending = 0 }: Props
       >
         <div className="sheet__body">
           <div className="sheet__head">
-            <strong className="sheet__title">Menú</strong>
+            {/* The school (a selector with several): it no longer sits in a top bar on phones */}
+            {schools.length > 0 ? <span className="sheet__school"><SchoolSwitcher /></span> : <strong className="sheet__title">Menú</strong>}
             <button type="button" className="icon-btn" onClick={() => closeDialog(sheet.current)} aria-label="Cerrar">
               <Icon name="close" />
             </button>
