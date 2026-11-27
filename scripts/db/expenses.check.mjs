@@ -112,4 +112,16 @@ check('deleting a rule removes its pending generated expenses', pcPending === 1 
 check('a hand-made expense can be deleted', (await as(db, ADM, `delete from public.expenses where concept = 'Agua'`)).affectedRows === 1)
 check('audit log records the deletion', (await one(`select count(*)::int n from public.audit_log where action = 'expense_deleted'`)).n >= 1)
 
+// ---- Period of the payment (migration 20261127000003) ---------------------------------------------------------------
+const pr = await tryAs(db, ADM, `insert into public.expenses (school_id, concept, amount, teacher_id, period_from, period_to, status) values ($1,'Comisión enero',200000,$2,'2026-01-01','2026-01-31','pagado') returning period_from::text f, period_to::text t`, [sc, t1])
+check('a manual payment keeps the month it pays for', pr.ok && pr.rows[0].f === '2026-01-01' && pr.rows[0].t === '2026-01-31', pr)
+const rg = await tryAs(db, ADM, `insert into public.expenses (school_id, concept, amount, period_from, period_to) values ($1,'Quincena',90000,'2026-03-01','2026-03-15') returning id`, [sc])
+check('a manual payment takes any date range', rg.ok, rg.err)
+check('the range cannot end before it starts', !(await tryAs(db, ADM, `insert into public.expenses (school_id, concept, amount, period_from, period_to) values ($1,'x',1,'2026-03-15','2026-03-01')`, [sc])).ok)
+check('the range needs both dates', !(await tryAs(db, ADM, `insert into public.expenses (school_id, concept, amount, period_from) values ($1,'x',1,'2026-03-15')`, [sc])).ok)
+const gen = await one(`select id, period::text p from public.expenses where period is not null limit 1`)
+await as(db, ADM, `update public.expenses set period_from = '2020-01-01', period_to = '2020-01-02' where id = $1`, [gen.id])
+const gr = await one(`select period_from::text f, period_to::text t from public.expenses where id = $1`, [gen.id])
+check('a generated expense always covers its month', gr.f === gen.p && gr.t.slice(0, 7) === gen.p.slice(0, 7) && Number(gr.t.slice(8)) >= 28, [gen, gr])
+
 report()

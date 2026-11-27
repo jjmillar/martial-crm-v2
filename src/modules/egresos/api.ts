@@ -45,6 +45,9 @@ export type ExpenseInput = {
   paid_at: string | null
   teacher_id: string | null
   notes: string | null
+  /** The period it pays for (both or neither): a month or any range. */
+  period_from: string | null
+  period_to: string | null
 }
 
 /** A calendar day as a timestamp at noon in Chile (the same date whatever the summer time). */
@@ -124,10 +127,32 @@ export function ruleSummary(r: Pick<ExpenseRule, 'kind' | 'amount' | 'day_of_mon
     : `${formatCLP(r.amount)} al mes · el día ${r.day_of_month}`
 }
 
-/** What a generated expense came from: 'Octubre de 2026 · 12 clases'. */
-export function periodLabel(e: Pick<Expense, 'period' | 'classes'>): string | null {
-  if (!e.period) return null
-  return [monthTitle(e.period), e.classes != null ? `${e.classes} ${e.classes === 1 ? 'clase' : 'clases'}` : null].filter(Boolean).join(' · ')
+/** First and last day of the month of an ISO date. */
+export function monthRange(iso: string): [string, string] {
+  const [y, m] = iso.slice(0, 7).split('-').map(Number)
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate()
+  return [`${iso.slice(0, 7)}-01`, `${iso.slice(0, 7)}-${String(last).padStart(2, '0')}`]
+}
+export const isFullMonth = (from: string, to: string) => { const [a, b] = monthRange(from); return from === a && to === b }
+
+/** 'Octubre de 2026' for a whole month; '1 mar – 15 mar 2026' (or across years: '20 dic 2025 – 10 ene 2026'). */
+export function rangeLabel(from: string, to: string): string {
+  if (isFullMonth(from, to)) return monthTitle(from)
+  const y1 = from.slice(0, 4), y2 = to.slice(0, 4)
+  return y1 === y2 ? `${dayMonth(from)} – ${dayMonth(to)} ${y2}` : `${dayMonth(from)} ${y1} – ${dayMonth(to)} ${y2}`
+}
+
+/** The period it pays for, and for a per-class one its classes: 'Octubre de 2026 · 12 clases'. */
+export function periodLabel(e: Pick<Expense, 'period' | 'classes'> & Partial<Pick<Expense, 'period_from' | 'period_to'>>): string | null {
+  const range = e.period_from && e.period_to ? rangeLabel(e.period_from, e.period_to) : e.period ? monthTitle(e.period) : null
+  if (!range) return null
+  return [range, e.classes != null ? `${e.classes} ${e.classes === 1 ? 'clase' : 'clases'}` : null].filter(Boolean).join(' · ')
+}
+
+/** Manual payments of the same teacher whose period overlaps [from, to] (to warn before paying twice). */
+export function overlapping<T extends Pick<Expense, 'id' | 'teacher_id' | 'status' | 'period_from' | 'period_to'>>(list: T[], teacherId: string | null, from: string | null, to: string | null, except?: string): T[] {
+  if (!teacherId || !from || !to) return []
+  return list.filter((e) => e.id !== except && e.teacher_id === teacherId && e.status !== 'anulado' && e.period_from && e.period_to && e.period_from <= to && e.period_to >= from)
 }
 
 /** 'Vence el 5 dic' / 'Pagado el 3 nov' / 'Anulado'. */

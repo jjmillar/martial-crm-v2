@@ -1,16 +1,31 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { formatCLP, parseCLP } from '../../lib/money'
-import { todayIso } from '../../lib/dates'
+import { monthTitle, todayIso } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 import { methodLabel } from '../pagos/api'
 import type { Expense, ExpenseCategory, ExpenseRule, ExpenseStatus, PaymentMethod } from '../../lib/database.types'
-import { categoryLabel, dayStamp, periodLabel, ruleSummary, type ExpenseInput, type RuleInput } from './api'
+import { categoryLabel, dayStamp, isFullMonth, monthRange, overlapping, periodLabel, rangeLabel, ruleSummary, type ExpenseInput, type RuleInput } from './api'
 
 type TeacherOpt = { id: string; full_name: string | null; active: boolean }
 const methods = Object.keys(methodLabel) as PaymentMethod[]
 const categories = Object.keys(categoryLabel) as ExpenseCategory[]
+
+type PeriodKind = 'ninguno' | 'mes' | 'rango'
+/** The months to choose from: two ahead and two years back, newest first ('aaaa-mm-01'). */
+function monthOptions(today: string, keep: string | null): string[] {
+  const out: string[] = []
+  const [y, m] = today.slice(0, 7).split('-').map(Number)
+  for (let i = 2; i >= -24; i--) out.push(new Date(Date.UTC(y, m - 1 + i, 1)).toISOString().slice(0, 10))
+  if (keep && !out.includes(keep)) out.push(keep)
+  return out
+}
+/** Paying a teacher early in the month is usually for the month before. */
+const defaultMonth = (today: string) => {
+  const [y, m, d] = today.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1 - (d <= 15 ? 1 : 0), 1)).toISOString().slice(0, 10)
+}
 
 function Danger({ label, onConfirm, busy }: { label: string; onConfirm: () => void; busy: boolean }) {
   const [ask, setAsk] = useState(false)
@@ -30,9 +45,11 @@ function Danger({ label, onConfirm, busy }: { label: string; onConfirm: () => vo
 }
 
 /** Register or edit an expense. A generated one (from a rule) shows where it came from and is cancelled, not deleted. */
-export function ExpenseForm({ expense, preset, teachers, ruleName, onSave, onDelete, onDone }: {
+export function ExpenseForm({ expense, preset, teachers, others = [], ruleName, onSave, onDelete, onDone }: {
   expense: Expense | null
   preset?: Partial<ExpenseInput>
+  /** The school's other expenses (to warn about paying a teacher twice for the same period). */
+  others?: Expense[]
   teachers: TeacherOpt[]
   ruleName?: string | null
   onSave: (id: string | null, input: ExpenseInput) => Promise<unknown>
@@ -41,13 +58,26 @@ export function ExpenseForm({ expense, preset, teachers, ruleName, onSave, onDel
 }) {
   const today = todayIso()
   const [f, setF] = useState<ExpenseInput>(() => expense
-    ? { concept: expense.concept, amount: expense.amount, category: expense.category, date: expense.date, status: expense.status, method: expense.method, paid_at: expense.paid_at, teacher_id: expense.teacher_id, notes: expense.notes }
-    : { concept: '', amount: 0, category: 'otro', date: today, status: 'pagado', method: 'transferencia', paid_at: null, teacher_id: null, notes: null, ...preset })
+    ? { concept: expense.concept, amount: expense.amount, category: expense.category, date: expense.date, status: expense.status, method: expense.method, paid_at: expense.paid_at, teacher_id: expense.teacher_id, notes: expense.notes, period_from: expense.period_from, period_to: expense.period_to }
+    : { amount: 0, category: 'otro', date: today, status: 'pagado', method: 'transferencia', paid_at: null, teacher_id: null, notes: null, period_from: null, period_to: null, ...preset,
+        concept: preset?.concept ?? (preset?.teacher_id ? `Comisión ${teachers.find((t) => t.id === preset.teacher_id)?.full_name ?? ''} · ${monthTitle(defaultMonth(today))}` : '') })
   const set = <K extends keyof ExpenseInput>(k: K, v: ExpenseInput[K]) => setF((x) => ({ ...x, [k]: v }))
   const [amount, setAmount] = useState(expense || preset?.amount ? formatCLP(expense?.amount ?? preset?.amount) : '')
   const [paidDay, setPaidDay] = useState(expense?.paid_at ? todayIso(new Date(expense.paid_at)) : today)
   const [err, setErr] = useState<string | null>(null)
   const generated = Boolean(expense?.period)
+  // Period it pays for: none, a month or a date range. A teacher's payment starts on a month.
+  const [kind, setKind] = useState<PeriodKind>(() => f.period_from && f.period_to ? (isFullMonth(f.period_from, f.period_to) ? 'mes' : 'rango') : !expense && preset?.teacher_id ? 'mes' : 'ninguno')
+  const [month, setMonth] = useState(() => f.period_from && f.period_to && isFullMonth(f.period_from, f.period_to) ? f.period_from : defaultMonth(today))
+  const [from, setFrom] = useState(f.period_from ?? '')
+  const [to, setTo] = useState(f.period_to ?? '')
+  // A teacher's payment: the concept follows the period until it is edited by hand.
+  const teacherName = (id: string | null) => teachers.find((t) => t.id === id)?.full_name ?? ''
+  const [autoConcept, setAutoConcept] = useState(!expense && Boolean(preset?.teacher_id))
+  const range: [string, string] | null = kind === 'mes' ? monthRange(month) : kind === 'rango' && from && to && to >= from ? [from, to] : null
+  const conceptFor = (r: [string, string] | null, teacherId: string | null) => [`Comisión ${teacherName(teacherId)}`.trim(), r ? rangeLabel(r[0], r[1]) : null].filter(Boolean).join(' · ')
+  const followPeriod = (r: [string, string] | null) => { if (autoConcept) set('concept', conceptFor(r, f.teacher_id)) }
+  const twice = generated ? [] : overlapping(others, f.teacher_id, range?.[0] ?? null, range?.[1] ?? null, expense?.id)
   const wasPaid = expense?.status === 'pagado'
 
   const save = useMutation({ mutationFn: (input: ExpenseInput) => onSave(expense?.id ?? null, input), onSuccess: onDone, onError: (e: Error) => setErr(e.message) })
@@ -60,10 +90,13 @@ export function ExpenseForm({ expense, preset, teachers, ruleName, onSave, onDel
     if (!f.concept.trim()) return setErr('Escribe el concepto del egreso.')
     if (!n || !(n > 0)) return setErr('Escribe el monto.')
     if (!f.date) return setErr('Elige la fecha.')
+    if (kind === 'rango' && (!from || !to)) return setErr('Elige las dos fechas del periodo.')
+    if (kind === 'rango' && to < from) return setErr('El periodo no puede terminar antes de empezar.')
     setErr(null)
     // A new expense registered as paid is paid on its own date; an existing one on the "Pagado el" day.
     const paid_at = f.status !== 'pagado' ? null : !expense ? dayStamp(f.date) : dayStamp(paidDay)
-    save.mutate({ ...f, concept: f.concept.trim(), amount: n, notes: f.notes?.trim() || null, paid_at })
+    const period = generated ? { period_from: f.period_from, period_to: f.period_to } : { period_from: range?.[0] ?? null, period_to: range?.[1] ?? null }
+    save.mutate({ ...f, ...period, concept: f.concept.trim(), amount: n, notes: f.notes?.trim() || null, paid_at })
   }
 
   const teacherOpts = teachers.filter((t) => t.active || t.id === f.teacher_id)
@@ -84,7 +117,7 @@ export function ExpenseForm({ expense, preset, teachers, ruleName, onSave, onDel
       <div className="form-grid">
         <div className="field field--wide">
           <label htmlFor="ex-concept">Concepto</label>
-          <input id="ex-concept" className="input" maxLength={120} value={f.concept} placeholder="Ej: Cuenta de luz" onChange={(e) => set('concept', e.target.value)} />
+          <input id="ex-concept" className="input" maxLength={120} value={f.concept} placeholder="Ej: Cuenta de luz" onChange={(e) => { setAutoConcept(false); set('concept', e.target.value) }} />
         </div>
         <div className="field">
           <label htmlFor="ex-amount">Monto</label>
@@ -99,11 +132,39 @@ export function ExpenseForm({ expense, preset, teachers, ruleName, onSave, onDel
         </div>
         <div className="field">
           <label htmlFor="ex-teacher">Profesor (opcional)</label>
-          <select id="ex-teacher" className="input" value={f.teacher_id ?? ''} onChange={(e) => set('teacher_id', e.target.value || null)}>
+          <select id="ex-teacher" className="input" value={f.teacher_id ?? ''} onChange={(e) => { const id = e.target.value || null; set('teacher_id', id); if (autoConcept) set('concept', conceptFor(range, id)) }}>
             <option value="">Ninguno</option>
             {teacherOpts.map((t) => <option key={t.id} value={t.id}>{t.full_name}</option>)}
           </select>
         </div>
+        {!generated && (
+          <div className="field field--wide egr-period">
+            <span className="field__label" id="ex-period">Periodo que paga</span>
+            <div className="segmented" role="group" aria-labelledby="ex-period">
+              <button type="button" aria-pressed={kind === 'ninguno'} onClick={() => { setKind('ninguno'); followPeriod(null) }}>Sin periodo</button>
+              <button type="button" aria-pressed={kind === 'mes'} onClick={() => { setKind('mes'); followPeriod(monthRange(month)) }}>Un mes</button>
+              <button type="button" aria-pressed={kind === 'rango'} onClick={() => { const r: [string, string] = from && to ? [from, to] : monthRange(month); setKind('rango'); setFrom(r[0]); setTo(r[1]); followPeriod(r) }}>Rango de fechas</button>
+            </div>
+            {kind === 'mes' && (
+              <select id="ex-month" className="input" aria-label="Mes que paga" value={month} onChange={(e) => { setMonth(e.target.value); followPeriod(monthRange(e.target.value)) }}>
+                {monthOptions(today, month).map((m) => <option key={m} value={m}>{monthTitle(m)}</option>)}
+              </select>
+            )}
+            {kind === 'rango' && (
+              <div className="code-pair">
+                <div className="field"><label htmlFor="ex-from">Desde</label><input id="ex-from" type="date" className="input" value={from} max={to || undefined}
+                  onChange={(e) => { setFrom(e.target.value); if (e.target.value && to && to >= e.target.value) followPeriod([e.target.value, to]) }} /></div>
+                <div className="field"><label htmlFor="ex-to">Hasta</label><input id="ex-to" type="date" className="input" value={to} min={from || undefined}
+                  onChange={(e) => { setTo(e.target.value); if (from && e.target.value && e.target.value >= from) followPeriod([from, e.target.value]) }} /></div>
+              </div>
+            )}
+            {twice.length > 0 && (
+              <p className="hint egr-twice" role="status">
+                Ya hay {twice.length === 1 ? 'un pago' : `${twice.length} pagos`} a {teacherName(f.teacher_id)} en ese periodo: {twice.map((o) => `${periodLabel(o)} (${formatCLP(o.amount)}${o.status === 'pendiente' ? ', por pagar' : ''})`).join(', ')}.
+              </p>
+            )}
+          </div>
+        )}
         <div className="field">
           <label htmlFor="ex-date">{f.status === 'pagado' && !expense ? 'Fecha de pago' : generated || f.status === 'pendiente' ? 'Vence el' : 'Fecha'}</label>
           <input id="ex-date" type="date" className="input" value={f.date} onChange={(e) => set('date', e.target.value)} />

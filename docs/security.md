@@ -143,4 +143,5 @@ aunque la funcionalidad esté lista.
 - Generated expenses: `rule_id`, `period`, `classes` and `auto` are set only by `sync_expenses` (the guard trigger resets them on API writes); they can be cancelled (`anulado`) but not deleted (delete policy requires `rule_id is null`), so the generator never recreates them.
 - `sync_expenses(uuid)` / `expense_rules_month(uuid)`: security definer, check `has_school_role(admin)`, granted to `authenticated` only. `sync_all_expenses()` (nightly cron) and `teacher_classes_between()` are internal (revoked from every API role). Trigger functions revoked.
 - Audit log: expense paid, cancelled, back to pending, amount changed after paid, deleted.
-- Tests: `scripts/db/expenses.check.mjs` (41 checks).
+- Period paid (`period_from`/`period_to`, migration 20261127000003): both or neither, end ≥ start; a generated expense always covers its month (set by the guard).
+- Tests: `scripts/db/expenses.check.mjs` (46 checks).

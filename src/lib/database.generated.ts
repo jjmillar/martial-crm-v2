@@ -1079,6 +1079,8 @@ export type Database = {
           paid_at: string | null;
           paid_by: string | null;
           period: string | null;
+          period_from: string | null;
+          period_to: string | null;
           rule_id: string | null;
           school_id: string;
           status: Database["public"]["Enums"]["expense_status"];
@@ -1101,6 +1103,8 @@ export type Database = {
           paid_at?: string | null;
           paid_by?: string | null;
           period?: string | null;
+          period_from?: string | null;
+          period_to?: string | null;
           rule_id?: string | null;
           school_id: string;
           status?: Database["public"]["Enums"]["expense_status"];
@@ -1122,6 +1126,8 @@ export type Database = {
           paid_at?: string | null;
           paid_by?: string | null;
           period?: string | null;
+          period_from?: string | null;
+          period_to?: string | null;
           rule_id?: string | null;
           school_id?: string;
           status?: Database["public"]["Enums"]["expense_status"];

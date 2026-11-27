@@ -27,3 +27,25 @@ describe('egresos', () => {
     expect(periodLabel({ period: null, classes: null })).toBeNull()
   })
 })
+
+describe('periodo del pago', async () => {
+  const { monthRange, rangeLabel, periodLabel, overlapping } = await import('./api')
+  it('months and ranges', () => {
+    expect(monthRange('2026-02-14')).toEqual(['2026-02-01', '2026-02-28'])
+    expect(monthRange('2028-02-01')).toEqual(['2028-02-01', '2028-02-29'])
+    expect(rangeLabel('2026-01-01', '2026-01-31')).toBe('Enero de 2026')
+    expect(rangeLabel('2026-03-01', '2026-03-15')).toBe('1 mar – 15 mar 2026')
+    expect(rangeLabel('2025-12-20', '2026-01-10')).toBe('20 dic 2025 – 10 ene 2026')
+    expect(periodLabel({ period: null, classes: null, period_from: '2026-03-01', period_to: '2026-03-15' })).toBe('1 mar – 15 mar 2026')
+  })
+  it('finds overlapping payments of the same teacher', () => {
+    const list = [
+      { id: 'a', teacher_id: 't', status: 'pagado' as const, period_from: '2026-01-01', period_to: '2026-01-31' },
+      { id: 'b', teacher_id: 't', status: 'anulado' as const, period_from: '2026-02-01', period_to: '2026-02-28' },
+      { id: 'c', teacher_id: 'u', status: 'pagado' as const, period_from: '2026-02-01', period_to: '2026-02-28' },
+    ]
+    expect(overlapping(list, 't', '2026-01-15', '2026-02-15').map((e) => e.id)).toEqual(['a'])
+    expect(overlapping(list, 't', '2026-02-01', '2026-02-28')).toEqual([])
+    expect(overlapping(list, 't', '2026-01-01', '2026-01-31', 'a')).toEqual([])
+  })
+})

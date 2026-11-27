@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { usePersisted } from '../../lib/persist'
 import { formatCLP } from '../../lib/money'
-import { dayMonth, monthTitle, todayIso } from '../../lib/dates'
+import { dayMonth, todayIso } from '../../lib/dates'
 import { Icon } from '../../ui/Icon'
 import { Modal } from '../../ui/Modal'
 import { ShowMore } from '../../ui/ShowMore'
@@ -19,7 +19,7 @@ const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '
 
 /** One pop-up for an expense: new, from a preset (a teacher's monthly payment) or an existing one. */
 function useExpenseDialog() {
-  const { schoolId, rules, teachers } = useEgresos()
+  const { schoolId, expenses, rules, teachers } = useEgresos()
   const qc = useQueryClient()
   const [state, setState] = useState<{ expense: Expense | null; preset?: Partial<ExpenseInput>; key: string } | null>(null)
   const [open, setOpen] = useState(false)
@@ -29,7 +29,7 @@ function useExpenseDialog() {
   const dialog = (
     <Modal open={open} onClose={() => setOpen(false)} labelledBy="exp-form-h">
       {state && (
-        <ExpenseForm key={state.key} expense={state.expense} preset={state.preset} teachers={teachers.data ?? []} ruleName={ruleName}
+        <ExpenseForm key={state.key} expense={state.expense} preset={state.preset} teachers={teachers.data ?? []} others={expenses.data ?? []} ruleName={ruleName}
           onSave={async (id, input) => { await saveExpense(schoolId!, id, input); await refresh() }}
           onDelete={async (id) => { await deleteExpense(id); await refresh() }}
           onDone={() => setOpen(false)} />
@@ -157,7 +157,6 @@ export function ComisionesSection() {
     onSuccess: () => Promise.all([qc.invalidateQueries({ queryKey: rulesKey(schoolId) }), qc.invalidateQueries({ queryKey: expensesKey(schoolId) })]),
     onError: (e: Error) => setErr(e.message),
   })
-  const month = monthTitle(todayIso())
   const active = (teachers.data ?? []).filter((t) => t.active)
 
   if (teachers.isLoading || rules.isLoading) return <p className="hint">Cargando…</p>
@@ -178,14 +177,14 @@ export function ComisionesSection() {
               <div className="egr-teacher__head">
                 <span className="egr-teacher__name">
                   <strong>{t.full_name}</strong>
-                  <span className="hint">{last ? `Último pago: ${formatCLP(last.amount)} · ${dayMonth(last.paid_at ? todayIso(new Date(last.paid_at)) : last.date)}` : 'Sin pagos registrados'}</span>
+                  <span className="hint">{last ? `Último pago: ${formatCLP(last.amount)} · ${dayMonth(last.paid_at ? todayIso(new Date(last.paid_at)) : last.date)}${periodLabel(last) ? ` · ${periodLabel(last)}` : ''}` : 'Sin pagos registrados'}</span>
                 </span>
                 <div className="segmented" role="group" aria-label={`Comisión de ${t.full_name}`}>
                   <button type="button" aria-pressed={m === 'manual'} onClick={() => m !== 'manual' && mode.mutate({ id: t.id, m: 'manual' })}>Manual</button>
                   <button type="button" aria-pressed={m === 'automatica'} onClick={() => m !== 'automatica' && mode.mutate({ id: t.id, m: 'automatica' })}>Automática</button>
                 </div>
                 {m === 'manual' && (
-                  <button type="button" className="btn btn--ghost egr-teacher__pay" onClick={() => exp.show(null, { category: 'comision_profesor', teacher_id: t.id, concept: `Comisión ${t.full_name} · ${month}`, status: 'pagado' })}>
+                  <button type="button" className="btn btn--ghost egr-teacher__pay" onClick={() => exp.show(null, { category: 'comision_profesor', teacher_id: t.id, status: 'pagado' })}>
                     <Icon name="plus" size={16} /> Registrar pago
                   </button>
                 )}

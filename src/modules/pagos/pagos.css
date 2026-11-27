@@ -778,3 +778,14 @@
 .egr-row .student-row__main .hint {
   white-space: normal;
 }
+.egr-period {
+  display: grid;
+  gap: 8px;
+}
+.egr-period .code-pair {
+  margin-top: 2px;
+}
+.hint.egr-twice {
+  margin: 0;
+  color: #e8c547;
+}
