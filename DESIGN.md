@@ -135,7 +135,9 @@ at the foot) and the page on one work panel (`.main`: 10 px inset, 18 px radius,
 menu item is drawn as a piece of that panel (panel colour + hairline), so the menu points into the page. Phones (≤760 px): no top bar; the user's photo top left, a draggable round menu button, a bottom
 sheet with every section. Pages are one long view of open sections (`Acc`, `<details>`: a header row over a hairline,
 never a box) grouped by `h2.acc-group` (20 px heading); no tabs. The staff home greeting is the page header (no box)
-over four numbers (2 × 2 on phones). Lists of people and movements are grouped lists (`.student-list`,
+over four numbers (2 × 2 on phones). The student home opens with the greeting and the level as one header (no boxes; the level
+sits at the right on desktop), class rows carry their action at the right ("Marcar" on phones), and skills and belts
+share one progress block. Lists of people and movements are grouped lists (`.student-list`,
 `.member-group`). Long lists show 3, then "Mostrar más" by 10.
 
 ## Elevation & Depth

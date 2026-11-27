@@ -87,8 +87,8 @@ export function TodayCheckIn() {
           <span className="hint">{isToday ? `${hhmm(s.start_time)}–${hhmm(s.end_time)}` : dayLabel(date, today)}{c.room ? ` · ${c.room}` : ''}</span>
         </span>
         {!a && (classOpen(date, s.start_time) ? (
-          <button type="button" className="btn" disabled={mark.isPending} onClick={() => mark.mutate({ classId: c.id, date })}>
-            <Icon name="check" size={16} /> Marcar asistencia
+          <button type="button" className="btn" aria-label="Marcar asistencia" disabled={mark.isPending} onClick={() => mark.mutate({ classId: c.id, date })}>
+            <Icon name="check" size={16} /> Marcar<span className="checkin-btn__more"> asistencia</span>
           </button>
         ) : (
           <span className="tag" title="Puedes marcar tu asistencia desde 1 hora antes de la clase">Desde las {opensAt(s.start_time)}</span>
@@ -249,13 +249,14 @@ function SchoolHome({ setAll }: { setAll: (v: boolean) => void }) {
       )}
 
 
-      <section className="tile tile--wide rise" style={{ animationDelay: '120ms' }} aria-label="Skills">
-        {p ? <SkillsBreakdown skills={p.skills} own emptyText="Tus skills aparecen cuando asistas a clases con skills (por ejemplo Gi, NoGi o Guardia)." /> : <p className="hint">Cargando…</p>}
-      </section>
-
-      <section className="tile tile--wide rise" style={{ animationDelay: '130ms' }} aria-label="Cinturones">
-        <h2 className="tile__title">{child ? 'Sus cinturones' : 'Mis cinturones'}</h2>
-        {studentId && <MisCinturones studentId={studentId} child={child} />}
+      <section className="tile tile--wide st-progress rise" style={{ animationDelay: '120ms' }} aria-label="Progreso">
+        <div className="st-progress__part">
+          {p ? <SkillsBreakdown skills={p.skills} own emptyText="Tus skills aparecen cuando asistas a clases con skills (por ejemplo Gi, NoGi o Guardia)." /> : <p className="hint">Cargando…</p>}
+        </div>
+        <div className="st-progress__part">
+          <h2 className="tile__title">{child ? 'Sus cinturones' : 'Mis cinturones'}</h2>
+          {studentId && <MisCinturones studentId={studentId} child={child} />}
+        </div>
       </section>
 
       <section className="tile tile--wide rise" style={{ animationDelay: '140ms' }} aria-label="Logros" id="logros">
