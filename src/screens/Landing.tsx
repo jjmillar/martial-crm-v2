@@ -98,10 +98,9 @@ export function Landing() {
       <main>
         <section className="hero" ref={hero}>
           <div className="hero__copy">
-            <p className="hero__kicker rise">CRM para academias de artes marciales</p>
             <h1 className="rise" style={{ animationDelay: '60ms' }}>Tu academia, en orden.</h1>
             <p className="hero__lead rise" style={{ animationDelay: '120ms' }}>
-              Alumnos, clases, asistencia con QR, pagos y comisiones en un solo lugar. Y un portal para que tus alumnos vean su nivel, sus skills y su progreso.
+              El CRM para academias de artes marciales: alumnos, clases, asistencia con QR, pagos y comisiones en un solo lugar. Y un portal para que tus alumnos vean su nivel, sus skills y su progreso.
             </p>
             <div className="hero__actions rise" style={{ animationDelay: '180ms' }}>
               <Link className="btn btn--lg" to="/registro">Empieza tu prueba de {TRIAL_DAYS} días <Icon name="arrow" size={18} /></Link>

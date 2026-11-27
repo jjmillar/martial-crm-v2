@@ -90,3 +90,8 @@ The user's decision of 2026-11-24: "que no se vaya a otro menú esa opción. Rec
 - Going to another menu is optional, secondary, and always said explicitly. The pop-up ends with `<MoreLink text menu to />` (`src/ui/MoreLink.tsx`), which shows: "Para más información, ver todas las clases de ese día en Asistencia →".
 - Plain navigation is fine for menu entries, "Ver todas"/"Historial" headers, and opening a record from its own list (Alumnos → ficha).
 - After the pop-up closes, refresh the list it came from, so a finished item leaves it.
+
+## Impeccable es obligatorio en toda UI (2026-11-27)
+- Todo cambio de interfaz usa la skill **impeccable** (`~/.claude/skills/impeccable`, guía de github.com/pbakaus/impeccable, sin su binario): leer `reference/craft-floor.md` antes de editar y revisar el render (celular/escritorio, claro/oscuro).
+- Sus prohibiciones absolutas se suman a las de este documento: nada de rótulo/eyebrow sobre un título, ni barras pegadas a un costado de una caja.
+- En el MCP de desarrollo (ODD), cada tarea que toca UI lleva `- UI: impeccable <comando>` y no se aplica sin `revision_ui`.
