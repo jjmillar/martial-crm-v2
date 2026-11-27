@@ -170,6 +170,7 @@ function Administrativos({ schoolId }: { schoolId: string }) {
       {members.data?.length === 0 && <p className="hint">Esta escuela aún no tiene administrativos. Invita a su administrador.</p>}
       {all.length > 0 && rows.length === 0 && <p className="hint">Nadie coincide con la búsqueda.</p>}
 
+      <div className="member-group">
       {rows.slice(0, shown).map((r) => r.kind === 'ceo' ? (
         <article key={r.key} className="card member-row">
           <div className="member-row__who">
@@ -213,6 +214,7 @@ function Administrativos({ schoolId }: { schoolId: string }) {
           </div>
         </article>
       ))}
+      </div>
       <ShowMore shown={shown} total={rows.length} onMore={more} label="Mostrar más" />
 
       <Modal open={inviting} onClose={closeInvite} label="Invitar administrativo">

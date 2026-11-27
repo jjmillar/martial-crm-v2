@@ -574,20 +574,36 @@
   align-self: start;
   padding-top: 1px;
 }
+
+/* In "Marcar asistencia" the action sits at the right of the class, like the staff home */
 .bento--student .checkin-list li .today-list__name,
 .portal-att .checkin-list li .today-list__name {
-  grid-column: 3 / -1;
+  grid-column: 3;
 }
-/* In "Marcar asistencia" the action sits under the class name, left-aligned with it */
 .bento--student .checkin-list .btn,
 .bento--student .checkin-list .checkin-state,
 .bento--student .checkin-list .tag,
 .portal-att .checkin-list .btn,
 .portal-att .checkin-list .checkin-state,
 .portal-att .checkin-list .tag {
-  grid-column: 3 / -1;
-  justify-self: start;
+  grid-column: 4;
+  justify-self: end;
   margin-left: 0;
+}
+.bento--student .checkin-list .checkin-state,
+.portal-att .checkin-list .checkin-state {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+/* the button's 8 px gap would read as a double space between "Marcar" and "asistencia" */
+.checkin-btn__more {
+  margin-left: -4px;
+}
+@media (max-width: 600px) {
+  .checkin-btn__more {
+    display: none;
+  }
 }
 .bento--student .checkin-list .btn,
 .portal-att .checkin-list .btn {
@@ -603,6 +619,40 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   column-gap: 18px;
+}
+
+/* Header with progress: the greeting and the level read as one header, no boxes. Desktop: level at the right. */
+.bento--student > .level-card {
+  align-self: end;
+  padding: 0 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+@media (min-width: 901px) {
+  .bento--student > .st-hero {
+    grid-column: span 2;
+  }
+}
+@media (max-width: 900px) {
+  .bento--student > .level-card {
+    grid-column: 1 / -1;
+    padding: 0 2px 6px;
+  }
+}
+
+/* Progress: skills and belts in one block, divided by a hairline */
+.st-progress {
+  gap: 0;
+}
+.st-progress__part {
+  display: grid;
+  gap: 10px;
+}
+.st-progress__part + .st-progress__part {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
 }
 .st-hero__text {
   display: grid;

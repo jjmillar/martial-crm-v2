@@ -72,7 +72,7 @@ function StaffHome() {
   }, [students.data, enrollments.data, classes.data, payments.data, today])
 
   return (
-    <div className="bento">
+    <div className={`bento${isAdmin ? ' bento--4' : ''}`}>
       <section className={`tile tile--hero rise${isAdmin ? '' : ' tile--full'}`}>
         <h1>Hola{firstName ? `, ${firstName}` : ''}.</h1>
         <p className="tile__lead">

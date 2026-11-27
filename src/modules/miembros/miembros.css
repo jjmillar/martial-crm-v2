@@ -15,7 +15,21 @@
 
 .miembros__list {
   display: grid;
-  gap: 8px;
+  gap: 12px;
+}
+/* The people themselves: one grouped list, rows divided by hairlines */
+.member-group {
+  display: grid;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow: clip;
+}
+.member-group:empty {
+  display: none;
+}
+.member-group > * + * {
+  border-top: 1px solid var(--line);
 }
 
 .member-row {
@@ -25,6 +39,15 @@
   justify-content: space-between;
   gap: 12px;
   padding: 14px 16px;
+}
+.member-group .member-row.card {
+  border-inline: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  background: none;
+}
+.member-group .member-row.card:first-child {
+  border-top: 0;
 }
 
 .member-row__who {

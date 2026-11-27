@@ -13,25 +13,35 @@
   flex-direction: column;
   gap: 10px;
   height: 100%;
-  padding-left: 26px;
-  overflow: hidden;
   color: inherit;
   text-decoration: none;
-  transition: border-color var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
 
-/* colour stripe */
-.class-card::before {
+/* no blank row when a class has no tags */
+.class-card .plan-card__tags:not(:has(.tag:not(:empty))) {
+  display: none;
+}
+
+/* the class colour: a dot before the name */
+.class-card .teacher-card__name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.class-card .teacher-card__name::before {
   content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 5px;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
   background: var(--class-color, var(--accent));
 }
 
 .class-card:hover,
 .class-card:focus-visible {
-  border-color: var(--faint);
+  border-color: var(--line-strong);
+  background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
 }
 
 .class-card.is-off {
@@ -49,8 +59,8 @@
 }
 
 .slots li {
-  padding: 4px 8px;
-  border-radius: var(--radius);
+  padding: 4px 10px;
+  border-radius: 999px;
   background: var(--surface-2);
   color: var(--muted);
 }

@@ -18,7 +18,7 @@
   place-items: center;
   width: 36px;
   height: 36px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   background: transparent;
   color: var(--muted);
@@ -148,6 +148,32 @@
   background: var(--surface-2);
 }
 
+/* Desktop: the sidebar sits on the deeper shell ground and the page on one rounded work panel. The current
+   section is a piece of that panel (same colour, same edge): the menu points into the page. */
+@media (min-width: 761px) {
+  body:has(.shell) {
+    background: var(--shell);
+  }
+  .shell .sidebar {
+    border-right: 0;
+    background: var(--shell);
+  }
+  .shell .main {
+    margin: 10px 10px 10px 0;
+    min-height: calc(100dvh - 20px);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+    background: var(--bg);
+  }
+  .shell .nav__link:hover {
+    background: color-mix(in srgb, var(--bg) 60%, var(--shell));
+  }
+  .shell .nav__link.active {
+    background: var(--bg);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+}
+
 .sidebar__user {
   margin-top: auto;
   display: flex;
@@ -156,6 +182,11 @@
   gap: 8px;
   padding-top: 16px;
   border-top: 1px solid var(--line);
+}
+@media (min-width: 761px) {
+  .shell .sidebar__user .icon-btn {
+    border-color: transparent;
+  }
 }
 
 .sidebar__actions,
@@ -189,9 +220,9 @@
 .content {
   flex: 1;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 32px;
+  padding: 40px 40px 32px;
 }
 
 .page-head {
@@ -200,7 +231,8 @@
 }
 
 .page-head h1 {
-  font-size: clamp(28px, 4vw, 40px);
+  font-size: clamp(28px, 3.4vw, 38px);
+  letter-spacing: -0.03em;
 }
 
 /* Page header with an action on the right (shared by modules) */
@@ -233,7 +265,7 @@
 }
 
 .app-footer {
-  padding: 16px 32px;
+  padding: 16px 40px 20px;
   font-size: 13px;
   color: var(--faint);
 }
@@ -338,7 +370,7 @@
   padding: 0;
   border: 1px solid var(--line);
   border-bottom: 0;
-  border-radius: 16px 16px 0 0;
+  border-radius: 22px 22px 0 0;
   background: var(--surface);
   color: var(--text);
 }
@@ -376,8 +408,9 @@
   justify-items: center;
   gap: 6px;
   padding: 14px 8px;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: var(--radius-card);
+  background: var(--surface-2);
   color: var(--muted);
   font-size: 13px;
   font-weight: 500;
@@ -386,8 +419,8 @@
 }
 
 .sheet__link.active {
-  color: var(--text);
-  background: var(--surface-2);
+  color: var(--btn-text);
+  background: var(--btn-bg);
 }
 
 .sheet__account {
@@ -492,7 +525,7 @@
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: var(--surface);
+    background: var(--bg);
     color: var(--text);
     font-size: 16px;
     font-weight: 700;
@@ -659,6 +692,7 @@
   .me-chip {
     display: inline-flex;
     border-radius: 50%;
+    text-decoration: none;
   }
   .me-chip .avatar {
     border: 1px solid var(--line);

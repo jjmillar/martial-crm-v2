@@ -15,14 +15,22 @@
   border-radius: var(--radius-card);
 }
 
+/* The greeting is the page's header, not a box */
 .tile--hero {
-  grid-column: span 2;
-  justify-content: flex-end;
-  min-height: 200px;
+  grid-column: 1 / -1;
+  gap: 8px;
+  min-height: 0;
+  padding: 0 0 12px;
+  border: 0;
+  background: none;
 }
 
 .tile--hero h1 {
-  font-size: clamp(32px, 5vw, 52px);
+  font-size: clamp(32px, 4.4vw, 46px);
+  letter-spacing: -0.035em;
+}
+.bento--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .tile--wide {
@@ -46,10 +54,11 @@
 }
 
 .tile__big {
-  font-size: clamp(30px, 4vw, 40px);
+  font-size: clamp(28px, 3vw, 36px);
   line-height: 1.05;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
 
@@ -70,7 +79,8 @@
 
 .tile--link:hover,
 .tile--link:focus-visible {
-  border-color: var(--faint);
+  border-color: var(--line-strong);
+  background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
 }
 
 .tile__head {
@@ -125,25 +135,27 @@
 }
 
 @media (max-width: 900px) {
-  .bento {
+  .bento,
+  .bento--4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 600px) {
   /* stat tiles pair up on phones; hero and lists stay full width */
-  .bento {
+  .bento,
+  .bento--4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
-  .tile {
+  .tile:not(.tile--hero) {
     padding: 16px;
   }
 
   .tile--hero {
     grid-column: 1 / -1;
-    min-height: 140px;
+    padding: 0 0 4px;
   }
 
   .tile__big {
@@ -166,4 +178,18 @@
 
 .tile__big--sm {
   font-size: 22px;
+}
+
+/* Phones: the four numbers pair up (2 × 2) instead of four full-width boxes */
+@media (max-width: 600px) {
+  .bento.bento--4 > .tile.tile--link:not(.tile--hero):not(.tile--wide):not(.level-card) {
+    grid-column: auto;
+    gap: 6px;
+  }
+  .bento--4 .tile__label {
+    font-size: 13px;
+  }
+  .bento--4 .tile__big {
+    font-size: 26px;
+  }
 }
