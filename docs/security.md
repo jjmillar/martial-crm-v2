@@ -154,3 +154,7 @@ aunque la funcionalidad esté lista.
 - `set_my_student_photo(uuid, text)`: el alumno o su apoderado cambian la foto de su ficha (solo sus propios registros).
 - `Permissions-Policy`: `camera=(self)` (antes `camera=()`) para tomar la foto con la webcam; solo páginas propias.
 - Tests: `scripts/db/avatars.check.mjs` (28 checks).
+
+## Lista de precios pública (2026-11-27, migration 20261127000006)
+- `public_plans()`: security definer, ejecutable por `anon`. Devuelve solo planes activos de pago y solo columnas de una lista de precios (sin clientes ni conteos). La tabla `platform_plans` sigue cerrada para `anon`.
+- `security.check.mjs` mantiene la lista blanca de RPC anónimas: book_trial, public_plans, school_landing, student_public_profile.

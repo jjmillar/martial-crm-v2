@@ -26,7 +26,7 @@ check('signed-in users keep the RLS helpers', (await tryAs(db, ADM, `select publ
 const trig = (await db.query(`select count(*)::int c from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.prorettype='trigger'::regtype and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))`)).rows[0].c
 check('no trigger function is callable through the API', trig === 0, trig)
 const anonAny = (await db.query(`select array_agg(p.proname order by p.proname) l from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and has_function_privilege('anon', p.oid, 'execute')`)).rows[0].l
-check('anon executes only the three public RPCs', JSON.stringify(anonAny) === JSON.stringify(['book_trial', 'school_landing', 'student_public_profile']), anonAny)
+check('anon executes only the public RPCs (landing, trial booking, student profile, price list)', JSON.stringify(anonAny) === JSON.stringify(['book_trial', 'public_plans', 'school_landing', 'student_public_profile']), anonAny)
 await db.query(`create function public.zz_new() returns int language sql as 'select 1'`)
 check('new functions are not executable by anon by default', !(await db.query(`select has_function_privilege('anon', 'public.zz_new()', 'execute') x`)).rows[0].x)
 

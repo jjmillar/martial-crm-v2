@@ -3354,6 +3354,17 @@ export type Database = {
         Returns: undefined;
       };
       platform_whoami: { Args: Record<PropertyKey, never>; Returns: Json };
+      public_plans: {
+        Args: never;
+        Returns: {
+          id: string;
+          max_schools: number;
+          max_students: number;
+          name: string;
+          period: string;
+          price_clp: number;
+        }[];
+      };
       qr_check_in: {
         Args: {
           p_lat?: number;

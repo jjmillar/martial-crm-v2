@@ -8,6 +8,7 @@ import { useShowMore } from '../../ui/useShowMore'
 import { CodeField } from '../descuentos/CodeField'
 import { TransferData } from '../pagar/Checkout'
 import {
+  PLAN_PICK_KEY,
   applyCode, checkout, fetchMySubscription, invoiceStatusLabel, mySubKey, perLabel, reportTransfer, subStatusLabel,
   type BillPlan, type Invoice, type MySubscription,
 } from './api'
@@ -69,7 +70,10 @@ function Status({ s }: { s: MySubscription }) {
 }
 
 function Pay({ s, open, refresh }: { s: MySubscription; open: Invoice | null; refresh: () => Promise<unknown> }) {
-  const [plan, setPlan] = useState<string | null>(open?.plan_id ?? s.plan?.id ?? s.plans[0]?.id ?? null)
+  // A plan picked on the landing (before signing up) comes first while still on the trial.
+  const landingPick = (() => { try { return localStorage.getItem(PLAN_PICK_KEY) } catch { return null } })()
+  const picked = s.status === 'prueba' && landingPick && s.plans.some((p) => p.id === landingPick) ? landingPick : null
+  const [plan, setPlan] = useState<string | null>(open?.plan_id ?? picked ?? s.plan?.id ?? s.plans[0]?.id ?? null)
   const [reference, setReference] = useState('')
   const [error, setError] = useState<string | null>(null)
   useEffect(() => { if (open?.plan_id) setPlan(open.plan_id) }, [open?.plan_id])

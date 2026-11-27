@@ -131,3 +131,6 @@ export function subSummary(s: MySubscription): string {
   if (s.status === 'activa') return `${plan} · ${s.period_end ? `pagado hasta el ${formatDate(s.period_end)}` : 'activa'}`
   return `${plan} · ${s.status ? subStatusLabel[s.status].toLowerCase() : 'sin suscripción'}`
 }
+
+/** The plan an academy picked on the main site's landing; Mi suscripción pre-selects it. */
+export const PLAN_PICK_KEY = 'mcrm.planElegido'
