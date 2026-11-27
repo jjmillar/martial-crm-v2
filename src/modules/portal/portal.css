@@ -635,11 +635,22 @@
   font-size: 13px;
   font-weight: 600;
 }
+/* Phones: the photo goes to the right of the greeting (and the top bar photo steps aside on this page) */
 @media (max-width: 760px) {
   .bento--student > .st-hero {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 14px;
   }
   .st-hero .st-hero__photo {
+    order: 2;
+    width: 56px !important;
+    height: 56px !important;
+    font-size: 20px !important;
+  }
+  .shell:has(.bento--student) > .sidebar {
     display: none;
+  }
+  .shell:has(.bento--student) .content {
+    padding-top: 20px;
   }
 }
