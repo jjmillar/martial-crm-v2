@@ -273,15 +273,8 @@ a {
 
 /* Motion tokens, keyframes and enter/exit rules live in src/ui/motion.css (docs/ui-standards.md) */
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-}
+/* Reduced motion: no travel (no slide, rise, scale or height animation), but state changes stay visible as short fades
+   and color changes, so feedback (a pop-up opening, a saved message, a toggle) is never lost. The rules live in motion.css. */
 
 /* Shared bits used by several modules */
 .sr-only {

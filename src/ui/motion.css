@@ -154,3 +154,49 @@ details[open] > :not(summary) {
     translate: -50% -12px;
   }
 }
+
+/* ---------- Reduced motion (Impeccable animate, audit 2026-11-27) ----------
+   Fewer and gentler, not none: everything that entered by moving now just fades in, quicker; dialogs and the menu
+   sheet fade without sliding; accordions open at once; hover / state colors keep their short transition. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 140ms;
+    --dur-slow: 140ms;
+    --dur-exit: 120ms;
+  }
+  .m-in,
+  .rise,
+  .m-pop,
+  .alert,
+  .field__error,
+  details[open] > :not(summary) {
+    animation-name: m-fade;
+  }
+  .modal,
+  .sheet,
+  .modal[open][data-closing],
+  .sheet[open][data-closing] {
+    transform: none;
+  }
+  @starting-style {
+    .modal[open],
+    .sheet[open] {
+      transform: none;
+    }
+  }
+  details::details-content,
+  details[open]::details-content {
+    transition: none;
+  }
+  .flash--out {
+    animation-name: m-fade-out;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+@keyframes m-fade-out {
+  to {
+    opacity: 0;
+  }
+}

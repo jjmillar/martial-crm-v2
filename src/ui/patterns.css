@@ -403,7 +403,7 @@ input[type='checkbox']:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   .flash {
-    animation: none;
+    animation-name: m-fade; /* the toast still appears gently, without dropping in */
   }
 }
 
