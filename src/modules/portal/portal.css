@@ -91,7 +91,7 @@
   grid-area: lvl;
   font-size: 13px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .skills__bar {
@@ -451,7 +451,7 @@
   font-size: 15px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 @media (prefers-reduced-motion: reduce) {
   .ginogi__bar span {

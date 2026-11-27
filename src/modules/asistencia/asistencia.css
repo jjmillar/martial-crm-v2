@@ -239,14 +239,14 @@
 
 /* Self check-in waiting for staff confirmation (card item 7) */
 .att-student.is-pending {
-  border-color: color-mix(in srgb, #e8c547 60%, var(--line));
-  background: color-mix(in srgb, #e8c547 10%, var(--bg));
+  border-color: color-mix(in srgb, var(--warn) 60%, var(--line));
+  background: color-mix(in srgb, var(--warn) 10%, var(--bg));
 }
 
 .att-student.is-pending .att-check {
-  border-color: #e8c547;
+  border-color: var(--warn);
   background: transparent;
-  color: #e8c547;
+  color: var(--warn);
 }
 
 .att-student .tag {
@@ -260,9 +260,9 @@
   justify-content: space-between;
   gap: 10px;
   padding: 12px 14px;
-  border: 1px solid color-mix(in srgb, #e8c547 50%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--warn) 50%, var(--line));
   border-radius: 10px;
-  background: color-mix(in srgb, #e8c547 8%, transparent);
+  background: color-mix(in srgb, var(--warn) 8%, transparent);
 }
 
 .att-card__no {
@@ -365,8 +365,8 @@
   color: var(--muted);
 }
 .qr-checkin__icon.is-ok {
-  background: color-mix(in srgb, #2fbf71 18%, transparent);
-  color: #2fbf71;
+  background: color-mix(in srgb, var(--ok) 18%, transparent);
+  color: var(--ok);
 }
 .qr-checkin__icon.is-bad {
   background: color-mix(in srgb, var(--accent) 16%, transparent);
@@ -387,6 +387,6 @@
   width: 100%;
 }
 .qr-checkin__icon.is-wait-static {
-  background: color-mix(in srgb, #e8c547 18%, transparent);
-  color: #c9a227;
+  background: color-mix(in srgb, var(--warn) 18%, transparent);
+  color: var(--warn);
 }

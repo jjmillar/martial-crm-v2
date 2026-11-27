@@ -16,9 +16,12 @@ export function themeColors(theme: string | null | undefined, primary?: string |
   return { primary: t.primary, accent: t.accent }
 }
 
-// Readable text color on top of a brand color.
+// Readable text color on top of a brand color: white or near-black, whichever has the higher WCAG contrast.
 export function onColor(hex: string) {
   const n = parseInt(hex.slice(1), 16)
-  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#111111' : '#ffffff'
+  const lin = (v: number) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 }
+  const L = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255)
+  const onWhite = 1.05 / (L + 0.05)
+  const onDark = (L + 0.05) / (0.0056 + 0.05) // #111111
+  return onDark > onWhite ? '#111111' : '#ffffff'
 }

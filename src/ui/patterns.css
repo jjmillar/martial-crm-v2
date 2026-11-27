@@ -58,6 +58,9 @@
   margin-left: 4px;
   color: var(--faint);
 }
+.segmented button[aria-pressed='true'] span {
+  color: var(--muted); /* on the pressed (raised) surface the faint gray falls under 4.5:1 */
+}
 
 .segmented button[aria-pressed='true'] {
   background: var(--surface-2);
@@ -296,7 +299,7 @@ input[type='checkbox']:disabled {
 
 .tag--accent {
   border-color: color-mix(in srgb, var(--accent) 60%, transparent);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* Status tags shared by enrollments (and payments later) */
@@ -306,8 +309,8 @@ input[type='checkbox']:disabled {
 }
 
 .tag--phase-por_vencer {
-  color: #e8c547;
-  border-color: color-mix(in srgb, #e8c547 45%, transparent);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
 }
 
 .tag--phase-vencida,
@@ -317,7 +320,7 @@ input[type='checkbox']:disabled {
 }
 
 .tag--phase-pendiente {
-  color: var(--accent);
+  color: var(--accent-text);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
@@ -413,8 +416,8 @@ input[type='checkbox']:disabled {
 }
 
 .tag--wait {
-  color: #e8c547;
-  border-color: color-mix(in srgb, #e8c547 45%, transparent);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
 }
 
 /* Accordion (Ajustes) */
@@ -731,7 +734,7 @@ button.date-pick__day:hover {
   border-radius: 0 10px 10px 0;
 }
 .date-pick__week.is-today .date-pick__wk {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .date-pick__wk {
   display: grid;

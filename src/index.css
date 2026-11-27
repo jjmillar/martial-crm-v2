@@ -10,6 +10,11 @@
   --accent: #e0492c;
   --ok: #3fb27f;
   --danger: #ff6b5a;
+  /* Status and accent roles, one value per theme so every pair keeps WCAG AA (audit 2026-11-27) */
+  --warn: var(--warn);
+  --info: var(--info);
+  --accent-text: #f2694d; /* the accent as small text on dark surfaces */
+  --accent-solid: #c23a1f; /* accent background behind white text */
   --btn-bg: #f4f4f7;
   --btn-text: #19191c;
   --focus: #f4f4f7;
@@ -29,7 +34,12 @@
   --line: #dcdce1;
   --text: #19191c;
   --muted: #55555c;
-  --faint: #7a7a82;
+  --faint: #66666e;
+  --ok: #1b744e;
+  --danger: #c2342a;
+  --warn: #845f00;
+  --info: #2b67b3;
+  --accent-text: #c23a1f;
   --btn-bg: #19191c;
   --btn-text: #f4f4f7;
   --focus: #19191c;

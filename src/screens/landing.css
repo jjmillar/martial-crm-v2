@@ -468,7 +468,7 @@
   left: 24px;
   padding: 4px 10px;
   border-radius: 99px;
-  background: var(--accent);
+  background: var(--accent-solid);
   color: #fff;
   font-size: 12px;
   font-weight: 700;

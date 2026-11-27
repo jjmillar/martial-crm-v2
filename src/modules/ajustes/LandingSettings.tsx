@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useSchool } from '../../lib/school'
 import type { School } from '../../lib/database.types'
-import { landingThemes, themeColors, type LandingTheme } from '../../lib/landingThemes'
+import { landingThemes, onColor, themeColors, type LandingTheme } from '../../lib/landingThemes'
 import { Icon } from '../../ui/Icon'
 import { Toggle } from '../../ui/Toggle'
 
@@ -97,7 +97,7 @@ export function LandingSettings({ school }: { school: School }) {
           </div>
         )}
         <div className="theme-preview" style={{ background: `radial-gradient(circle at 10% 10%, ${preview.accent}66, transparent 60%), ${preview.primary}33` }}>
-          <span style={{ background: preview.primary }}>Crear cuenta</span>
+          <span style={{ background: preview.primary, color: onColor(preview.primary) }}>Crear cuenta</span>
           <b style={{ color: preview.primary }}>{school.name}</b>
         </div>
       </div>

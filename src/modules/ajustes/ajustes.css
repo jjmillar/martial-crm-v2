@@ -643,13 +643,13 @@
 .qr-geo svg {
   flex: none;
   margin-top: 1px;
-  color: #2fbf71;
+  color: var(--ok);
 }
 .qr-geo.is-warn svg {
-  color: #c9a227;
+  color: var(--warn);
 }
 .qr-geo.is-warn {
-  border-color: color-mix(in srgb, #e8c547 45%, var(--line));
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
 }
 .qr-geo {
   flex-wrap: wrap;

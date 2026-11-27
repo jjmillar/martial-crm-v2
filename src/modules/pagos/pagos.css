@@ -38,8 +38,8 @@
 }
 
 .tag.tag--pay-pendiente {
-  color: #e8c547;
-  border-color: color-mix(in srgb, #e8c547 45%, transparent);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
 }
 
 .tag.tag--pay-fallido {
@@ -223,8 +223,8 @@
   color: var(--ok);
 }
 .tag.tag--review {
-  color: #6aa9f0;
-  border-color: color-mix(in srgb, #6aa9f0 45%, transparent);
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 45%, transparent);
 }
 /* Student: my payments */
 .my-pays {
@@ -379,7 +379,7 @@
   font-size: 13px;
 }
 .pay-card.is-review {
-  border-color: color-mix(in srgb, #6aa9f0 45%, var(--line));
+  border-color: color-mix(in srgb, var(--info) 45%, var(--line));
 }
 .pay-card.is-rejected {
   border-color: color-mix(in srgb, var(--danger) 45%, var(--line));
@@ -400,7 +400,7 @@
   margin-left: auto;
 }
 .cust-row__due.is-late {
-  color: #e8c547;
+  color: var(--warn);
 }
 .pay-amount small {
   margin-left: 1px;
@@ -413,8 +413,8 @@
   border-color: color-mix(in srgb, var(--ok) 45%, transparent);
 }
 .tag.tag--sub-prueba {
-  color: #e8c547;
-  border-color: color-mix(in srgb, #e8c547 45%, transparent);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
 }
 .tag.tag--sub-suspendida {
   color: var(--danger);
@@ -503,13 +503,13 @@
   overflow-wrap: anywhere;
 }
 .tag.tag--code-programado {
-  color: #6aa9f0;
-  border-color: color-mix(in srgb, #6aa9f0 45%, transparent);
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 45%, transparent);
 }
 .tag.tag--code-vencido,
 .tag.tag--code-agotado {
-  color: #e8c547;
-  border-color: color-mix(in srgb, #e8c547 45%, transparent);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
 }
 .code-input {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -671,7 +671,7 @@
   white-space: nowrap;
 }
 .egr-row__when.is-late {
-  color: #e8c547;
+  color: var(--warn);
 }
 .egr-origin {
   display: flex;
@@ -787,5 +787,5 @@
 }
 .hint.egr-twice {
   margin: 0;
-  color: #e8c547;
+  color: var(--warn);
 }

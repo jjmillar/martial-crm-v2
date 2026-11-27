@@ -68,10 +68,10 @@
   font-variant-numeric: tabular-nums;
 }
 .cal-grid__day.is-today small {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .cal-grid__day.is-today b {
-  background: var(--accent);
+  background: var(--accent-solid);
   color: #fff;
 }
 .cal-grid--day .cal-grid__day {
@@ -476,10 +476,10 @@
   font-variant-numeric: tabular-nums;
 }
 .cal-agenda__day.is-today .cal-agenda__date small {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .cal-agenda__day.is-today .cal-agenda__date b {
-  background: var(--accent);
+  background: var(--accent-solid);
   color: #fff;
 }
 .cal-agenda__none {
@@ -561,7 +561,7 @@
   cursor: pointer;
 }
 .cal-month__cell.is-today .cal-month__num {
-  background: var(--accent);
+  background: var(--accent-solid);
   color: #fff;
 }
 

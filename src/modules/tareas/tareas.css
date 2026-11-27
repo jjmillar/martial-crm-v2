@@ -276,7 +276,7 @@
   margin-left: auto;
   padding: 0 6px;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--accent-solid);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -315,7 +315,7 @@
   border-bottom: 0;
 }
 .appr--pay {
-  --class-color: #6aa9f0;
+  --class-color: var(--info);
 }
 .appr--account {
   --class-color: var(--accent);
