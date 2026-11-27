@@ -45,18 +45,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
           )}
         </div>
 
-        <nav className="nav" aria-label="Secciones">
-          {nav.map((m) => (
-            <NavLink key={m.id} to={`/app/${m.path}`} also={m.also?.map((p) => `/app/${p}`)} className="nav__link">
-              {m.icon && <Icon name={m.icon} />}
-              <span>{m.label}</span>
-              {m.id === 'tareas' && pending > 0 && <span className="nav-badge" aria-label={`${pending} pendientes`}>{pending}</span>}
-            </NavLink>
-          ))}
-        </nav>
+        <div className="sidebar__menu">
+          <nav className="nav" aria-label="Secciones">
+            {nav.map((m) => (
+              <NavLink key={m.id} to={`/app/${m.path}`} also={m.also?.map((p) => `/app/${p}`)} className="nav__link">
+                {m.icon && <Icon name={m.icon} />}
+                <span>{m.label}</span>
+                {m.id === 'tareas' && pending > 0 && <span className="nav-badge" aria-label={`${pending} pendientes`}>{pending}</span>}
+              </NavLink>
+            ))}
+          </nav>
+          {/* Desktop: the CRM's name, quietly under the menu */}
+          <div className="sidebar__crm"><Wordmark to="/app" /></div>
+        </div>
 
         <div className="sidebar__end">
           <div className="sidebar__user">
+            <span className="sidebar__avatar" aria-hidden="true">{initials(profile?.full_name || user?.email || '?')}</span>
             <div className="sidebar__who">
               <strong>{profile?.full_name || user?.email}</strong>
               <span className="hint">{role ? roleLabel[role] : 'Sin rol asignado'}</span>
@@ -68,8 +73,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
             </div>
           </div>
-          {/* Desktop: the CRM's name at the foot of the bar */}
-          <div className="sidebar__crm"><Wordmark to="/app" /></div>
         </div>
       </aside>
 

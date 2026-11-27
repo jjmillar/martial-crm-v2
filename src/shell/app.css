@@ -444,16 +444,22 @@
   margin: 0;
 }
 
-/* ---------- Desktop sidebar of a school: school on top, menu centred, CRM name at the foot ---------- */
+/* ---------- Desktop sidebar of a school: school on top, menu centred (CRM name under it), user at the foot ---------- */
 .sidebar__school,
-.sidebar__crm {
+.sidebar__crm,
+.sidebar__avatar {
   display: none;
 }
 @media (min-width: 761px) {
+  .shell:has(.sidebar--school) {
+    grid-template-columns: 264px minmax(0, 1fr);
+  }
   .sidebar--school {
+    width: 264px;
     display: grid;
     grid-template-rows: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
-    gap: 24px;
+    gap: 28px;
+    padding: 24px 16px 20px;
   }
   .sidebar--school .sidebar__top {
     align-self: start;
@@ -461,44 +467,34 @@
   .sidebar--school .brand {
     display: none;
   }
-  /* Without a school yet the CRM's own wordmark stays on top */
+  /* Without a school yet the CRM's own wordmark stays on top (and not again under the menu) */
   .sidebar--school .sidebar__top:not(:has(.sidebar__school)) .brand {
     display: grid;
   }
-  .sidebar--school .sidebar__top:not(:has(.sidebar__school)) ~ .sidebar__end .sidebar__crm {
+  .sidebar--school .sidebar__top:not(:has(.sidebar__school)) ~ .sidebar__menu .sidebar__crm {
     display: none;
   }
-  .sidebar--school > .nav {
-    align-self: center;
-  }
-  .sidebar--school .sidebar__end {
-    display: grid;
-    align-self: end;
-    gap: 14px;
-  }
-  .sidebar--school .sidebar__end .sidebar__user {
-    margin-top: 0;
-  }
 
+  /* School: logo + name, on the same left edge as the menu icons */
   .sidebar__school {
     display: flex;
     align-items: center;
     gap: 12px;
     min-width: 0;
-    padding: 0 10px; /* same left edge as the menu icons */
+    padding: 0 6px;
   }
   .school-mark {
     display: grid;
     flex: none;
     place-items: center;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     overflow: hidden;
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--surface);
     color: var(--text);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: -0.02em;
     text-decoration: none;
@@ -515,9 +511,9 @@
   .sidebar__school .school-switch {
     margin-left: 0;
     color: var(--text);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     line-height: 1.25;
   }
   .sidebar__school .school-switch--one {
@@ -531,28 +527,121 @@
     margin-left: -8px;
   }
 
+  /* Menu: roomier rows, larger type and icons; the current section is clearly marked */
+  .sidebar__menu {
+    display: grid;
+    align-self: center;
+    gap: 28px;
+  }
+  .sidebar--school .nav {
+    gap: 6px;
+  }
+  .sidebar--school .nav__link {
+    position: relative;
+    gap: 14px;
+    min-height: 46px;
+    padding: 0 14px;
+    border-radius: 12px;
+    font-size: 15.5px;
+    letter-spacing: -0.005em;
+  }
+  .sidebar--school .nav__link svg {
+    flex: none;
+    width: 21px;
+    height: 21px;
+    stroke-width: 1.7;
+  }
+  .sidebar--school .nav__link.active {
+    font-weight: 600;
+  }
+  .sidebar--school .nav__link.active svg {
+    color: var(--accent);
+  }
+  .sidebar--school .nav__link.active::before {
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: -16px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--accent);
+    content: "";
+  }
+  .sidebar--school .nav__link:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+  .sidebar--school .nav__link .nav-badge {
+    margin-left: auto;
+  }
+
+  /* CRM name: a quiet signature under the menu */
   .sidebar__crm {
     display: block;
-    padding: 0 10px;
-  }
-  .sidebar--school .sidebar__who {
-    padding-left: 10px;
+    padding: 0 14px;
   }
   .sidebar__crm .wordmark {
-    color: var(--muted);
-    font-size: 13px;
     gap: 8px;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    opacity: 0.75;
+    transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
   }
   .sidebar__crm .wordmark svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
-  .sidebar__crm .wordmark:hover {
+  .sidebar__crm .wordmark svg rect {
+    fill: currentColor;
+  }
+  .sidebar__crm .wordmark svg circle {
+    display: none;
+  }
+  .sidebar__crm .wordmark:hover,
+  .sidebar__crm .wordmark:focus-visible {
     color: var(--text);
+    opacity: 1;
+  }
+
+  /* User: avatar, name and role, then theme and logout */
+  .sidebar--school .sidebar__end {
+    display: grid;
+    align-self: end;
+  }
+  .sidebar--school .sidebar__user {
+    gap: 10px;
+    margin-top: 0;
+    padding: 14px 6px 0;
+  }
+  .sidebar__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .sidebar--school .sidebar__who {
+    flex: 1;
+    gap: 1px;
+  }
+  .sidebar--school .sidebar__who .hint {
+    font-size: 12.5px;
+  }
+  .sidebar--school .sidebar__actions .icon-btn {
+    width: 34px;
+    height: 34px;
   }
 }
 @media (max-width: 760px) {
-  .sidebar__end {
+  .sidebar__end,
+  .sidebar__menu {
     display: none;
   }
 }
