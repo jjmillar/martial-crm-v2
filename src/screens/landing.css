@@ -364,37 +364,38 @@
   line-height: 1.55;
 }
 
+/* Features: a two-column list with hairline dividers, not a grid of identical cards */
 .lp-features {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--gap);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(32px, 6vw, 88px);
+  border-top: 1px solid var(--line);
 }
 .lp-feature {
   display: grid;
-  align-content: start;
-  gap: 10px;
-  padding: 24px 22px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-card);
-  background: var(--surface);
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 18px;
+  row-gap: 6px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--line);
 }
 .lp-feature__icon {
+  grid-row: 1 / span 2;
   display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: 6px;
-  border-radius: 12px;
-  background: var(--surface-2);
+  place-items: start;
+  padding-top: 2px;
+  color: var(--accent-text);
 }
 .lp-feature h3 {
-  font-size: 18px;
+  font-size: 19px;
   letter-spacing: -0.015em;
 }
 .lp-feature p {
+  max-width: 52ch;
   color: var(--muted);
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 /* Student portal */
@@ -662,9 +663,6 @@
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1040px) {
-  .lp-features {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

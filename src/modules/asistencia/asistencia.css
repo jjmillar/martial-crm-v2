@@ -44,7 +44,6 @@
   min-height: 76px;
   padding: 12px 14px 12px 16px;
   border: 1px solid var(--line);
-  border-left: 4px solid var(--class-color, var(--accent));
   border-radius: var(--radius-card);
   background: var(--surface);
   color: var(--text);
@@ -52,6 +51,16 @@
   text-align: left;
   cursor: pointer;
   transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), translate var(--dur-fast) var(--ease);
+}
+
+.att-card::before {
+  flex: none;
+  align-self: center;
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--class-color, var(--accent));
 }
 
 .att-card:hover {
@@ -112,8 +121,17 @@
 
 /* Class pop-up (one class on one date) */
 .sess-title {
-  padding-left: 12px;
-  border-left: 4px solid var(--class-color, var(--accent));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sess-title::before {
+  flex: none;
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--class-color, var(--accent));
 }
 
 .sess-title h2 {
@@ -265,14 +283,6 @@
   background: color-mix(in srgb, var(--warn) 8%, transparent);
 }
 
-.att-card__no {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--faint);
-  font-variant-numeric: tabular-nums;
-}
 
 /* Record under each name: who marked it and who approved it */
 .att-student__name .hint {

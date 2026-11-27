@@ -88,15 +88,23 @@
   list-style: none;
 }
 
+/* A class row: colour dot · time · name · action. Flat rows with dividers (no card inside the tile, no side bar). */
 .today-list li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 10px 48px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--class-color, var(--line));
-  border-radius: 10px;
-  background: var(--bg);
+  gap: 4px 12px;
+  padding: 12px 0;
+}
+.today-list li + li {
+  border-top: 1px solid var(--line);
+}
+.today-list li::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--class-color, var(--faint));
 }
 
 .today-list__time {

@@ -183,9 +183,8 @@
 .cal-block,
 .cal-chip,
 .cal-slot {
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--class-color, var(--accent));
-  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--class-color, var(--accent)) 50%, var(--line));
+  background: color-mix(in srgb, var(--class-color, var(--accent)) 10%, var(--surface));
   color: var(--text);
   font: inherit;
   text-align: left;
@@ -195,7 +194,7 @@
 .cal-block:hover,
 .cal-chip:hover,
 .cal-slot:hover {
-  background: color-mix(in srgb, var(--class-color, var(--accent)) 9%, var(--surface));
+  background: color-mix(in srgb, var(--class-color, var(--accent)) 18%, var(--surface));
 }
 .cal-block:focus-visible,
 .cal-chip:focus-visible,
@@ -573,7 +572,6 @@
   width: 100%;
   min-width: 0;
   padding: 2px 6px;
-  border-left-width: 3px;
   border-radius: 6px;
   font-size: 12px;
   line-height: 1.35;

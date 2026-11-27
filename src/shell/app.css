@@ -557,16 +557,6 @@
   .sidebar--school .nav__link.active svg {
     color: var(--accent);
   }
-  .sidebar--school .nav__link.active::before {
-    position: absolute;
-    top: 12px;
-    bottom: 12px;
-    left: -16px;
-    width: 3px;
-    border-radius: 0 3px 3px 0;
-    background: var(--accent);
-    content: "";
-  }
   .sidebar--school .nav__link:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: -2px;

@@ -114,15 +114,21 @@
 }
 
 .checkin-list li {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 10px 48px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px 14px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--class-color, var(--line));
-  border-radius: 10px;
-  background: var(--bg);
+  gap: 4px 12px;
+  padding: 12px 0;
+}
+.checkin-list li + li {
+  border-top: 1px solid var(--line);
+}
+.checkin-list li::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--class-color, var(--faint));
 }
 
 .checkin-list .btn,
@@ -540,10 +546,10 @@
 .portal-att .today-list li {
   position: relative;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
+  grid-template-columns: 10px 48px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px 12px;
-  padding: 12px 0 12px 14px;
+  gap: 4px 12px;
+  padding: 12px 0;
   border: 0;
   border-radius: 0;
   background: none;
@@ -554,19 +560,13 @@
 .portal-att .today-list li + li {
   border-top: 1px solid var(--line);
 }
-/* the class color as a slim pill, aligned with the row's text */
+/* the class color as a leading dot, on the first line of the row */
 .bento--student .checkin-list li::before,
 .bento--student .today-list li::before,
 .portal-att .checkin-list li::before,
 .portal-att .today-list li::before {
-  content: '';
-  position: absolute;
-  top: 14px;
-  bottom: 14px;
-  left: 0;
-  width: 3px;
-  border-radius: 3px;
-  background: var(--class-color, var(--line));
+  align-self: start;
+  margin-top: 6px;
 }
 .bento--student .today-list__time,
 .portal-att .today-list__time {
@@ -576,7 +576,7 @@
 }
 .bento--student .checkin-list li .today-list__name,
 .portal-att .checkin-list li .today-list__name {
-  grid-column: 2 / -1;
+  grid-column: 3 / -1;
 }
 /* In "Marcar asistencia" the action sits under the class name, left-aligned with it */
 .bento--student .checkin-list .btn,
@@ -585,7 +585,7 @@
 .portal-att .checkin-list .btn,
 .portal-att .checkin-list .checkin-state,
 .portal-att .checkin-list .tag {
-  grid-column: 2 / -1;
+  grid-column: 3 / -1;
   justify-self: start;
   margin-left: 0;
 }

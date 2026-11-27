@@ -108,7 +108,7 @@
 }
 
 .task--auto {
-  border-left: 3px solid var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
 }
 
 .task__main {

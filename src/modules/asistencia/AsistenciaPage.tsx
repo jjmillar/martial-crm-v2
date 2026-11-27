@@ -157,9 +157,8 @@ export function StaffAttendance() {
                         aria-label={`${v.number ? `Clase N° ${v.number}, ` : ''}${v.name}, ${hhmm(s.start_time)}. ${n} presentes${t ? `, ${t} ${t === 1 ? 'clase de prueba' : 'clases de prueba'}` : ''}. Abrir`}>
                         <span className="att-card__time">{hhmm(s.start_time)}<small>{hhmm(s.end_time)}</small></span>
                         <span className="att-card__main">
-                          <span className="att-card__no">{v.number ? `N° ${v.number}` : 'Programada'}</span>
                           <strong>{v.name}</strong>
-                          <span className="hint">{[v.teacher, v.room].filter(Boolean).join(' · ') || 'Sin profesor'}</span>
+                          <span className="hint">{[v.number ? `N° ${v.number}` : 'Programada', v.teacher ?? 'Sin profesor', v.room].filter(Boolean).join(' · ')}</span>
                           <span className="att-card__tags">
                             {live && <span className="tag tag--ok">En curso</span>}
                             {s.row?.not_held ? <span className="tag">No se realizó</span>
