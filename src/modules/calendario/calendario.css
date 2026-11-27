@@ -206,20 +206,33 @@
 .cal-chip.is-live,
 .cal-slot.is-live {
   border-color: color-mix(in srgb, var(--class-color) 55%, var(--line));
-  border-left-color: var(--class-color);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--class-color) 45%, transparent), 0 6px 18px -8px color-mix(in srgb, var(--class-color) 70%, transparent);
 }
+/* Past classes lose their colour (grey surface and border) but keep readable text; fading the whole block
+   with opacity dropped its secondary text under 3:1. Hover or focus brings the colour back. */
 .cal-block.is-past,
 .cal-chip.is-past,
 .cal-slot.is-past {
-  opacity: 0.62;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--muted);
 }
 .cal-block.is-past:hover,
 .cal-chip.is-past:hover,
 .cal-slot.is-past:hover,
 .cal-block.is-past:focus-visible,
 .cal-slot.is-past:focus-visible {
-  opacity: 1;
+  border-color: color-mix(in srgb, var(--class-color, var(--accent)) 50%, var(--line));
+  background: color-mix(in srgb, var(--class-color, var(--accent)) 10%, var(--surface));
+  color: var(--text);
+}
+/* Secondary text on the tinted blocks: --muted (the --faint hint gray falls under 4.5:1 on a tint) */
+.cal-block .hint,
+.cal-chip .hint,
+.cal-slot .hint,
+.cal-block small,
+.cal-slot small {
+  color: var(--muted);
 }
 .cal-live {
   display: inline-flex;
