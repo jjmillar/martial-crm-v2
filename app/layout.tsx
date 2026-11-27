@@ -27,7 +27,13 @@ import '@/shell/app.css'
 import '@/index.css'
 import '@/ui/patterns.css'
 import '@/ui/motion.css'
+import { Inter_Tight } from 'next/font/google'
 import { Providers } from './providers'
+
+// Inter Tight, self-hosted: next/font downloads it at build time and serves it from our own origin (no request to
+// Google per visit, no third-party host in the CSP). One variable file (latin covers Spanish), preloaded, with a
+// metric-matched fallback so the swap does not shift the layout.
+const interTight = Inter_Tight({ subsets: ['latin'], display: 'swap', variable: '--font-inter-tight' })
 
 export const metadata: Metadata = {
   title: 'Martial CRM',
@@ -42,12 +48,8 @@ const themeScript = "try { var t = localStorage.getItem('mcrm.theme'); if (t) do
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" className={interTight.variable} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>

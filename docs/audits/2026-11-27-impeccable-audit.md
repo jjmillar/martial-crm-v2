@@ -108,12 +108,12 @@ del proyecto), barras de color pegadas a un costado y tarjetas iguales de ícono
 | # | Dimensión | Antes | Después | Qué cambió |
 |---|---|---|---|---|
 | 1 | Accesibilidad | 2 | 4 | Contraste: ~250 fallas → 0 (claro y oscuro). Foco visible en el 100 % de los elementos recorridos con Tab; campos con anillo de 2 px |
-| 2 | Rendimiento | 3 | 3 | Sin cambios (la fuente sigue cargando desde Google Fonts: P3 pendiente, `/impeccable optimize`) |
+| 2 | Rendimiento | 3 | 4 | Inter Tight autoalojada con next/font: un solo archivo variable precargado, respaldo con métricas ajustadas (sin salto al cargar), 0 peticiones a Google |
 | 3 | Temas | 2 | 4 | `--warn`, `--info`, `--accent-text`, `--accent-solid` y estados por tema; 0 colores de estado fijos |
 | 4 | Responsive | 3 | 4 | Controles <44 px en celular: 400 → 56 (switches cuya área es su etiqueta y enlaces con alto completo) |
 | 5 | Integridad | 2 | 3 | 0 eyebrows, 0 barras a un costado, sin tarjetas anidadas; DESIGN.md. Los KPIs del Inicio y Contabilidad se mantienen a propósito (pantallas de trabajo) |
-| **Total** | | **12/20** | **18/20** | **Excelente (pulido menor)** |
+| **Total** | | **12/20** | **19/20** | **Excelente** |
 
 Commits: 45e4acc colorize · 7f4a98a polish (eyebrows) · 7d26194 adapt · 034e75d harden · 064bcb6 animate ·
 4ea56cc layout · 0f3135e document · polish final (calendario: clases pasadas legibles sin opacidad).
-Pendiente: P3 `/impeccable optimize` (autoalojar Inter Tight).
+P3 `/impeccable optimize` hecho después: fuente autoalojada y CSP sin hosts de Google (`style-src`/`font-src` solo 'self').

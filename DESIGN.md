@@ -116,7 +116,7 @@ Every colour is a CSS custom property remapped per theme (`:root` = dark, `:root
 
 ## Typography
 
-One family, Inter Tight (body 15/1.5). Headings 700, tracking -0.02em, `text-wrap: balance`. Hints 13 px in
+One family, Inter Tight (body 15/1.5), self-hosted through `next/font` in `app/layout.tsx` (variable 100–900, latin, `--font-inter-tight`); never link Google Fonts. Headings 700, tracking -0.02em, `text-wrap: balance`. Hints 13 px in
 `--faint`. Section titles inside tiles 16 px/700 (`.tile__title`); modal titles 17 px (`.modal__title`). Numbers in
 tables, times and money use `font-variant-numeric: tabular-nums`. Inputs are 16 px on phones (no iOS zoom).
 

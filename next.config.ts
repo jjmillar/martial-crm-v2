@@ -9,12 +9,12 @@ const supabaseWs = supabaseUrl.replace(/^https:/, 'wss:')
 // scripts, so scripts allow 'unsafe-inline' but never 'unsafe-eval' or other hosts; data only goes to our Supabase
 // project (plus the OpenStreetMap geocoder for the school's own address); nothing may frame the app (clickjacking).
 // Geolocation only for our own pages (QR check-in checks the student is at the school); the camera too, only for our
-// own pages (taking a profile photo).
+// own pages (taking a profile photo). Fonts are self-hosted (next/font), so styles and fonts come only from us.
 const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
   `img-src 'self' data: blob: ${supabaseUrl} https://tile.openstreetmap.org`,
   `connect-src 'self' ${supabaseUrl} ${supabaseWs} https://nominatim.openstreetmap.org`,
   "frame-ancestors 'none'",

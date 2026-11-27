@@ -22,7 +22,7 @@
   --radius: 5px;
   --radius-card: 12px;
   --gap: 12px;
-  --font: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font: var(--font-inter-tight), 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   color-scheme: dark;
 }
