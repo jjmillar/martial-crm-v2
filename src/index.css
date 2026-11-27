@@ -1,9 +1,14 @@
-/* Martial CRM design tokens (S8): graphite surfaces, one grotesque, small radii, short motion. */
+/* Martial CRM design tokens: graphite in layers (shell ground, one work panel, cards), one grotesque,
+   soft radii, few lines, short motion. See DESIGN.md. */
 :root {
-  --bg: #19191c;
-  --surface: #212125;
-  --surface-2: #2b2b30;
-  --line: #323236;
+  --shell: #111113; /* the ground under the sidebar; the page sits on --bg as one panel */
+  --bg: #18181b;
+  --surface: #1f1f23;
+  --surface-2: #29292e;
+  --line: #2b2b30;
+  --line-strong: #3a3a41; /* fields and ghost buttons: a control needs a firmer edge than a divider */
+  --input-bg: #141417;
+  --seg-on: #38383f;
   --text: #f4f4f7;
   --muted: #bababf;
   --faint: #8a8a92;
@@ -11,16 +16,17 @@
   --ok: #3fb27f;
   --danger: #ff6b5a;
   /* Status and accent roles, one value per theme so every pair keeps WCAG AA (audit 2026-11-27) */
-  --warn: var(--warn);
-  --info: var(--info);
+  --warn: #e8c547;
+  --info: #6aa9f0;
   --accent-text: #f2694d; /* the accent as small text on dark surfaces */
   --accent-solid: #c23a1f; /* accent background behind white text */
   --btn-bg: #f4f4f7;
   --btn-text: #19191c;
   --focus: #f4f4f7;
 
-  --radius: 5px;
-  --radius-card: 12px;
+  --radius: 8px;
+  --radius-card: 14px;
+  --radius-panel: 18px;
   --gap: 12px;
   --font: var(--font-inter-tight), 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -28,10 +34,14 @@
 }
 
 :root[data-theme='light'] {
-  --bg: #f4f4f7;
+  --shell: #ededf0;
+  --bg: #f8f8fa;
   --surface: #ffffff;
-  --surface-2: #ebebef;
-  --line: #dcdce1;
+  --surface-2: #f0f0f3;
+  --line: #e4e4e9;
+  --line-strong: #d0d0d7;
+  --input-bg: #ffffff;
+  --seg-on: #ffffff;
   --text: #19191c;
   --muted: #55555c;
   --faint: #66666e;
@@ -145,6 +155,7 @@ a {
   background: var(--btn-bg);
   color: var(--btn-text);
   font: 600 14px/1 var(--font);
+  letter-spacing: -0.005em;
   text-decoration: none;
   cursor: pointer;
   transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
@@ -166,7 +177,7 @@ a {
 .btn--ghost {
   background: transparent;
   color: var(--text);
-  border-color: var(--line);
+  border-color: var(--line-strong);
 }
 
 .btn--ghost:hover {
@@ -212,7 +223,7 @@ a {
 
 .field label {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--muted);
 }
 
@@ -220,9 +231,9 @@ a {
   width: 100%;
   min-height: 42px;
   padding: 0 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius);
-  background: var(--bg);
+  background: var(--input-bg);
   color: var(--text);
   font: inherit;
   transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
@@ -303,12 +314,16 @@ textarea.input {
 
 .tag {
   flex: none;
-  padding: 3px 8px;
+  padding: 3px 9px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
   color: var(--muted);
+}
+
+.tag:empty {
+  display: none;
 }
 
 .chips {
@@ -321,9 +336,10 @@ textarea.input {
 }
 
 .chips li {
-  padding: 6px 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-2);
   font-size: 13px;
   color: var(--muted);
 }
@@ -363,9 +379,10 @@ textarea.input {
   max-height: calc(100dvh - 32px);
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-panel);
   background: var(--surface);
   color: var(--text);
+  box-shadow: 0 24px 64px -16px rgb(0 0 0 / 0.45);
 }
 
 .modal--wide {
@@ -381,7 +398,7 @@ textarea.input {
 
 .modal__title {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.01em;
 }

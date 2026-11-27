@@ -33,20 +33,22 @@
   padding-left: 36px;
 }
 
+/* Segmented filter: a soft track, the chosen option raised on it */
 .segmented {
   display: inline-flex;
   padding: 3px;
   gap: 2px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 0;
+  border-radius: 999px;
 }
 
 .segmented button {
   min-height: 34px;
-  padding: 0 12px;
+  padding: 0 14px;
   border: 0;
-  border-radius: 3px;
+  border-radius: 999px;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
   background: transparent;
   color: var(--muted);
   font: inherit;
@@ -56,26 +58,34 @@
 
 .segmented button span {
   margin-left: 4px;
-  color: var(--faint);
+  color: var(--muted); /* faint gray falls under 4.5:1 on the track */
+  font-variant-numeric: tabular-nums;
 }
-.segmented button[aria-pressed='true'] span {
-  color: var(--muted); /* on the pressed (raised) surface the faint gray falls under 4.5:1 */
+.segmented button:hover {
+  color: var(--text);
 }
 
 .segmented button[aria-pressed='true'] {
-  background: var(--surface-2);
+  background: var(--seg-on);
   color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 0 0 1px color-mix(in srgb, var(--line) 60%, transparent);
 }
 
 .empty {
   display: grid;
   justify-items: start;
   gap: 10px;
-  padding: 32px;
+  padding: 28px;
 }
 
 .empty h2 {
-  font-size: 22px;
+  font-size: 19px;
+  letter-spacing: -0.015em;
+}
+.empty p {
+  max-width: 60ch;
+  color: var(--muted);
 }
 
 .avatar {
@@ -146,7 +156,7 @@ input[type='checkbox'] {
   width: 40px;
   height: 24px;
   margin: 0;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: var(--surface-2);
   box-sizing: border-box;
@@ -262,7 +272,7 @@ input[type='checkbox']:disabled {
 .pick-chip {
   min-height: 36px;
   padding: 0 14px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: transparent;
   color: var(--muted);
@@ -420,20 +430,38 @@ input[type='checkbox']:disabled {
   border-color: color-mix(in srgb, var(--warn) 45%, transparent);
 }
 
-/* Accordion (Ajustes) */
-.acc {
+/* Accordion: an open section, a header row over a hairline, never a box, so the cards inside it are the
+   first container (no card inside a card) */
+.acc.card {
   padding: 0;
-  overflow: clip;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+.acc.card:last-child,
+.acc.card:has(+ :not(.acc)) {
+  border-bottom: 1px solid var(--line);
+}
+/* consecutive sections touch: the hairline is their only separation */
+:has(> .acc + .acc) {
+  row-gap: 0;
 }
 
 .acc__summary {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
+  gap: 14px;
+  padding: 18px 4px;
   cursor: pointer;
   list-style: none;
-  min-height: 56px;
+  min-height: 64px;
+  border-radius: var(--radius);
+}
+.acc__summary:hover .acc__chev,
+.acc__summary:hover .acc__icon {
+  color: var(--text);
 }
 
 .acc__summary::-webkit-details-marker {
@@ -449,11 +477,12 @@ input[type='checkbox']:disabled {
   display: grid;
   flex: none;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: var(--surface-2, rgba(127, 127, 127, 0.1));
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
   color: var(--muted);
+  transition: color var(--dur-fast) var(--ease);
 }
 
 .acc__title {
@@ -470,7 +499,7 @@ input[type='checkbox']:disabled {
 .acc__chev {
   display: grid;
   color: var(--muted);
-  transition: transform var(--dur) var(--ease);
+  transition: transform var(--dur) var(--ease), color var(--dur-fast) var(--ease);
 }
 
 .acc[open] .acc__chev {
@@ -480,8 +509,7 @@ input[type='checkbox']:disabled {
 .acc__body {
   display: grid;
   gap: 16px;
-  padding: 4px 20px 20px;
-  border-top: 1px solid var(--line);
+  padding: 0 4px 28px;
 }
 
 .acc__body > .card {
@@ -497,13 +525,16 @@ input[type='checkbox']:disabled {
   display: none;
 }
 
+/* A group of sections: a real heading, with more space above it than below */
 .acc-group {
-  margin-top: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
+  margin: 28px 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.acc-group:first-child {
+  margin-top: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
