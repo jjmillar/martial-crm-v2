@@ -55,8 +55,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </NavLink>
             ))}
           </nav>
-          {/* Desktop: the CRM's name, quietly under the menu */}
-          <div className="sidebar__crm"><Wordmark to="/app" /></div>
         </div>
 
         <div className="sidebar__end">
@@ -73,6 +71,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
             </div>
           </div>
+          {/* Desktop: the CRM's name, a quiet signature at the foot of the bar (not a link) */}
+          <div className="sidebar__crm"><Wordmark plain /></div>
         </div>
       </aside>
 

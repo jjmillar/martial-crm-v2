@@ -471,7 +471,7 @@
   .sidebar--school .sidebar__top:not(:has(.sidebar__school)) .brand {
     display: grid;
   }
-  .sidebar--school .sidebar__top:not(:has(.sidebar__school)) ~ .sidebar__menu .sidebar__crm {
+  .sidebar--school .sidebar__top:not(:has(.sidebar__school)) ~ .sidebar__end .sidebar__crm {
     display: none;
   }
 
@@ -575,10 +575,10 @@
     margin-left: auto;
   }
 
-  /* CRM name: a quiet signature under the menu */
+  /* CRM name: a quiet signature at the very bottom, on the avatar's left edge */
   .sidebar__crm {
     display: block;
-    padding: 0 14px;
+    padding: 14px 6px 0;
   }
   .sidebar__crm .wordmark {
     gap: 8px;
@@ -587,7 +587,7 @@
     font-weight: 600;
     letter-spacing: 0;
     opacity: 0.75;
-    transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+    cursor: default;
   }
   .sidebar__crm .wordmark svg {
     width: 16px;
@@ -598,11 +598,6 @@
   }
   .sidebar__crm .wordmark svg circle {
     display: none;
-  }
-  .sidebar__crm .wordmark:hover,
-  .sidebar__crm .wordmark:focus-visible {
-    color: var(--text);
-    opacity: 1;
   }
 
   /* User: avatar, name and role, then theme and logout */
