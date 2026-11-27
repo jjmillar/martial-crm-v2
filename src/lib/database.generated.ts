@@ -906,125 +906,6 @@ export type Database = {
           },
         ];
       };
-      expense_rules: {
-        Row: {
-          active: boolean;
-          amount: number;
-          category: Database["public"]["Enums"]["expense_category"];
-          concept: string;
-          created_at: string;
-          created_by: string | null;
-          day_of_month: number;
-          ends_on: string | null;
-          id: string;
-          kind: Database["public"]["Enums"]["expense_rule_kind"];
-          school_id: string;
-          starts_on: string;
-          teacher_id: string | null;
-          updated_at: string;
-        };
-        ComputedFields: never;
-        Insert: {
-          active?: boolean;
-          amount: number;
-          category?: Database["public"]["Enums"]["expense_category"];
-          concept: string;
-          created_at?: string;
-          created_by?: string | null;
-          day_of_month?: number;
-          ends_on?: string | null;
-          id?: string;
-          kind?: Database["public"]["Enums"]["expense_rule_kind"];
-          school_id: string;
-          starts_on?: string;
-          teacher_id?: string | null;
-          updated_at?: string;
-        };
-        Update: {
-          active?: boolean;
-          amount?: number;
-          category?: Database["public"]["Enums"]["expense_category"];
-          concept?: string;
-          created_at?: string;
-          created_by?: string | null;
-          day_of_month?: number;
-          ends_on?: string | null;
-          id?: string;
-          kind?: Database["public"]["Enums"]["expense_rule_kind"];
-          school_id?: string;
-          starts_on?: string;
-          teacher_id?: string | null;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      expenses: {
-        Row: {
-          amount: number;
-          auto: boolean;
-          category: Database["public"]["Enums"]["expense_category"];
-          classes: number | null;
-          concept: string;
-          created_at: string;
-          created_by: string | null;
-          date: string;
-          id: string;
-          method: Database["public"]["Enums"]["payment_method"] | null;
-          notes: string | null;
-          paid_at: string | null;
-          paid_by: string | null;
-          period: string | null;
-          rule_id: string | null;
-          school_id: string;
-          status: Database["public"]["Enums"]["expense_status"];
-          teacher_id: string | null;
-          updated_at: string;
-        };
-        ComputedFields: never;
-        Insert: {
-          amount: number;
-          auto?: boolean;
-          category?: Database["public"]["Enums"]["expense_category"];
-          classes?: number | null;
-          concept: string;
-          created_at?: string;
-          created_by?: string | null;
-          date?: string;
-          id?: string;
-          method?: Database["public"]["Enums"]["payment_method"] | null;
-          notes?: string | null;
-          paid_at?: string | null;
-          paid_by?: string | null;
-          period?: string | null;
-          rule_id?: string | null;
-          school_id: string;
-          status?: Database["public"]["Enums"]["expense_status"];
-          teacher_id?: string | null;
-          updated_at?: string;
-        };
-        Update: {
-          amount?: number;
-          auto?: boolean;
-          category?: Database["public"]["Enums"]["expense_category"];
-          classes?: number | null;
-          concept?: string;
-          created_at?: string;
-          created_by?: string | null;
-          date?: string;
-          id?: string;
-          method?: Database["public"]["Enums"]["payment_method"] | null;
-          notes?: string | null;
-          paid_at?: string | null;
-          paid_by?: string | null;
-          period?: string | null;
-          rule_id?: string | null;
-          school_id?: string;
-          status?: Database["public"]["Enums"]["expense_status"];
-          teacher_id?: string | null;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       enrollments: {
         Row: {
           created_at: string;
@@ -1111,6 +992,162 @@ export type Database = {
             columns: ["student_id", "school_id"];
             isOneToOne: false;
             referencedRelation: "students";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
+      expense_rules: {
+        Row: {
+          active: boolean;
+          amount: number;
+          category: Database["public"]["Enums"]["expense_category"];
+          concept: string;
+          created_at: string;
+          created_by: string | null;
+          day_of_month: number;
+          ends_on: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["expense_rule_kind"];
+          school_id: string;
+          starts_on: string;
+          teacher_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          amount: number;
+          category?: Database["public"]["Enums"]["expense_category"];
+          concept: string;
+          created_at?: string;
+          created_by?: string | null;
+          day_of_month?: number;
+          ends_on?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["expense_rule_kind"];
+          school_id: string;
+          starts_on?: string;
+          teacher_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          active?: boolean;
+          amount?: number;
+          category?: Database["public"]["Enums"]["expense_category"];
+          concept?: string;
+          created_at?: string;
+          created_by?: string | null;
+          day_of_month?: number;
+          ends_on?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["expense_rule_kind"];
+          school_id?: string;
+          starts_on?: string;
+          teacher_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expense_rules_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expense_rules_teacher_id_school_id_fkey";
+            columns: ["teacher_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "teachers";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
+      };
+      expenses: {
+        Row: {
+          amount: number;
+          auto: boolean;
+          category: Database["public"]["Enums"]["expense_category"];
+          classes: number | null;
+          concept: string;
+          created_at: string;
+          created_by: string | null;
+          date: string;
+          id: string;
+          method: Database["public"]["Enums"]["payment_method"] | null;
+          notes: string | null;
+          paid_at: string | null;
+          paid_by: string | null;
+          period: string | null;
+          rule_id: string | null;
+          school_id: string;
+          status: Database["public"]["Enums"]["expense_status"];
+          teacher_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          auto?: boolean;
+          category?: Database["public"]["Enums"]["expense_category"];
+          classes?: number | null;
+          concept: string;
+          created_at?: string;
+          created_by?: string | null;
+          date?: string;
+          id?: string;
+          method?: Database["public"]["Enums"]["payment_method"] | null;
+          notes?: string | null;
+          paid_at?: string | null;
+          paid_by?: string | null;
+          period?: string | null;
+          rule_id?: string | null;
+          school_id: string;
+          status?: Database["public"]["Enums"]["expense_status"];
+          teacher_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          amount?: number;
+          auto?: boolean;
+          category?: Database["public"]["Enums"]["expense_category"];
+          classes?: number | null;
+          concept?: string;
+          created_at?: string;
+          created_by?: string | null;
+          date?: string;
+          id?: string;
+          method?: Database["public"]["Enums"]["payment_method"] | null;
+          notes?: string | null;
+          paid_at?: string | null;
+          paid_by?: string | null;
+          period?: string | null;
+          rule_id?: string | null;
+          school_id?: string;
+          status?: Database["public"]["Enums"]["expense_status"];
+          teacher_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_rule_id_school_id_fkey";
+            columns: ["rule_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "expense_rules";
+            referencedColumns: ["id", "school_id"];
+          },
+          {
+            foreignKeyName: "expenses_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_teacher_id_school_id_fkey";
+            columns: ["teacher_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "teachers";
             referencedColumns: ["id", "school_id"];
           },
         ];
@@ -2701,7 +2738,22 @@ export type Database = {
           teacher_id?: string;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "teacher_pay_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "teacher_pay_teacher_id_school_id_fkey";
+            columns: ["teacher_id", "school_id"];
+            isOneToOne: false;
+            referencedRelation: "teachers";
+            referencedColumns: ["id", "school_id"];
+          },
+        ];
       };
       teacher_specialties: {
         Row: {
@@ -3165,11 +3217,15 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number };
         Returns: number;
       };
-      find_user_id_by_email: { Args: { p_email: string }; Returns: string };
       expense_rules_month: {
         Args: { p_school_id: string };
-        Returns: { amount: number; classes: number; rule_id: string }[];
+        Returns: {
+          amount: number;
+          classes: number;
+          rule_id: string;
+        }[];
       };
+      find_user_id_by_email: { Args: { p_email: string }; Returns: string };
       generate_enrollment_fees: {
         Args: { p_school_id?: string; p_today?: string };
         Returns: number;
@@ -3512,8 +3568,16 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
-      sync_expenses: { Args: { p_school_id: string }; Returns: number };
+      sync_all_expenses: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       sync_class_sessions: { Args: { p_school_id: string }; Returns: number };
+      sync_expenses: { Args: { p_school_id: string }; Returns: number };
+      teacher_classes_between: {
+        Args: { p_from: string; p_teacher_id: string; p_to: string };
+        Returns: number;
+      };
       trial_availability: { Args: { p_school_id: string }; Returns: Json };
       undo_check_in: { Args: { p_class_id: string }; Returns: undefined };
       undo_check_in_for: {
@@ -3555,9 +3619,6 @@ export type Database = {
         | "competicion";
       discount_scope: "pago" | "plan";
       enrollment_status: "activa" | "pausada" | "cancelada" | "pendiente";
-      gender: "masculino" | "femenino" | "otro";
-      payment_kind: "plan" | "matricula" | "otro";
-      payment_method: "transferencia" | "efectivo" | "tarjeta" | "otro";
       expense_category:
         | "comision_profesor"
         | "sueldo"
@@ -3569,7 +3630,9 @@ export type Database = {
         | "otro";
       expense_rule_kind: "fijo" | "por_clase";
       expense_status: "pendiente" | "pagado" | "anulado";
-      teacher_pay_mode: "manual" | "automatica";
+      gender: "masculino" | "femenino" | "otro";
+      payment_kind: "plan" | "matricula" | "otro";
+      payment_method: "transferencia" | "efectivo" | "tarjeta" | "otro";
       payment_status: "pendiente" | "pagado" | "fallido" | "reembolsado";
       platform_invoice_status:
         | "pendiente"
@@ -3580,6 +3643,7 @@ export type Database = {
       request_status: "pendiente" | "aprobada" | "rechazada";
       school_role: "admin" | "user";
       subscription_status: "prueba" | "activa" | "suspendida" | "cancelada";
+      teacher_pay_mode: "manual" | "automatica";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -3721,13 +3785,21 @@ export const Constants = {
       ],
       discount_scope: ["pago", "plan"],
       enrollment_status: ["activa", "pausada", "cancelada", "pendiente"],
+      expense_category: [
+        "comision_profesor",
+        "sueldo",
+        "arriendo",
+        "servicios",
+        "insumos",
+        "marketing",
+        "impuestos",
+        "otro",
+      ],
+      expense_rule_kind: ["fijo", "por_clase"],
+      expense_status: ["pendiente", "pagado", "anulado"],
       gender: ["masculino", "femenino", "otro"],
       payment_kind: ["plan", "matricula", "otro"],
       payment_method: ["transferencia", "efectivo", "tarjeta", "otro"],
-      expense_category: ["comision_profesor", "sueldo", "arriendo", "servicios", "insumos", "marketing", "impuestos", "otro"],
-      expense_rule_kind: ["fijo", "por_clase"],
-      expense_status: ["pendiente", "pagado", "anulado"],
-      teacher_pay_mode: ["manual", "automatica"],
       payment_status: ["pendiente", "pagado", "fallido", "reembolsado"],
       platform_invoice_status: [
         "pendiente",
@@ -3739,6 +3811,7 @@ export const Constants = {
       request_status: ["pendiente", "aprobada", "rechazada"],
       school_role: ["admin", "user"],
       subscription_status: ["prueba", "activa", "suspendida", "cancelada"],
+      teacher_pay_mode: ["manual", "automatica"],
     },
   },
 } as const;
