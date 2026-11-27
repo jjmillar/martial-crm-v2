@@ -137,3 +137,10 @@ aunque la funcionalidad esté lista.
   - A "permanent" code is snapshotted on the subscription.
   - Redemptions (`platform_redemptions`) are visible only to the operator.
 - New grants are explicit. `revoke … from public, anon` applies to every new function; the internal ones have no grants at all.
+
+## Egresos (2026-11-27, migration 20261127000001)
+- `expenses`, `expense_rules`, `teacher_pay`: RLS **admin-only, also for reading** (commissions and salaries are confidential; a `user` member sees nothing). Composite FKs keep teachers and rules inside the same school.
+- Generated expenses: `rule_id`, `period`, `classes` and `auto` are set only by `sync_expenses` (the guard trigger resets them on API writes); they can be cancelled (`anulado`) but not deleted (delete policy requires `rule_id is null`), so the generator never recreates them.
+- `sync_expenses(uuid)` / `expense_rules_month(uuid)`: security definer, check `has_school_role(admin)`, granted to `authenticated` only. `sync_all_expenses()` (nightly cron) and `teacher_classes_between()` are internal (revoked from every API role). Trigger functions revoked.
+- Audit log: expense paid, cancelled, back to pending, amount changed after paid, deleted.
+- Tests: `scripts/db/expenses.check.mjs` (41 checks).

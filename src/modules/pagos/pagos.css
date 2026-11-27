@@ -661,3 +661,120 @@
     font-size: 12px;
   }
 }
+
+/* ---------- Contabilidad → Egresos ---------- */
+.egr-row.is-off,
+.egr-rules .is-off {
+  opacity: 0.6;
+}
+.egr-row__when {
+  white-space: nowrap;
+}
+.egr-row__when.is-late {
+  color: #e8c547;
+}
+.egr-origin {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.egr-origin svg {
+  flex: none;
+  align-self: center;
+}
+.egr-teachers,
+.egr-rules {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.egr-teacher {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+}
+.egr-teacher__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+.egr-teacher__name {
+  display: grid;
+  min-width: 0;
+}
+.egr-teacher__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.egr-teacher__body > .egr-rules {
+  flex-basis: 100%;
+  gap: 0;
+}
+.egr-teacher__body > p.hint {
+  flex-basis: 100%;
+  margin: 0;
+}
+.egr-rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.egr-rules li + li .egr-rule {
+  border-top: 1px solid var(--line);
+}
+.egr-rule > svg {
+  flex: none;
+  color: var(--muted);
+}
+.egr-rule:hover > svg,
+.egr-rule:focus-visible > svg {
+  color: var(--text);
+}
+.egr-rule:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.toolbar--end {
+  justify-content: flex-end;
+}
+@media (max-width: 640px) {
+  .egr-row .cust-row__side {
+    width: 100%;
+    margin-left: 0;
+  }
+  .egr-row .egr-row__when {
+    margin-right: auto;
+  }
+}
+.egr-teacher__name {
+  flex: 1 1 160px;
+}
+.egr-teacher__note {
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .egr-teacher__pay {
+    margin-left: auto;
+  }
+}
+.egr-rule .student-row__main .hint,
+.egr-row .student-row__main .hint {
+  white-space: normal;
+}

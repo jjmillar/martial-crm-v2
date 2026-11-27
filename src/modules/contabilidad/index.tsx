@@ -1,6 +1,6 @@
 import type { ModuleManifest } from '../types'
 
-// Money in one place (accordions): Pagos, Inscripciones, Historial, Planes and Códigos de descuento, with a summary.
+// Money in one place (accordions): Pagos, Inscripciones, Historial, Egresos (admins), Planes and Códigos de descuento.
 export const contabilidad: ModuleManifest = {
   id: 'contabilidad',
   label: 'Contabilidad',

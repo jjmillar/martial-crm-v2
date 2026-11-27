@@ -16,6 +16,9 @@ import { HistorialSection, PagosSection } from '../pagos/PagosList'
 import { paymentStats, useSchoolPayments, type PayFilter } from '../pagos/data'
 import { PlanesList } from '../planes/PlanesList'
 import { listPlans, plansKey } from '../planes/api'
+import { ComisionesSection, EgresosSection, RecurrentesSection } from '../egresos/EgresosSections'
+import { useEgresos } from '../egresos/data'
+import { expenseStats } from '../egresos/api'
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
 
@@ -39,6 +42,7 @@ export function ContabilidadPage() {
   const { q: enrolls, withPhase } = useSchoolEnrollments()
   const plans = useQuery({ queryKey: plansKey(schoolId), queryFn: () => listPlans(schoolId!), enabled: Boolean(schoolId) })
   const codes = useQuery({ queryKey: codesKey(schoolId), queryFn: () => listCodes(schoolId!), enabled: Boolean(schoolId) && isAdmin })
+  const egr = useEgresos()
   // The filters live here so the summary cards can set them.
   const [payFilter, setPayFilter] = usePersisted<PayFilter>('pagos.filtro', 'pendiente')
   const [enrollFilter, setEnrollFilter] = usePersisted<EnrollFilter>('inscripciones.filtro', 'vigentes')
@@ -57,6 +61,10 @@ export function ContabilidadPage() {
   const unpaid = countPhase(withPhase, 'pendiente')
   const activePlans = plans.data?.filter((p) => p.active).length
   const loading = 'Cargando…'
+  const ex = egr.expenses.data ? expenseStats(egr.expenses.data) : null
+  const teacherRules = egr.rules.data?.rules.filter((r) => r.teacher_id && r.active).length ?? 0
+  const autoTeachers = egr.rules.data ? [...egr.rules.data.modes.values()].filter((m) => m === 'automatica').length : 0
+  const recurring = egr.rules.data?.rules.filter((r) => !r.teacher_id && r.active) ?? []
 
   return (
     <div className="miembros contabilidad">
@@ -93,6 +101,24 @@ export function ContabilidadPage() {
         <Acc id="acc-historial" icon="clock" title="Historial" hint="Últimas transacciones de la escuela">
           <HistorialSection />
         </Acc>
+
+        {isAdmin && (
+          <>
+            <h2 className="acc-group">Egresos</h2>
+            <Acc id="egresos" icon="bank" title="Egresos"
+              hint={ex ? `${ex.pendingCount ? `${plural(ex.pendingCount, 'por pagar', 'por pagar')} · ${formatCLP(ex.pending)}` : 'Nada por pagar'} · ${formatCLP(ex.paid)} pagado este mes` : loading}>
+              <EgresosSection />
+            </Acc>
+            <Acc id="acc-comisiones" icon="teacher" title="Comisiones de profesores"
+              hint={egr.rules.data ? (autoTeachers ? `${plural(autoTeachers, 'profesor automático', 'profesores automáticos')} · ${plural(teacherRules, 'regla', 'reglas')}` : 'Todos en pago manual') : loading}>
+              <ComisionesSection />
+            </Acc>
+            <Acc id="acc-recurrentes" icon="calendar" title="Pagos recurrentes"
+              hint={egr.rules.data ? (recurring.length ? `${plural(recurring.length, 'activo', 'activos')} · ${formatCLP(recurring.reduce((a, r) => a + r.amount, 0))} al mes` : 'Arriendo, cuentas, sueldos…') : loading}>
+              <RecurrentesSection />
+            </Acc>
+          </>
+        )}
 
         <h2 className="acc-group">Qué ofreces</h2>
         <Acc id="acc-planes" icon="plan" title="Planes"
