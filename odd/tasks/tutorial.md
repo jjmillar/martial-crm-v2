@@ -44,7 +44,7 @@ Branch: `tutorial` (one commit per task, PR + Netlify deploy preview; merge only
   - Test: a component test that the student sees only student content and that a tutorial opens in a pop-up.
   - Risk: (6) visual.
   - UI: impeccable onboard
-- [ ] **T5 Close.** QA screenshots at 390/1440 px, light and dark, plus `DESIGN.md` / `docs/ui-standards.md` notes, PR, deploy preview, and a Telegram notice.
+- [x] **T5 Close.** QA screenshots at 390/1440 px, light and dark, plus `DESIGN.md` / `docs/ui-standards.md` notes, PR, deploy preview, and a Telegram notice.
   - Files: docs.
   - Test: the full suite, lint, typecheck and build.
   - Risk: (5) deploy, so it goes to the preview only.
@@ -63,3 +63,4 @@ Branch: `tutorial` (one commit per task, PR + Netlify deploy preview; merge only
 - T2 completed: GuidedTour.test.tsx 8/8 GREEN. Honest note: these component tests were written after the component, so no RED was observed for T2 (T1 logic was RED→GREEN). Visual QA: qa-tour.mjs (mocked new CEO) 4 viewports × all steps PASS, 0 console errors. Bug found in QA and fixed: the target inside a closed accordion was invisible, so the tour now opens that section once per step and checks visibility.
 - T3 completed: content.test.ts RED (module missing) → GREEN 8/8. Copy checked against the code: buttons, menus, export (Alumnos/Inscripciones/Pagos/Asistencia), subscription only for the CEO, 2FA for every role, 14-day trial (Landing TRIAL_DAYS).
 - T4 completed: Ayuda.test.tsx RED (module missing) → GREEN 4/4. Visual QA: qa-ayuda.mjs, team + student × 4 viewports, 42/42 PASS, 0 console errors. The replay from Ayuda reaches the tour; the "Para más información" links close the pop-up and go to the menu.
+- T5: suite 89/89, tsc clean, eslint 0 errors (7 old warnings in other files), next build OK. Docs: DESIGN.md components + docs/ui-standards.md section 7. PR to deploy preview; merging waits for the user.
