@@ -39,7 +39,7 @@ Branch: `tutorial` (one commit per task, PR + Netlify deploy preview; merge only
   - Files: `src/modules/ayuda/content.ts`, `src/modules/ayuda/content.test.ts`.
   - Test: `content.test.ts`, which checks unique ids, non-empty steps, valid routes and the role filter.
   - Risk: (6) wrong copy, so check it against the code.
-- [ ] **T4 Ayuda section.** Add `Acc id="ayuda"` in Ajustes for every role, with the FAQ list, the tutorials list, the tutorial pop-up, and "Ver el tour guiado" for ceo/admin.
+- [x] **T4 Ayuda section.** Add `Acc id="ayuda"` in Ajustes for every role, with the FAQ list, the tutorials list, the tutorial pop-up, and "Ver el tour guiado" for ceo/admin.
   - Files: `src/modules/ayuda/Ayuda.tsx`, `src/modules/ajustes/AjustesPage.tsx`, `src/modules/ayuda/ayuda.css`.
   - Test: a component test that the student sees only student content and that a tutorial opens in a pop-up.
   - Risk: (6) visual.
@@ -62,3 +62,4 @@ Branch: `tutorial` (one commit per task, PR + Netlify deploy preview; merge only
 - T1 completed: tour.test.ts RED (module missing) → GREEN 10/10.
 - T2 completed: GuidedTour.test.tsx 8/8 GREEN. Honest note: these component tests were written after the component, so no RED was observed for T2 (T1 logic was RED→GREEN). Visual QA: qa-tour.mjs (mocked new CEO) 4 viewports × all steps PASS, 0 console errors. Bug found in QA and fixed: the target inside a closed accordion was invisible, so the tour now opens that section once per step and checks visibility.
 - T3 completed: content.test.ts RED (module missing) → GREEN 8/8. Copy checked against the code: buttons, menus, export (Alumnos/Inscripciones/Pagos/Asistencia), subscription only for the CEO, 2FA for every role, 14-day trial (Landing TRIAL_DAYS).
+- T4 completed: Ayuda.test.tsx RED (module missing) → GREEN 4/4. Visual QA: qa-ayuda.mjs, team + student × 4 viewports, 42/42 PASS, 0 console errors. The replay from Ayuda reaches the tour; the "Para más información" links close the pop-up and go to the menu.
