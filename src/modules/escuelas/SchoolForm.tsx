@@ -56,7 +56,7 @@ export function SchoolForm({ onCreated, actions, autoFocus }: Props) {
   }
 
   return (
-    <form className="escuelas__form" onSubmit={onSubmit} noValidate>
+    <form className="escuelas__form" onSubmit={onSubmit} noValidate data-tour="escuela">
       <div className="field">
         <label htmlFor="school-name">Nombre</label>
         <input id="school-name" className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Academia Ejemplo" autoComplete="off" autoFocus={autoFocus} />

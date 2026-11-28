@@ -30,7 +30,7 @@ Branch: `tutorial` (one commit per task, PR + Netlify deploy preview; merge only
   - Files: `src/modules/ayuda/tour.ts`, `src/modules/ayuda/tour.test.ts`.
   - Test: `tour.test.ts`, written first and seen RED.
   - Risk: low.
-- [ ] **T2 Tour UI.** `GuidedTour` adds the spotlight, the coach card and the docked card. It is mounted in `AppLayout`, with `data-tour` anchors on the create buttons and the school form.
+- [x] **T2 Tour UI.** `GuidedTour` adds the spotlight, the coach card and the docked card. It is mounted in `AppLayout`, with `data-tour` anchors on the create buttons and the school form.
   - Files: `src/modules/ayuda/GuidedTour.tsx`, `src/modules/ayuda/ayuda.css`, `src/shell/AppLayout.tsx`, `app/layout.tsx` (css import), and anchors in `ClasesList.tsx`, `ProfesoresList.tsx`, `PlanesList.tsx`, `EscuelasPage.tsx`.
   - Test: a component test that it renders the step for a new CEO, and that "Saltar tour" stores `skipped`.
   - Risk: (6) visual, so screenshots are required.
@@ -60,3 +60,4 @@ Branch: `tutorial` (one commit per task, PR + Netlify deploy preview; merge only
 - 2026-11-28 user: "vamos a añadir un tutorial al primer inicio de sesion. Cuando se creen su cuenta de prueba vamos a hacer un tour guiado al usuario para que rellene lo minimo para armar la escuela. Lo primero es crear una escuela con sus minimos datos, como el arte marcial. Despues que añada almenos una clase, despues que añada un profesor. Tambien que muestre como crear un plan para que se suscriban. El tutorial tiene que abordar lo minimo solamente. Como siempre usa la skill "impecable" para el diseño. Quiero que en el menu de ajuste, añadas la opcion de "ayuda" y que dentro crees un FAQ, y ademas una seccion de tutoriales, donde salgan todos los tutoriales. Con todos me refiero al primer tutorial y añade tutoriales diferentes para cada gran seccion que sea necesaria mostrar. El primer tutorial será como una animacion en la misma pagina, pero los tutoriales que accedamos por el menu se veran de manra "normal"."
 - Decision (Claude, a sensible default with no new DB object): tour state lives in localStorage per user (`mcrm.tour:v1:<userId>`). A new account has no schools, so the tour starts there. Progress does not follow the user to another device.
 - T1 completed: tour.test.ts RED (module missing) → GREEN 10/10.
+- T2 completed: GuidedTour.test.tsx 8/8 GREEN. Honest note: these component tests were written after the component, so no RED was observed for T2 (T1 logic was RED→GREEN). Visual QA: qa-tour.mjs (mocked new CEO) 4 viewports × all steps PASS, 0 console errors. Bug found in QA and fixed: the target inside a closed accordion was invisible, so the tour now opens that section once per step and checks visibility.
