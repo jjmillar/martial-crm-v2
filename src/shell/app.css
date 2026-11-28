@@ -202,7 +202,8 @@
   min-width: 0;
 }
 
-.sidebar__who strong {
+.sidebar__who strong,
+.sidebar__name {
   font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -478,9 +479,19 @@
 }
 
 /* ---------- Desktop sidebar of a school: school on top, menu centred (CRM name under it), user at the foot ---------- */
+.sidebar__name {
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+.sidebar__name:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+}
+
 .sidebar__school,
-.sidebar__crm,
-.sidebar__avatar {
+.sidebar__crm {
   display: none;
 }
 @media (min-width: 761px) {
@@ -632,18 +643,6 @@
     gap: 10px;
     margin-top: 0;
     padding: 14px 6px 0;
-  }
-  .sidebar__avatar {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 700;
   }
   .sidebar--school .sidebar__who {
     flex: 1;

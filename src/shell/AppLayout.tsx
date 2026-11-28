@@ -71,9 +71,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {/* Desktop: the CRM's name, a quiet signature just above the line over the user (not a link) */}
           <div className="sidebar__crm"><Wordmark plain /></div>
           <div className="sidebar__user">
-            <Avatar path={me.path} name={me.name} size={36} className="sidebar__avatar" />
+            {/* My name opens my profile in Ajustes */}
             <div className="sidebar__who">
-              <strong>{profile?.full_name || user?.email}</strong>
+              <Link to={me.to} className="sidebar__name" title="Ver mi perfil">{profile?.full_name || user?.email}</Link>
               <span className="hint">{role ? roleLabel[role] : 'Sin rol asignado'}</span>
             </div>
             <div className="sidebar__actions">
