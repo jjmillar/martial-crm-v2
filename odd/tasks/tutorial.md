@@ -35,7 +35,7 @@ Branch: `tutorial` (one commit per task, PR + Netlify deploy preview; merge only
   - Test: a component test that it renders the step for a new CEO, and that "Saltar tour" stores `skipped`.
   - Risk: (6) visual, so screenshots are required.
   - UI: impeccable onboard
-- [ ] **T3 Help content.** The FAQ and tutorials as typed data with roles. Every `to` must be a real app route.
+- [x] **T3 Help content.** The FAQ and tutorials as typed data with roles. Every `to` must be a real app route.
   - Files: `src/modules/ayuda/content.ts`, `src/modules/ayuda/content.test.ts`.
   - Test: `content.test.ts`, which checks unique ids, non-empty steps, valid routes and the role filter.
   - Risk: (6) wrong copy, so check it against the code.
@@ -61,3 +61,4 @@ Branch: `tutorial` (one commit per task, PR + Netlify deploy preview; merge only
 - Decision (Claude, a sensible default with no new DB object): tour state lives in localStorage per user (`mcrm.tour:v1:<userId>`). A new account has no schools, so the tour starts there. Progress does not follow the user to another device.
 - T1 completed: tour.test.ts RED (module missing) → GREEN 10/10.
 - T2 completed: GuidedTour.test.tsx 8/8 GREEN. Honest note: these component tests were written after the component, so no RED was observed for T2 (T1 logic was RED→GREEN). Visual QA: qa-tour.mjs (mocked new CEO) 4 viewports × all steps PASS, 0 console errors. Bug found in QA and fixed: the target inside a closed accordion was invisible, so the tour now opens that section once per step and checks visibility.
+- T3 completed: content.test.ts RED (module missing) → GREEN 8/8. Copy checked against the code: buttons, menus, export (Alumnos/Inscripciones/Pagos/Asistencia), subscription only for the CEO, 2FA for every role, 14-day trial (Landing TRIAL_DAYS).
