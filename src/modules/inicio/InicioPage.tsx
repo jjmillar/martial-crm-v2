@@ -14,6 +14,7 @@ import { listPayments, paymentsKey } from '../pagos/api'
 import { StudentHome } from '../portal/StudentPortal'
 import { useApprovalsCount } from '../tareas/api'
 import { useSessionPopup } from '../asistencia/SessionPopup'
+import { LandingShortcut } from './LandingShortcut'
 
 async function weekAttendance(schoolId: string, from: string): Promise<number> {
   const { count, error } = await supabase.from('attendance').select('id', { count: 'exact', head: true }).eq('school_id', schoolId).gte('date', from)
@@ -116,6 +117,8 @@ function StaffHome() {
               <p className="hint">{d.pendingCount ? `${formatCLP(d.pendingAmount)} por confirmar (${d.pendingCount})` : 'Sin pagos por confirmar'}</p>
             </Link>
           )}
+
+          <LandingShortcut slug={activeSchool.slug} enabled={Boolean(activeSchool.landing_enabled)} />
 
           <section className="tile tile--wide rise" style={{ animationDelay: '200ms' }}>
             <div className="tile__head">
