@@ -91,6 +91,17 @@ The user's decision of 2026-11-24: "que no se vaya a otro menú esa opción. Rec
 - Plain navigation is fine for menu entries, "Ver todas"/"Historial" headers, and opening a record from its own list (Alumnos → ficha).
 - After the pop-up closes, refresh the list it came from, so a finished item leaves it.
 
+## 7. First-run tour and Help (2026-11-28)
+
+- **Guided tour** (`src/modules/ayuda/GuidedTour.tsx`, logic in `tour.ts`). It starts by itself for a new customer: CEO, no schools, nothing saved. The steps are: school (name + art), a class, a teacher, and how to create a plan (that last one can be left for later).
+  - A step is done only when the real data exists.
+  - The page is never blocked: the dimming lets clicks through, and the person uses the real buttons and forms.
+  - State is kept in localStorage per user and per version: `mcrm.tour:v1:<userId>`. A new version of the tour = bump `v1`.
+  - A control the tour points at carries `data-tour="<name>"`. If it sits inside an accordion, the tour opens it, once per step.
+- **Help**: `Ajustes → Ayuda` (`#ayuda`), for every role. The content lives in `src/modules/ayuda/content.ts`, filtered by audience and role. **Every text names real buttons and menus**: when a flow changes, update its tutorial (the test checks that the links go to real menus).
+  - Tutorials open as a normal pop-up: numbered steps and «Para más información…».
+  - The first one («Primeros pasos») replays the guided tour.
+
 ## Impeccable es obligatorio en toda UI (2026-11-27)
 - Todo cambio de interfaz usa la skill **impeccable** (`~/.claude/skills/impeccable`, guía de github.com/pbakaus/impeccable, sin su binario): leer `reference/craft-floor.md` antes de editar y revisar el render (celular/escritorio, claro/oscuro).
 - Sus prohibiciones absolutas se suman a las de este documento: nada de rótulo/eyebrow sobre un título, ni barras pegadas a un costado de una caja.

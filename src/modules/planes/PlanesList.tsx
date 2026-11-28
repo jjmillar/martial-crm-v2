@@ -48,7 +48,7 @@ export function PlanesList() {
           {Boolean(plans.data?.length) && <p className="hint">{student ? 'Elige un plan y contrátalo aquí: lo pagas por transferencia o en efectivo y queda activo cuando tu escuela confirme el pago.' : 'Lo que ofrece tu escuela. El plan predeterminado se sugiere primero al matricular.'}</p>}
         </div>
         {canEdit && Boolean(plans.data?.length) && (
-          <Link className="btn btn--ghost" to="/app/planes/nuevo"><Icon name="plus" size={16} /> Nuevo plan</Link>
+          <Link className="btn btn--ghost" to="/app/planes/nuevo" data-tour="nuevo-plan"><Icon name="plus" size={16} /> Nuevo plan</Link>
         )}
       </div>
 
@@ -64,7 +64,7 @@ export function PlanesList() {
           {canEdit ? (
             <>
               <p className="hint">Define lo que ofreces: mensualidades, packs de clases o una clase de prueba gratis.</p>
-              <Link className="btn" to="/app/planes/nuevo"><Icon name="plus" size={16} /> Crear plan</Link>
+              <Link className="btn" to="/app/planes/nuevo" data-tour="nuevo-plan"><Icon name="plus" size={16} /> Crear plan</Link>
             </>
           ) : (
             <p className="hint">Un administrador de la escuela puede crearlos.</p>

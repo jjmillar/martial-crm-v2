@@ -15,6 +15,7 @@ import { SchoolSwitcher } from './SchoolSwitcher'
 import { PendingSignup } from '../modules/portal/PendingSignup'
 import { PersonSwitcher } from '../modules/portal/PersonSwitcher'
 import { usePendingCount } from '../modules/tareas/api'
+import { GuidedTour } from '../modules/ayuda/GuidedTour'
 
 /** 'Academia Norte Jiu-jitsu' → 'AN' */
 const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
@@ -96,6 +97,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Mobile: draggable floating menu button + sheet with every module, account and logout */}
+      {/* First-run guided tour for a new account (and replays from Ajustes → Ayuda) */}
+      <GuidedTour />
+
       <MobileMenu nav={nav} pending={pending} who={profile?.full_name || user?.email || ''} roleText={role ? roleLabel[role] : 'Sin rol asignado'} onSignOut={signOut} />
     </div>
   )

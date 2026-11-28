@@ -18,6 +18,7 @@ import { Actividad } from './Actividad'
 import { ArtesMarciales } from '../artes/ArtesMarciales'
 import { artsKey, listArts } from '../artes/api'
 import { QrCheckIn } from './QrCheckIn'
+import { Ayuda } from '../ayuda/Ayuda'
 
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
 
@@ -42,6 +43,10 @@ export function AjustesPage() {
       </header>
       {manages && <SchoolSections />}
       <CuentaSections />
+      <h2 className="acc-group">Ayuda</h2>
+      <Acc id="ayuda" icon="help" title="Tutoriales y preguntas frecuentes" hint="Cómo hacer lo principal en cada sección, paso a paso">
+        <Ayuda />
+      </Acc>
     </div>
   )
 }

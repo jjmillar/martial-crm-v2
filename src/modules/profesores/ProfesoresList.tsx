@@ -65,7 +65,7 @@ export function ProfesoresList() {
           {inactiveCount > 0 && (
             <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivos (${inactiveCount})`} />
           )}
-          {canEdit && <Link className="btn" to="/app/profesores/nuevo"><Icon name="plus" size={16} /> Nuevo profesor</Link>}
+          {canEdit && <Link className="btn" to="/app/profesores/nuevo" data-tour="nuevo-profesor"><Icon name="plus" size={16} /> Nuevo profesor</Link>}
         </div>
       )}
 
@@ -77,7 +77,7 @@ export function ProfesoresList() {
           {canEdit ? (
             <>
               <p className="hint">Agrega a tu equipo con su cinturón y las artes marciales que enseña (las de Ajustes → Artes marciales).</p>
-              <Link className="btn" to="/app/profesores/nuevo"><Icon name="plus" size={16} /> Crear profesor</Link>
+              <Link className="btn" to="/app/profesores/nuevo" data-tour="nuevo-profesor"><Icon name="plus" size={16} /> Crear profesor</Link>
             </>
           ) : (
             <p className="hint">Un administrador de la escuela puede agregarlos.</p>

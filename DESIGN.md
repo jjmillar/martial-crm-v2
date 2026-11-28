@@ -159,6 +159,10 @@ the segmented filter; round avatars, section icons and dots.
   muted; on phones they scroll sideways.
 - Dialogs: only `Modal` (fade + 8 px rise; reduced motion = fade only). Actions open their pop-up in place.
 - Sections `Acc`: round icon, title and a one-line summary over a hairline; open, never boxed.
+- Guided tour (`src/modules/ayuda/GuidedTour.tsx`): a spotlight (accent ring + dimming that lets clicks through) glides
+  to the real control, with a coach card beside it (docked at the bottom on phones and over forms). Progress is four short
+  segments in the card foot, never a label above the title. Help (`Ajustes → Ayuda`): tutorials as a grouped list that
+  opens a normal pop-up with numbered steps; FAQ answers always visible.
 - Class rows: dot · time · name · action, flat with dividers (no card inside a card, no side bar).
 - Avatars: `Avatar` (photo from the private bucket via signed URL, else initials).
 

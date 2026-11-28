@@ -43,7 +43,7 @@ export function ClasesList() {
           {canEdit ? (
             <>
               <p className="hint">Crea tus clases con profesor, nivel y horarios semanales. Aparecerán en el calendario y en asistencia.</p>
-              <Link className="btn" to="/app/clases/nueva"><Icon name="plus" size={16} /> Crear clase</Link>
+              <Link className="btn" to="/app/clases/nueva" data-tour="nueva-clase"><Icon name="plus" size={16} /> Crear clase</Link>
             </>
           ) : <p className="hint">Un administrador de la escuela puede crearlas.</p>}
         </div>
@@ -60,7 +60,7 @@ export function ClasesList() {
             {inactiveCount > 0 && (
               <Toggle inline checked={showInactive} onChange={setShowInactive} label={`Mostrar inactivas (${inactiveCount})`} />
             )}
-            {canEdit && <Link className="btn" to="/app/clases/nueva"><Icon name="plus" size={16} /> Nueva clase</Link>}
+            {canEdit && <Link className="btn" to="/app/clases/nueva" data-tour="nueva-clase"><Icon name="plus" size={16} /> Nueva clase</Link>}
           </div>
           <div className="segmented segmented--wrap segmented--scroll" role="group" aria-label="Filtrar por día">
             <button type="button" aria-pressed={day === 0} onClick={() => setDay(0)}>Todos</button>
